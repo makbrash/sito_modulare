@@ -1,0 +1,9 @@
+{
+  "build_date": "2025-10-04T01:41:20.795Z",
+  "version": "1.0.0",
+  "assets": {
+    "css": "assets/dist/css/main.min.css",
+    "js": "assets/dist/js/app.min.js"
+  },
+  "environment": "production"
+}

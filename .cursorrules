@@ -1,0 +1,167 @@
+# Bologna Marathon - Sistema Modulare
+# File di contesto per Cursor AI
+
+## 🏃‍♂️ PROGETTO
+Sistema modulare per il sito ufficiale della Bologna Marathon (bolognamarathon.run)
+- **Tipo**: Sito sportivo modulare
+- **Tecnologie**: PHP 8+, MySQL, CSS Variables, JavaScript vanilla
+- **Architettura**: SSR (Server-Side Rendering) modulare
+- **Path**: `http://localhost/BM_layout/sito_modulare/`
+
+## 📁 STRUTTURA PROGETTO
+```
+sito_modulare/
+├── assets/
+│   ├── css/core/          # CSS core (variables, reset, typography)
+│   ├── css/main.css       # Stili principali
+│   ├── js/core/           # JavaScript core
+│   └── images/            # Immagini
+├── config/
+│   └── database.php       # Configurazione database
+├── core/
+│   └── ModuleRenderer.php # Sistema rendering moduli SSR
+├── modules/               # Moduli riutilizzabili
+│   ├── hero/             # Action Hero
+│   ├── results/          # Tabella risultati
+│   ├── menu/             # Menu navigazione
+│   ├── footer/           # Footer sito
+│   └── text/             # Rich Text
+├── database/
+│   ├── schema.sql        # Schema database
+│   └── test_data.sql     # Dati di test
+├── admin/
+│   ├── test-setup.php    # Setup database
+│   └── admin.php         # Pannello admin
+└── index.php            # Homepage principale
+```
+
+## 🎨 SISTEMA CSS VARIABLES
+**File principale**: `assets/css/core/variables.css`
+
+### Colori Principali
+- `--primary`: #23a8eb (Colore principale)
+- `--secondary`: #dc335e (Colore secondario)
+- `--accent`: #cbdf44 (Colore accent)
+- `--info`: #5DADE2 (Colore info)
+- `--success`: #00a8ff (Colore success)
+- `--warning`: #F39C12 (Colore warning)
+- `--error`: #E74C3C (Colore error)
+
+### Font System
+- `--font-primary`: 'Inter' (Font principale)
+- `--font-display`: 'Bebas Neue' (Font display)
+- `--font-accent`: 'Gloss And Bloom' (Font accent personalizzato)
+
+### Personalizzazione
+- **Override per pagina**: Tramite database (campo `css_variables`)
+- **Override globali**: Modifica `variables.css`
+- **Responsive**: Variabili per breakpoint
+- **Font esterni**: Google Fonts + Font Awesome + Custom Fonts
+- **Esempi**: `assets/css/examples/marathon-theme.css`
+- **Documentazione**: `docs/COLORS_AND_FONTS.md`
+
+## 🧩 MODULI DISPONIBILI
+1. **actionHero** - Hero section con layout 2 colonne
+2. **resultsTable** - Tabella risultati gara (ordinabile, filtri)
+3. **menu** - Menu navigazione (sticky, mobile-friendly)
+4. **footer** - Footer sito (4 colonne, social)
+5. **richText** - Contenuti testuali ricchi
+6. **gallery** - Galleria immagini (lightbox)
+
+## 🗄️ DATABASE SCHEMA
+### Tabelle Principali
+- `pages` - Pagine del sito
+- `modules_registry` - Moduli disponibili
+- `page_modules` - Moduli assegnati alle pagine
+- `race_results` - Risultati gara
+- `races` - Gare
+- `dynamic_content` - Contenuti dinamici
+
+### Setup Database
+1. **Setup automatico**: `admin/test-setup.php`
+2. **Pannello admin**: `admin/admin.php`
+3. **Debug**: `debug.php`
+4. **Path corretto**: `http://localhost/BM_layout/sito_modulare/`
+
+## 🚀 WORKFLOW SVILUPPO
+
+### Aggiungere Nuovo Modulo
+1. **Crea cartella**: `modules/mio-modulo/`
+2. **File necessari**: `mio-modulo.php`, `mio-modulo.css`, `mio-modulo.js`
+3. **Registra modulo**: Inserisci in `modules_registry`
+4. **Template modulo**:
+```php
+<?php
+$moduleData = $renderer->getModuleData('mioModulo', $config);
+?>
+<div class="mio-modulo">
+    <!-- Contenuto modulo -->
+</div>
+```
+
+### Personalizzazione Colori
+```css
+/* In assets/css/core/variables.css */
+:root {
+  --primary-color: #TUO_COLORE;
+  --secondary-color: #ALTRO_COLORE;
+}
+```
+
+### Override per Pagina (Database)
+```json
+{
+  "--primary-color": "#D81E05",
+  "--hero-bg": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+}
+```
+
+## 🔧 COMANDI UTILI
+
+### Setup Iniziale
+1. **Avvia XAMPP** (Apache + MySQL)
+2. **Setup database**: `http://localhost/BM_layout/sito_modulare/admin/test-setup.php`
+3. **Test pagina**: `http://localhost/BM_layout/sito_modulare/index.php`
+
+### File di Test
+- **Versione semplice**: `index-simple.php` (senza database)
+- **Debug database**: `debug.php`
+- **Test setup**: `test.php`
+
+### Build System (Opzionale)
+```bash
+npm install
+npm run build
+npm run watch
+```
+
+## 🎯 OBIETTIVI PROGETTO
+- **Sistema modulare** riutilizzabile
+- **CSS Variables** per personalizzazioni
+- **SSR** per performance e SEO
+- **Responsive** design
+- **Facile estensione** con nuovi moduli
+- **AI-friendly** per generazione automatica pagine
+
+## 📝 NOTE IMPORTANTI
+- **Path corretto**: `http://localhost/BM_layout/sito_modulare/`
+- **Database**: MySQL su XAMPP
+- **Status pagina**: Deve essere "published" per essere visibile
+- **Moduli**: Ogni modulo ha PHP + CSS + JS nella stessa cartella
+- **CSS Variables**: Sistema di personalizzazione principale
+
+## 🚨 PROBLEMI COMUNI
+1. **"Pagina non trovata"**: Controlla status = 'published'
+2. **Database vuoto**: Usa `admin/test-setup.php`
+3. **Moduli mancanti**: Verifica `modules_registry`
+4. **Path sbagliato**: Usa `http://localhost/BM_layout/sito_modulare/`
+5. **"Undefined variable $renderer"**: Variabile passata automaticamente dal ModuleRenderer
+6. **Percorsi moduli**: Devono essere relativi (es. `hero/hero.php` non `modules/hero/hero.php`)
+7. **SQL LIMIT error**: LIMIT non può essere parametro preparato, usa concatenazione sicura
+
+## 🔄 PROSSIMI PASSI
+1. **Test sistema** con `index-simple.php`
+2. **Setup database** con `admin/test-setup.php`
+3. **Personalizza colori** in `variables.css`
+4. **Aggiungi moduli** secondo necessità
+5. **Deploy** su server produzione

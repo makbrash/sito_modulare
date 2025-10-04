@@ -1,0 +1,48 @@
+/**
+ * Main SCSS - Bologna Marathon
+ * Sistema modulare con build system
+ */
+
+// === CORE IMPORTS ===
+@import 'core/variables';
+@import 'core/reset';
+@import 'core/typography';
+@import 'core/fonts';
+
+// === MODULES ===
+@import 'modules/hero';
+@import 'modules/menu';
+@import 'modules/race-cards';
+@import 'modules/results';
+@import 'modules/footer';
+@import 'modules/text';
+@import 'modules/button';
+@import 'modules/select';
+
+// === LAYOUT ===
+.site-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-main {
+    flex: 1;
+}
+
+// === UTILITIES ===
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary);
+    color: var(--text-primary);
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+    
+    &:focus {
+        top: 6px;
+    }
+}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Development Tool - Bologna Marathon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: white;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: #3498db;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .step {
+            background: #2c3e50;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .step h3 {
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+        
+        .code {
+            background: #34495e;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .url {
+            background: #27ae60;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        
+        .warning {
+            background: #e74c3c;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .success {
+            background: #27ae60;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 CSS Development Tool</h1>
+        <p style="text-align: center; margin-bottom: 2rem; color: #bdc3c7;">
+            Tool semplice per modificare CSS visualmente nel browser
+        </p>
+        
+        <div class="step">
+            <h3>1. Avvia XAMPP</h3>
+            <p>Assicurati che Apache sia attivo in XAMPP</p>
+        </div>
+        
+        <div class="step">
+            <h3>2. Apri la pagina</h3>
+            <p>Clicca il pulsante per aprire la pagina principale:</p>
+            <a href="../index.php" target="_blank" class="btn btn-success">
+                📍 Apri Bologna Marathon
+            </a>
+        </div>
+        
+        <div class="step">
+            <h3>3. Modifica CSS nel browser</h3>
+            <p>Una volta aperta la pagina:</p>
+            <ol>
+                <li>Premi <strong>F12</strong> per aprire Developer Tools</li>
+                <li>Vai su <strong>Elements</strong></li>
+                <li>Seleziona un elemento</li>
+                <li>Nella sezione <strong>Styles</strong> modifica direttamente i CSS</li>
+                <li>Le modifiche sono immediate!</li>
+            </ol>
+        </div>
+        
+        <div class="step">
+            <h3>4. Salva le modifiche</h3>
+            <p>Quando sei soddisfatto delle modifiche:</p>
+            <ol>
+                <li>Copia il CSS modificato dal browser</li>
+                <li>Apri il file SCSS corrispondente in Cursor</li>
+                <li>Incolla le modifiche</li>
+                <li>Salva il file</li>
+                <li>Esegui <code>npm run build</code> per compilare</li>
+            </ol>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ Importante:</strong>
+            <p>Le modifiche nel browser sono temporanee. Devi sempre salvarle nei file SCSS per renderle permanenti.</p>
+        </div>
+        
+        <div class="step">
+            <h3>📁 File SCSS da modificare</h3>
+            <div class="code">
+                assets/scss/modules/_menu.scss      # Menu
+                assets/scss/modules/_hero.scss     # Hero section  
+                assets/scss/modules/_button.scss   # Pulsanti
+                assets/scss/modules/_results.scss  # Risultati
+                assets/scss/core/_variables.scss   # Variabili CSS
+            </div>
+        </div>
+        
+        <div class="success">
+            <strong>✅ Flusso completo:</strong>
+            <p>Browser → F12 → Modifica CSS → Copia → Incolla in SCSS → Salva → npm run build → Aggiorna pagina</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #34495e;">
+            <p style="color: #bdc3c7;">CSS Development Tool - Bologna Marathon</p>
+        </div>
+    </div>
+</body>
+</html>

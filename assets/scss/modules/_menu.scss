@@ -1,0 +1,170 @@
+/**
+ * Menu Module SCSS
+ * Stili per il modulo menu
+ */
+
+.main-menu {
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--bg-glass-hover);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-fast);
+}
+
+.main-menu.sticky {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky, 1020);
+}
+
+.menu-container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-brand .brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.brand-logo {
+    height: 40px;
+    width: auto;
+    transition: transform var(--transition-fast);
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+}
+
+.menu-nav {
+    display: flex;
+    list-style: none;
+    gap: var(--space-lg);
+    margin: 0;
+    padding: 0;
+}
+
+.menu-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.menu-link:hover {
+
+}
+
+.menu-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: all var(--transition-fast);
+    transform: translateX(-50%);
+}
+
+.menu-link:hover::after {
+    width: 80%;
+}
+
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 4px;
+    padding: var(--space-sm);
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--secondary);
+    transition: var(--transition-fast);
+    border-radius: 2px;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .menu-nav {
+        position: fixed;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: var(--space-lg);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+        z-index: var(--z-dropdown, 1000);
+    }
+    
+    .menu-nav.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .menu-nav li {
+        width: 100%;
+    }
+    
+    .menu-link {
+        display: block;
+        padding: var(--space-md);
+        text-align: center;
+        border-bottom: 1px solid var(--bg-glass-hover);
+    }
+    
+    
+    .menu-link:last-child {
+        border-bottom: none;
+    }
+    
+    .menu-link::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-container {
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    .brand-logo {
+        height: 35px;
+    }
+}
+// Test comment

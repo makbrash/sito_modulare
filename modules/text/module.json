@@ -1,0 +1,21 @@
+{
+  "name": "Rich Text",
+  "slug": "text",
+  "version": "1.0.0",
+  "component_path": "text/text.php",
+  "css_class": "rich-text",
+  "default_config": { 
+    "content": "<p>Inserisci il tuo contenuto qui...</p>",
+    "wrapper": "article" 
+  },
+  "aliases": ["richText"],
+  "assets": {
+    "css": [],
+    "js": [],
+    "vendors": []
+  },
+  "dependencies": [],
+  "install": "text/install.sql",
+  "uninstall": "text/uninstall.sql"
+}
+

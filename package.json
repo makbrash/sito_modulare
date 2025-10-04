@@ -1,0 +1,50 @@
+{
+  "name": "bologna-marathon-modular",
+  "version": "1.0.0",
+  "description": "Sistema modulare per Bologna Marathon",
+  "main": "index.php",
+  "scripts": {
+    "build": "gulp build",
+    "watch": "gulp watch",
+    "dev": "gulp dev",
+    "css:build": "gulp css",
+    "js:build": "gulp js",
+    "images:optimize": "gulp images",
+    "deploy": "node build-deploy.js",
+    "build:cloud": "node build-cloud.js",
+    "test-watch": "echo 'Modifica un file SCSS e salva per testare il watcher'"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-if": "^3.0.0",
+    "gulp-imagemin": "^8.0.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-uglify": "^3.0.2",
+    "gulp-watch": "^5.0.1",
+    "imagemin": "^9.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-optipng": "^8.0.0",
+    "imagemin-svgo": "^11.0.1",
+    "sass": "^1.69.5"
+  },
+  "keywords": [
+    "marathon",
+    "sport",
+    "modular",
+    "php",
+    "css",
+    "javascript"
+  ],
+  "author": "Bologna Marathon Team",
+  "license": "MIT",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

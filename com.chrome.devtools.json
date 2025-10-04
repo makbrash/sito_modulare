@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "mappings": [
+    {
+      "type": "folder",
+      "folder": "D:/XAMPP/htdocs/sito_modulare",
+      "url": "http://localhost/sito_modulare"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Race Cards",
+  "slug": "race-cards",
+  "version": "1.0.0",
+  "component_path": "race-cards/race-cards.php",
+  "css_class": "race-cards-module",
+  "default_config": { "layout": "vertical" },
+  "aliases": ["raceCards"],
+  "assets": { "css": [], "js": [], "vendors": [] },
+  "dependencies": [],
+  "install": "race-cards/install.sql",
+  "uninstall": "race-cards/uninstall.sql"
+}
+

@@ -1,0 +1,131 @@
+/**
+ * CSS Variables - Bologna Marathon
+ * Variabili CSS per il sistema modulare
+ */
+
+:root {
+  /* === BRAND COLORS === */
+  --primary: #23a8eb;                    /* Blu principale */
+  --marathon-blue: var(--primary);      /* Alias per maratona */
+  --hover-blue: #0080cc;                /* Blu hover */
+  --portici-pink: #dc335e;              /* Fuxia per 30K Portici */
+  --hover-portici-pink: #be294f;        /* Fuxia hover */
+  --runtune-green: #cbdf44;             /* Verde per Run Tune Up */
+  --hover-runtune-green: #a0b229;       /* Verde hover */
+  --accent-cyan: #5DADE2;               /* Ciano accent */
+  --accent-blue: #00a8ff;               /* Blu accent */
+  --secondary: var(--portici-pink);    /* Colore secondario */
+  --info: var(--accent-cyan);           /* Colore info */
+  --success: var(--accent-blue);        /* Colore success */
+  --warning: #F39C12;                   /* Colore warning */
+  --error: #E74C3C;                     /* Colore error */
+  
+  /* === NEUTRAL COLORS === */
+  --text-primary: #ffffff;
+  --text-secondary: rgb(209 213 219);
+  --text-muted: rgb(156 163 175);
+  --text-dark: #000000;
+  
+  /* === COUNTDOWN SPECIFIC === */
+  --cyano: rgb(34 211 238);             /* Ciano brillante */
+  --countdown-color: var(--cyano);      /* Alias per countdown */
+  
+  /* === SECTION BACKGROUNDS === */
+  --section-bg-1: linear-gradient(135deg, #0b0b15 0%, #1a1a2e 100%);
+  --section-bg-2: linear-gradient(135deg, #16213e 0%, #0f1419 100%);
+  
+  /* === BACKGROUND COLORS === */
+  --bg-primary: #0b0b15;
+  --bg-glass: rgba(255,255,255,0.05);
+  --bg-glass-hover: rgba(255,255,255,0.08);
+  
+  /* === GRADIENTS === */
+  --gradient-primary: linear-gradient(45deg, var(--accent-blue), #66d9ff);
+  --gradient-button: linear-gradient(135deg, var(--accent-cyan) 0%, #4db8e8 100%);
+  --gradient-button-hover: linear-gradient(135deg, var(--hover-blue) 0%, var(--accent-cyan) 100%);
+  --gradient-dark: linear-gradient(135deg, #0b0b15 0%, #1a1a2e 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(11, 11, 21, 0.8) 0%, rgba(26, 26, 46, 0.8) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--portici-pink) 0%, var(--runtune-green) 100%);
+  
+  /* === TYPOGRAPHY === */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-accent: 'Gloss And Bloom', serif;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+  --font-size-9xl: 8rem;
+    
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* === SPACING === */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  
+  /* === BORDERS & RADIUS === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 50px;
+  
+  /* === SHADOWS === */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(93, 173, 226, 0.3);
+  
+  /* === Z-INDEX === */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal: 1040;
+  --z-tooltip: 1050;
+  
+  /* === TRANSITIONS === */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.6s ease;
+  
+  /* === BREAKPOINTS === */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1920px;
+  
+  /* === CONTAINERS === */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1400px;
+  --container-3xl: 1600px;
+}
