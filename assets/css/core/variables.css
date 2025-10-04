@@ -1,0 +1,52 @@
+:root {
+	--primary: #23a8eb;
+	--secondary: #dc335e;
+	--accent: #cbdf44;
+	--info: #5DADE2;
+	--success: #00a8ff;
+	--warning: #F39C12;
+	--error: #E74C3C;
+
+	--text-primary: #ffffff;
+	--text-secondary: rgb(209 213 219);
+	--text-muted: rgb(156 163 175);
+	--text-dark: #000000;
+
+	--bg-primary: #0b0b15;
+	--bg-glass: rgba(255,255,255,0.05);
+	--bg-glass-hover: rgba(255,255,255,0.08);
+
+	--font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--font-display: "Bebas Neue", "Arial Black", sans-serif;
+	--font-accent: "Gloss And Bloom", serif;
+
+	--space-xs: 0.5rem;
+	--space-sm: 1rem;
+	--space-md: 1.5rem;
+	--space-lg: 2rem;
+	--space-xl: 3rem;
+	--space-2xl: 4rem;
+	--space-3xl: 6rem;
+
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--radius-xl: 20px;
+	--radius-full: 50px;
+
+	--shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+	--shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+	--shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
+	--shadow-xl: 0 20px 40px rgba(0,0,0,0.3);
+
+	--z-dropdown: 1000;
+	--z-sticky: 1020;
+	--z-fixed: 1030;
+	--z-modal: 1040;
+	--z-tooltip: 1050;
+
+	--transition-fast: 0.15s ease;
+	--transition-normal: 0.3s ease;
+	--transition-slow: 0.6s ease;
+}
+

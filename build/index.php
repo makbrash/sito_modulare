@@ -1,7 +1,7 @@
 <?php
 /**
- * Bologna Marathon - Homepage
- * Sistema modulare SSR
+ * Bologna Marathon - Homepage PROD
+ * Sistema modulare SSR - Versione Produzione
  */
 
 require_once 'config/database.php';
@@ -15,9 +15,6 @@ $db = $database->getConnection();
 $renderer = new ModuleRenderer($db);
 
 try {
-    // Reset moduli annidati per nuova pagina
-    $renderer->resetNestedModules();
-    
     // Controlla se è richiesta una pagina specifica per ID
     $pageId = isset($_GET['id_pagina']) ? (int)$_GET['id_pagina'] : null;
     
@@ -46,53 +43,8 @@ try {
     <title><?= htmlspecialchars($page['title']) ?></title>
     <meta name="description" content="<?= htmlspecialchars($page['description']) ?>">
     
-    <!-- CSS DEV/PROD -->
-    <?php
-        // DEV se NON stiamo eseguendo dalla cartella build
-        $isDev = (strpos(__DIR__, DIRECTORY_SEPARATOR . 'build') === false);
-        if ($isDev) {
-            // DEV: carica core + CSS moduli deduplicati
-            $coreCss = [
-                'assets/css/core/variables.css',
-                'assets/css/core/reset.css',
-                'assets/css/core/typography.css',
-                'assets/css/core/fonts.css'
-            ];
-            foreach ($coreCss as $href) {
-                if (file_exists(__DIR__ . '/' . $href)) {
-                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
-                }
-            }
-            // Vendor CSS
-            $vendorAssets = $renderer->collectVendorAssets($modules);
-            if (!empty($vendorAssets['css'])) {
-                foreach ($vendorAssets['css'] as $href) {
-                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
-                }
-            }
-
-            // Pre-rendering per tracciare moduli annidati
-            ob_start();
-            foreach ($modules as $module) {
-                if ($module['module_name'] !== 'menu') {
-                    $config = json_decode($module['config'], true) ?? [];
-                    $renderer->renderModule($module['module_name'], $config);
-                }
-            }
-            ob_end_clean();
-            
-            // Ora raccogli asset con moduli annidati tracciati
-            $moduleAssets = $renderer->collectModuleAssets($modules);
-            if (!empty($moduleAssets['css'])) {
-                foreach ($moduleAssets['css'] as $href) {
-                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
-                }
-            }
-        } else {
-            // PROD: un solo bundle
-            echo '<link rel="stylesheet" href="build/assets/css/main.min.css">';
-        }
-    ?>
+    <!-- CSS PROD - Bundle unico -->
+    <link rel="stylesheet" href="assets/css/main.min.css">
     
     <!-- CSS Variables dinamiche -->
     <?php if (!empty($cssVariables)): ?>
@@ -161,37 +113,7 @@ try {
         <?php endif; ?>
     </main>
     
-    
-    <!-- JavaScript DEV/PROD -->
-    <?php if ($isDev): ?>
-        <?php
-            // Vendor JS
-            $vendorAssets = $vendorAssets ?? $renderer->collectVendorAssets($modules);
-            if (!empty($vendorAssets['js'])) {
-                foreach ($vendorAssets['js'] as $src) {
-                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
-                }
-            }
-
-            $moduleAssets = $moduleAssets ?? $renderer->collectModuleAssets($modules);
-            // Core JS (se esiste)
-            $coreJs = [
-                'assets/js/core/app.js'
-            ];
-            foreach ($coreJs as $src) {
-                if (file_exists(__DIR__ . '/' . $src)) {
-                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
-                }
-            }
-            // JS moduli deduplicati
-            if (!empty($moduleAssets['js'])) {
-                foreach ($moduleAssets['js'] as $src) {
-                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
-                }
-            }
-        ?>
-    <?php else: ?>
-        <script src="build/assets/js/app.min.js"></script>
-    <?php endif; ?>
+    <!-- JavaScript PROD - Bundle unico -->
+    <script src="assets/js/app.min.js"></script>
 </body>
 </html>

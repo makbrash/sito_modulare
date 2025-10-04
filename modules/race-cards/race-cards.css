@@ -1,0 +1,230 @@
+/**
+ * Race Cards Module CSS
+ * Stili per il modulo race cards - Design completo e definito
+ */
+
+.race-cards-module {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-primary);
+}
+
+.race-cards-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+}
+
+.race-card {
+    position: relative;
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--bg-glass-hover);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+}
+
+.race-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.card-number {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    font-family: var(--font-display);
+    font-size: 6rem;
+    font-weight: 900;
+    opacity: 0.1;
+    color: var(--primary);
+    z-index: 1;
+}
+
+.marathon-card .card-number {
+    color: var(--primary);
+}
+
+.portici-card .card-number {
+    color: var(--secondary);
+}
+
+.runtune-card .card-number {
+    color: var(--accent);
+}
+
+.card-tag {
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.marathon-tag {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+.portici-tag {
+    background: var(--secondary);
+    color: var(--text-primary);
+}
+
+.runtune-tag {
+    background: var(--accent);
+    color: var(--text-dark);
+}
+
+.card-content {
+    position: relative;
+    z-index: 3;
+    margin-top: var(--space-2xl);
+}
+
+.card-title {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-md) 0;
+    text-transform: uppercase;
+}
+
+.card-distance {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+}
+
+.marathon-distance {
+    color: var(--primary);
+}
+
+.portici-distance {
+    color: var(--secondary);
+}
+
+.runtune-distance {
+    color: var(--accent);
+}
+
+.card-description {
+    color: var(--text-secondary);
+    line-height: 1.625;
+    margin-bottom: var(--space-xl);
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.detail-item i {
+    width: 16px;
+    color: var(--primary);
+}
+
+.card-button {
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.marathon-button {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+.marathon-button:hover {
+    background: #1e7bb8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(35, 168, 235, 0.3);
+}
+
+.portici-button {
+    background: var(--secondary);
+    color: var(--text-primary);
+}
+
+.portici-button:hover {
+    background: #e6395e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 51, 94, 0.3);
+}
+
+.runtune-button {
+    background: var(--accent);
+    color: var(--text-dark);
+}
+
+.runtune-button:hover {
+    background: #d4e85c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(203, 223, 68, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .race-cards-container {
+        grid-template-columns: 1fr;
+        padding: 0 var(--space-md);
+    }
+    
+    .card-number {
+        font-size: 4rem;
+    }
+    
+    .card-title {
+        font-size: 1.875rem;
+    }
+    
+    .card-distance {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .race-card {
+        padding: var(--space-lg);
+    }
+    
+    .card-number {
+        font-size: 3.75rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .card-details {
+        grid-template-columns: 1fr;
+    }
+}

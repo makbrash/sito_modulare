@@ -1,0 +1,189 @@
+/**
+ * Footer Module CSS
+ * Stili per il modulo footer
+ */
+
+.site-footer {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    margin-top: var(--space-3xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-lg);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.footer-section h3,
+.footer-section h4 {
+    margin-bottom: var(--space-lg);
+}
+
+.footer-title {
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    color: var(--secondary);
+    margin: 0;
+    text-shadow: 0 0 10px rgba(220, 51, 94, 0.3);
+}
+
+.footer-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+}
+
+.footer-description {
+    color: var(--text-secondary);
+    line-height: 1.625;
+    margin-bottom: var(--space-lg);
+}
+
+.social-links {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-glass);
+    color: var(--secondary);
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--bg-glass-hover);
+    
+    &:hover {
+        background: var(--secondary);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 51, 94, 0.3);
+    }
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: var(--space-sm);
+}
+
+.footer-links li a {
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.footer-links li a:hover {
+    color: var(--primary);
+}
+
+.contact-info p {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
+}
+
+.contact-info p i {
+    color: var(--primary);
+    width: 16px;
+}
+
+.newsletter .newsletter-form {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.newsletter .newsletter-input {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--bg-glass-hover);
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    backdrop-filter: blur(10px);
+}
+
+.newsletter .newsletter-input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(220, 51, 94, 0.2);
+}
+
+.newsletter .newsletter-input::placeholder {
+    color: var(--text-muted);
+}
+
+.newsletter .newsletter-btn {
+    padding: var(--space-sm) var(--space-lg);
+    background: linear-gradient(135deg, var(--secondary) 0%, #b42a4a 100%);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(220, 51, 94, 0.3);
+}
+
+.newsletter .newsletter-btn:hover {
+    background: linear-gradient(135deg, #e6395e 0%, var(--secondary) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 51, 94, 0.4);
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--bg-glass-hover);
+    padding-top: var(--space-lg);
+    text-align: center;
+}
+
+.copyright {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        padding: var(--space-xl) var(--space-md);
+    }
+    
+    .footer-title {
+        font-size: 1.5rem;
+    }
+}

@@ -6,7 +6,7 @@ Sistema modulare per il sito ufficiale della Bologna Marathon (bolognamarathon.r
 - **Tipo**: Sito sportivo modulare
 - **Tecnologie**: PHP 8+, MySQL, CSS Variables, JavaScript vanilla
 - **Architettura**: SSR (Server-Side Rendering) modulare
-- **Path**: `http://localhost/BM_layout/sito_modulare/`
+- **Path**: `http://localhost/sito_modulare/`
 
 ## 📁 STRUTTURA PROGETTO
 ```
@@ -81,7 +81,7 @@ sito_modulare/
 1. **Setup automatico**: `admin/test-setup.php`
 2. **Pannello admin**: `admin/admin.php`
 3. **Debug**: `debug.php`
-4. **Path corretto**: `http://localhost/BM_layout/sito_modulare/`
+4. **Path corretto**: `http://localhost/sito_modulare/`
 
 ## 🚀 WORKFLOW SVILUPPO
 
@@ -120,20 +120,26 @@ $moduleData = $renderer->getModuleData('mioModulo', $config);
 
 ### Setup Iniziale
 1. **Avvia XAMPP** (Apache + MySQL)
-2. **Setup database**: `http://localhost/BM_layout/sito_modulare/admin/test-setup.php`
-3. **Test pagina**: `http://localhost/BM_layout/sito_modulare/index.php`
+2. **Setup database**: `http://localhost/sito_modulare/admin/test-setup.php`
+3. **Test pagina**: `http://localhost/sito_modulare/index.php`
 
 ### File di Test
 - **Versione semplice**: `index-simple.php` (senza database)
 - **Debug database**: `debug.php`
 - **Test setup**: `test.php`
 
-### Build System (Opzionale)
+### Build System
 ```bash
 npm install
-npm run build
-npm run watch
+npm run dev        # Server sviluppo con live-reload
+npm run release    # Build completo per produzione (SOLO SU RICHIESTA)
 ```
+
+**⚠️ IMPORTANTE**: NON eseguire build automatici durante lo sviluppo. 
+Il build è necessario SOLO:
+- Su richiesta esplicita dell'utente
+- Prima del deploy su cloud
+- Per testare versione produzione
 
 ## 🎯 OBIETTIVI PROGETTO
 - **Sistema modulare** riutilizzabile
@@ -149,12 +155,14 @@ npm run watch
 - **Status pagina**: Deve essere "published" per essere visibile
 - **Moduli**: Ogni modulo ha PHP + CSS + JS nella stessa cartella
 - **CSS Variables**: Sistema di personalizzazione principale
+- **Build**: SOLO su richiesta esplicita, mai automatico durante sviluppo
+- **Sviluppo**: Modifica file direttamente, usa `npm run dev` per live-reload
 
 ## 🚨 PROBLEMI COMUNI
 1. **"Pagina non trovata"**: Controlla status = 'published'
 2. **Database vuoto**: Usa `admin/test-setup.php`
 3. **Moduli mancanti**: Verifica `modules_registry`
-4. **Path sbagliato**: Usa `http://localhost/BM_layout/sito_modulare/`
+4. **Path sbagliato**: Usa `http://localhost/sito_modulare/`
 5. **"Undefined variable $renderer"**: Variabile passata automaticamente dal ModuleRenderer
 6. **Percorsi moduli**: Devono essere relativi (es. `hero/hero.php` non `modules/hero/hero.php`)
 7. **SQL LIMIT error**: LIMIT non può essere parametro preparato, usa concatenazione sicura

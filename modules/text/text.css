@@ -1,0 +1,97 @@
+/**
+ * Rich Text Module CSS
+ */
+
+.rich-text-module {
+  background: var(--bg-primary);
+  padding: var(--space-3xl) 0;
+}
+
+.rich-text-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.rich-text-content h1,
+.rich-text-content h2,
+.rich-text-content h3,
+.rich-text-content h4,
+.rich-text-content h5,
+.rich-text-content h6 {
+  color: var(--secondary);
+  margin-bottom: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+.rich-text-content h1:first-child,
+.rich-text-content h2:first-child,
+.rich-text-content h3:first-child {
+  margin-top: 0;
+}
+
+.rich-text-content p {
+  font-size: 1.125rem;
+  line-height: 1.625;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.rich-text-content p:last-child { margin-bottom: 0; }
+
+.rich-text-content ul,
+.rich-text-content ol {
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-xl);
+}
+
+.rich-text-content li {
+  margin-bottom: var(--space-sm);
+  line-height: 1.5;
+}
+
+.rich-text-content a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.rich-text-content a:hover {
+  color: #1e7bb8;
+  text-decoration: underline;
+}
+
+.rich-text-content strong { font-weight: 700; color: var(--secondary); }
+.rich-text-content em { font-style: italic; color: var(--text-muted); }
+
+.rich-text-content blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: var(--space-lg);
+  margin: var(--space-xl) 0;
+  font-style: italic;
+  color: var(--text-muted);
+  background: var(--bg-glass);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+}
+
+.rich-text-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: var(--space-lg) 0;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .rich-text-content { padding: 0 var(--space-md); }
+  .rich-text-content p { font-size: 1rem; }
+  .rich-text-content ul,
+  .rich-text-content ol { padding-left: var(--space-lg); }
+}
+
+@media (max-width: 480px) {
+  .rich-text-module { padding: var(--space-xl) 0; }
+  .rich-text-content { padding: 0 var(--space-sm); }
+}

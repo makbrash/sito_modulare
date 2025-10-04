@@ -1,0 +1,156 @@
+/**
+ * Results Module CSS
+ * Stili per il modulo results
+ */
+
+.results-module {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-primary);
+}
+
+.results-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.results-title {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: var(--secondary);
+    margin: 0;
+    text-shadow: 0 0 10px rgba(220, 51, 94, 0.3);
+}
+
+.results-filters {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--bg-glass-hover);
+    border-radius: var(--radius-lg);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(35, 168, 235, 0.2);
+}
+
+.results-table {
+    background: var(--bg-glass);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid var(--bg-glass-hover);
+    backdrop-filter: blur(10px);
+}
+
+.results-table-content {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.results-table-content thead {
+    background: linear-gradient(135deg, var(--primary) 0%, #1e7bb8 100%);
+    color: var(--text-primary);
+}
+
+.results-table-content thead th {
+    padding: var(--space-md);
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--bg-glass-hover);
+}
+
+.results-table-content tbody tr {
+    border-bottom: 1px solid var(--bg-glass-hover);
+    transition: all var(--transition-fast);
+}
+
+.results-table-content tbody tr:nth-child(even) {
+    background: var(--bg-glass);
+}
+
+.results-table-content tbody tr:hover {
+    background: var(--bg-glass-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.results-table-content tbody tr td {
+    padding: var(--space-md);
+    vertical-align: middle;
+}
+
+.rank {
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    width: 60px;
+}
+
+.name {
+    font-weight: 600;
+}
+
+.time {
+    font-family: 'Courier New', monospace;
+    color: #00ffff;
+}
+
+.category {
+    background: var(--bg-glass);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .results-table-content {
+        font-size: 0.75rem;
+    }
+    
+    .results-table-content thead th,
+    .results-table-content tbody td {
+        padding: var(--space-sm);
+    }
+    
+    .results-filters {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-select {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-table-content {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
