@@ -1,18 +1,68 @@
 {
   "name": "Hero",
   "slug": "hero",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "component_path": "hero/hero.php",
   "css_class": "hero-module",
-  "default_config": { "layout": "2col", "height": "100vh" },
+  "description": "Hero principale con overlay configurabile, CTA modulari e statistiche di impatto",
   "aliases": ["actionHero"],
+  "default_config": {
+    "height": "min(100vh, 860px)",
+    "eyebrow": {
+      "icon": "fa-regular fa-calendar",
+      "label": "2 MARZO 2026"
+    },
+    "title": "Thermal Bologna Marathon",
+    "subtitle": "Corri attraverso la storia",
+    "description": "Tre percorsi unici nel cuore di Bologna. Scegli la tua sfida e vivi un'esperienza indimenticabile tra storia, cultura e sport.",
+    "background": {
+      "image": "assets/images/hero-bg.jpg",
+      "position": "center",
+      "size": "cover",
+      "overlay": "linear-gradient(135deg, rgba(35, 168, 235, 0.82) 0%, rgba(220, 51, 94, 0.65) 100%)",
+      "overlay_opacity": 0.88
+    },
+    "actions": [
+      {
+        "type": "button",
+        "text": "Scopri le gare",
+        "variant": "primary",
+        "size": "large",
+        "icon": "fa-solid fa-play",
+        "iconPosition": "left",
+        "href": "#gare"
+      },
+      {
+        "type": "button",
+        "text": "Iscriviti ora",
+        "variant": "ghost",
+        "size": "large",
+        "href": "#iscrizioni"
+      }
+    ],
+    "stats": [
+      { "label": "Percorsi", "value": "3", "icon": "fa-solid fa-route" },
+      { "label": "Atleti attesi", "value": "12K+", "icon": "fa-solid fa-users" },
+      { "label": "Villaggio Expo", "value": "3 giorni", "icon": "fa-solid fa-flag-checkered" }
+    ]
+  },
   "assets": {
     "css": ["modules/hero/hero.css"],
     "js": ["modules/hero/hero.js"],
     "vendors": []
   },
   "dependencies": [],
+  "ui_schema": {
+    "eyebrow.label": { "type": "text", "label": "Eyebrow", "placeholder": "Data o messaggio" },
+    "eyebrow.icon": { "type": "text", "label": "Icona" },
+    "title": { "type": "text", "label": "Titolo" },
+    "subtitle": { "type": "text", "label": "Sottotitolo" },
+    "description": { "type": "textarea", "label": "Descrizione", "rows": 4 },
+    "actions": { "type": "repeater", "label": "Call to action" },
+    "stats": { "type": "repeater", "label": "Statistiche" },
+    "background.image": { "type": "text", "label": "Immagine di sfondo" },
+    "background.overlay": { "type": "text", "label": "Overlay" }
+  },
   "install": "hero/install.sql",
   "uninstall": "hero/uninstall.sql"
 }
-

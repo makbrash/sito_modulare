@@ -56,7 +56,8 @@ try {
                 'assets/css/core/variables.css',
                 'assets/css/core/reset.css',
                 'assets/css/core/typography.css',
-                'assets/css/core/fonts.css'
+                'assets/css/core/fonts.css',
+                'assets/css/site/layout.css'
             ];
             foreach ($coreCss as $href) {
                 if (file_exists(__DIR__ . '/' . $href)) {

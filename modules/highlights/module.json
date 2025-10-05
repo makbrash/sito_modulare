@@ -1,0 +1,53 @@
+{
+  "name": "Highlights",
+  "slug": "highlights",
+  "version": "1.0.0",
+  "component_path": "highlights/highlights.php",
+  "css_class": "highlights-module",
+  "description": "Griglia di punti di forza con CTA e icone personalizzabili",
+  "aliases": ["impactHighlights"],
+  "default_config": {
+    "eyebrow": "Perché Bologna",
+    "title": "Una maratona, mille motivi per esserci",
+    "subtitle": "Un evento diffuso che abbraccia sportivi, famiglie e aziende con un programma ricco e inclusivo.",
+    "theme": "dark",
+    "items": [
+      {
+        "icon": "fa-solid fa-city",
+        "title": "Cuore storico",
+        "description": "Percorsi che attraversano i portici UNESCO e mostrano la città da una prospettiva unica."
+      },
+      {
+        "icon": "fa-solid fa-handshake-angle",
+        "title": "Community first",
+        "description": "Partnership con oltre 80 associazioni e una rete di volontari pronti ad accoglierti."
+      },
+      {
+        "icon": "fa-solid fa-bolt",
+        "title": "Servizi premium",
+        "description": "Logistica fluida, villaggio expo tematico e assistenza continua dal ritiro pettorale al dopo gara."
+      }
+    ],
+    "cta": {
+      "text": "Scopri il programma completo",
+      "variant": "ghost",
+      "href": "#programma"
+    }
+  },
+  "assets": {
+    "css": ["modules/highlights/highlights.css"],
+    "js": [],
+    "vendors": []
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "eyebrow": { "type": "text", "label": "Eyebrow" },
+    "title": { "type": "text", "label": "Titolo" },
+    "subtitle": { "type": "textarea", "label": "Sottotitolo", "rows": 3 },
+    "theme": { "type": "select", "label": "Tema", "options": [{"label": "Dark", "value": "dark"}, {"label": "Light", "value": "light"}] },
+    "items": { "type": "repeater", "label": "Schede" },
+    "cta": { "type": "object", "label": "Call to action" }
+  },
+  "install": "highlights/install.sql",
+  "uninstall": "highlights/uninstall.sql"
+}

@@ -1,0 +1,1 @@
+-- Install script placeholder for highlights module

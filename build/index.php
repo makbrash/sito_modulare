@@ -43,7 +43,8 @@ try {
     <title><?= htmlspecialchars($page['title']) ?></title>
     <meta name="description" content="<?= htmlspecialchars($page['description']) ?>">
     
-    <!-- CSS PROD - Bundle unico -->
+    <!-- CSS PROD -->
+    <link rel="stylesheet" href="assets/css/site/layout.css">
     <link rel="stylesheet" href="assets/css/main.min.css">
     
     <!-- CSS Variables dinamiche -->

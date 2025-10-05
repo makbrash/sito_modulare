@@ -1,0 +1,1 @@
+-- Install script placeholder for event-schedule module
