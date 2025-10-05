@@ -391,6 +391,12 @@ class ModuleRenderer {
             case 'hero':
             case 'actionHero':
                 return $this->getHeroData($config);
+            case 'highlights':
+            case 'impactHighlights':
+                return $this->getHighlightsData($config);
+            case 'event-schedule':
+            case 'eventSchedule':
+                return $this->getEventScheduleData($config);
             case 'text':
             case 'richText':
                 return $this->getTextData($config);
@@ -426,12 +432,184 @@ class ModuleRenderer {
      * Ottiene dati hero
      */
     private function getHeroData($config) {
-        return [
-            'title' => $config['title'] ?? 'Bologna Marathon',
-            'subtitle' => $config['subtitle'] ?? 'La corsa più bella d\'Italia',
-            'image' => $config['image'] ?? 'hero-bg.jpg',
-            'layout' => $config['layout'] ?? '2col'
+        $defaults = [
+            'height' => 'min(100vh, 860px)',
+            'eyebrow' => [
+                'icon' => 'fa-regular fa-calendar',
+                'label' => '2 MARZO 2026'
+            ],
+            'title' => 'Thermal Bologna Marathon',
+            'subtitle' => 'Corri attraverso la storia',
+            'description' => "Tre percorsi unici nel cuore di Bologna. Scegli la tua sfida e vivi un'esperienza indimenticabile tra storia, cultura e sport.",
+            'background' => [
+                'image' => 'assets/images/hero-bg.jpg',
+                'position' => 'center',
+                'size' => 'cover',
+                'overlay' => 'linear-gradient(135deg, rgba(35, 168, 235, 0.82) 0%, rgba(220, 51, 94, 0.65) 100%)',
+                'overlay_opacity' => 0.88
+            ],
+            'actions' => [
+                [
+                    'type' => 'button',
+                    'text' => 'Scopri le gare',
+                    'variant' => 'primary',
+                    'size' => 'large',
+                    'icon' => 'fa-solid fa-play',
+                    'iconPosition' => 'left',
+                    'href' => '#gare'
+                ],
+                [
+                    'type' => 'button',
+                    'text' => 'Iscriviti ora',
+                    'variant' => 'ghost',
+                    'size' => 'large',
+                    'href' => '#iscrizioni'
+                ]
+            ],
+            'stats' => [
+                ['label' => 'Percorsi', 'value' => '3', 'icon' => 'fa-solid fa-route'],
+                ['label' => 'Atleti attesi', 'value' => '12K+', 'icon' => 'fa-solid fa-users'],
+                ['label' => 'Villaggio Expo', 'value' => '3 giorni', 'icon' => 'fa-solid fa-flag-checkered']
+            ]
         ];
+
+        $config = is_array($config) ? $config : [];
+        $data = array_replace_recursive($defaults, $config);
+
+        $data['actions'] = array_values(array_filter($data['actions'] ?? [], 'is_array'));
+        $data['stats'] = array_values(array_filter($data['stats'] ?? [], 'is_array'));
+
+        return $data;
+    }
+
+    private function getHighlightsData($config) {
+        $defaults = [
+            'eyebrow' => 'Perché Bologna',
+            'title' => 'Una maratona, mille motivi per esserci',
+            'subtitle' => 'Un evento diffuso che abbraccia sportivi, famiglie e aziende con un programma ricco e inclusivo.',
+            'items' => [
+                [
+                    'icon' => 'fa-solid fa-city',
+                    'title' => 'Cuore storico',
+                    'description' => 'Percorsi che attraversano i portici UNESCO e mostrano la città da una prospettiva unica.'
+                ],
+                [
+                    'icon' => 'fa-solid fa-handshake-angle',
+                    'title' => 'Community first',
+                    'description' => 'Partnership con oltre 80 associazioni e una rete di volontari pronti ad accoglierti.'
+                ],
+                [
+                    'icon' => 'fa-solid fa-bolt',
+                    'title' => 'Servizi premium',
+                    'description' => 'Logistica fluida, villaggio expo tematico e assistenza continua dal ritiro pettorale al dopo gara.'
+                ]
+            ],
+            'cta' => [
+                'text' => 'Scopri il programma completo',
+                'variant' => 'ghost',
+                'href' => '#programma'
+            ]
+        ];
+
+        $config = is_array($config) ? $config : [];
+        $data = array_replace_recursive($defaults, $config);
+
+        $data['items'] = array_values(array_filter($data['items'] ?? [], function ($item) {
+            return is_array($item) && (!empty($item['title']) || !empty($item['description']));
+        }));
+
+        return $data;
+    }
+
+    private function getEventScheduleData($config) {
+        $defaults = [
+            'eyebrow' => 'Programma ufficiale',
+            'title' => 'Tre giorni di festa sportiva',
+            'subtitle' => 'Dalla consegna pettorali alla cerimonia finale, ogni momento è pensato per creare energia in città.',
+            'days' => [
+                [
+                    'label' => 'Venerdì',
+                    'date' => '28 Febbraio',
+                    'events' => [
+                        [
+                            'time' => '10:00',
+                            'title' => 'Apertura Marathon Expo',
+                            'location' => 'Piazza Maggiore',
+                            'description' => 'Espositori, partner e attività di warm-up con ospiti speciali.'
+                        ],
+                        [
+                            'time' => '18:30',
+                            'title' => 'Talk ispirazionale',
+                            'location' => 'Teatro Duse',
+                            'description' => 'Storie di resilienza con campioni e ambassador della maratona.'
+                        ]
+                    ]
+                ],
+                [
+                    'label' => 'Sabato',
+                    'date' => '1 Marzo',
+                    'events' => [
+                        [
+                            'time' => '09:30',
+                            'title' => 'Family Run',
+                            'location' => 'Giardini Margherita',
+                            'description' => 'Percorso inclusivo di 5 km per famiglie, scuole e associazioni.'
+                        ],
+                        [
+                            'time' => '15:00',
+                            'title' => 'Ritiro pettorali',
+                            'location' => 'Marathon Expo',
+                            'description' => 'Ultimo slot per ritiro pettorali e briefing tecnico con i pacer.'
+                        ]
+                    ]
+                ],
+                [
+                    'label' => 'Domenica',
+                    'date' => '2 Marzo',
+                    'events' => [
+                        [
+                            'time' => '08:30',
+                            'title' => 'Partenza maratona & 30km dei Portici',
+                            'location' => 'Via Rizzoli',
+                            'description' => 'Start con onde dedicate e musica live per accompagnare gli atleti.'
+                        ],
+                        [
+                            'time' => '12:30',
+                            'title' => 'Cerimonia di premiazione',
+                            'location' => 'Piazza Maggiore',
+                            'description' => 'Live band, medaglie personalizzate e festa conclusiva aperta alla città.'
+                        ]
+                    ]
+                ]
+            ],
+            'cta' => [
+                'text' => 'Scarica il programma PDF',
+                'variant' => 'primary',
+                'href' => '#download-programma',
+                'icon' => 'fa-solid fa-file-arrow-down',
+                'iconPosition' => 'left'
+            ]
+        ];
+
+        $config = is_array($config) ? $config : [];
+        $data = array_replace_recursive($defaults, $config);
+
+        $data['days'] = array_values(array_filter($data['days'] ?? [], function ($day) {
+            return is_array($day) && (!empty($day['events']) || !empty($day['label']));
+        }));
+
+        foreach ($data['days'] as &$day) {
+            if (!isset($day['events']) || !is_array($day['events'])) {
+                $day['events'] = [];
+                continue;
+            }
+            $day['events'] = array_values(array_filter($day['events'], function ($event) {
+                return is_array($event) && (!empty($event['title']) || !empty($event['time']));
+            }));
+        }
+        unset($day);
+
+        return $data;
     }
     
     /**

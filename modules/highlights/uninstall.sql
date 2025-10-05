@@ -1,0 +1,1 @@
+-- Uninstall script placeholder for highlights module

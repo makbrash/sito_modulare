@@ -1,407 +1,166 @@
-# 🏃‍♂️ Bologna Marathon - Sistema Modulare
+# 🏃‍♂️ Bologna Marathon · Sistema Modulare
 
-Sistema modulare SSR per il sito ufficiale della Bologna Marathon (bolognamarathon.run)
+Piattaforma SSR modulare per bolognamarathon.run. Il progetto è pensato per funzionare su hosting PHP/MySQL tradizionali (nessun runtime Node richiesto in produzione) e mette a disposizione un sistema di moduli riutilizzabili affiancato da un page builder drag&drop.
 
-## 📋 Panoramica
+## 📦 Stack & Requisiti
 
-- **Tipo**: Sito sportivo modulare
-- **Tecnologie**: PHP 8+, MySQL, CSS Variables, JavaScript vanilla
-- **Architettura**: SSR (Server-Side Rendering) modulare
-- **Build System**: Gulp 4 + BrowserSync
-- **Path**: `http://localhost/BM_layout/sito_modulare/`
+| Ambito            | Tecnologie |
+|-------------------|------------|
+| Runtime           | PHP 8.1+, MySQL 5.7+
+| Front-end         | CSS Variables + Vanilla JS
+| Tooling locale    | Node 18+, Gulp 4 (solo per build CSS/JS)
+| Compatibilità     | Hosting condivisi senza Node.js
 
-## 🚀 Quick Start
+Per lo sviluppo locale è consigliato un ambiente tipo XAMPP o Valet.
 
-### Prerequisiti
-- XAMPP (Apache + MySQL)
-- Node.js 16+
-- PHP 8.0+
+## 🚀 Avvio rapido
 
-### Setup Iniziale
 ```bash
 # 1. Clona il repository
-git clone [repository-url]
+git clone <repository-url>
 cd sito_modulare
 
-# 2. Installa dipendenze Node.js
+# 2. Installa le dipendenze front-end (per sviluppo)
 npm install
 
-# 3. Avvia XAMPP (Apache + MySQL)
+# 3. Avvia il backend (Apache/MySQL) e importa il database
+mysql -u root -p < database/schema.sql
 
-# 4. Setup database
-# Vai su: http://localhost/BM_layout/sito_modulare/admin/test-setup.php
+# 4. Popola dati di esempio (opzionale)
+mysql -u root -p < database/test_data.sql
 
-# 5. Test sito
-# Vai su: http://localhost/BM_layout/sito_modulare/index.php
-```
-
-## 🛠️ Comandi di Sviluppo
-
-### Sviluppo Locale
-```bash
-# Avvia server di sviluppo con live-reload
+# 5. Avvia il watcher front-end
 npm run dev
 
-# Configura proxy personalizzato (opzionale)
-set BROWSERSYNC_PROXY=http://localhost/custom-path/index.php
-npm run dev
+# 6. Visita
+# Sito    → http://localhost/BM_layout/sito_modulare/index.php
+# Admin   → http://localhost/BM_layout/sito_modulare/admin/admin.php
 ```
 
-### Build per Produzione
+### Build per il cloud
+
 ```bash
-# Genera cartella build/ pronta per cloud
 npm run release
-
-# La cartella build/ contiene:
-# - index.php (rinominato da index-prod.php)
-# - assets/css/main.min.css (bundle minificato)
-# - assets/js/app.min.js (bundle minificato)
-# - Tutti i file PHP e database
 ```
 
-### Altri Comandi
-```bash
-# Build solo CSS
-npm run css:build
+Genera la cartella `build/` con asset minificati e `index.php` già ottimizzato per l'upload su hosting senza Node.
 
-# Build solo JS
-npm run js:build
-
-# Ottimizza immagini
-npm run images:optimize
-```
-
-## 📁 Struttura Progetto
+## 🧠 Architettura
 
 ```
 sito_modulare/
-├── assets/
-│   ├── css/core/           # CSS core (variables, reset, typography)
-│   ├── css/main.css        # Stili principali (dev)
-│   ├── js/core/            # JavaScript core
-│   ├── images/             # Immagini
-│   └── font/               # Font personalizzati
-├── config/
-│   └── database.php        # Configurazione database
-├── core/
-│   └── ModuleRenderer.php  # Sistema rendering moduli SSR
-├── modules/                # Moduli riutilizzabili
-│   ├── hero/              # Action Hero
-│   ├── results/           # Tabella risultati
-│   ├── menu/              # Menu navigazione
-│   ├── footer/            # Footer sito
-│   ├── text/              # Rich Text
-│   ├── button/            # Pulsanti
-│   ├── race-cards/        # Card gare
-│   └── select/            # Select personalizzato
-├── admin/                  # Pannello amministrazione
-│   ├── admin.php          # Dashboard principale
-│   ├── page-builder.php   # Drag&drop moduli
-│   └── test-setup.php     # Setup database
-├── database/
-│   ├── schema.sql         # Schema database
-│   └── test_data.sql      # Dati di test
-├── build/                  # Output build (generata)
-├── gulpfile.js            # Configurazione build
-├── package.json           # Dipendenze Node.js
-├── index.php              # Homepage (dev)
-├── index-prod.php         # Template produzione
-└── README.md              # Questo file
+├─ admin/                 # Control center e page builder
+│  ├─ assets/             # CSS e JS dedicati all'admin
+│  ├─ includes/           # Helpers riutilizzabili (bootstrap, sync, util)
+│  ├─ admin.php           # Dashboard modulare
+│  ├─ page-builder.php    # Drag&drop per le istanze modulo
+│  └─ sync-modules.php    # Report visivo per la sincronizzazione moduli
+├─ core/ModuleRenderer.php# Motore SSR dei moduli
+├─ modules/               # Moduli riutilizzabili (hero, menu, button...)
+├─ assets/                # CSS/JS core del sito pubblico
+├─ database/              # Schema SQL e dati di esempio
+├─ build/                 # Output produzione (generato)
+├─ index.php              # Entry point principale (dev)
+└─ index-prod.php         # Template produzione
 ```
 
-## 🎨 Sistema CSS Variables
+### Registro moduli
 
-### File Principale
-`assets/css/core/variables.css`
+- Ogni modulo vive in `modules/<slug>/` e include:
+  - `module.json` → manifest con slug, path componente, config di default, alias.
+  - `<slug>.php` → vista SSR invocata dal `ModuleRenderer`.
+  - Asset opzionali (CSS/JS) caricati manualmente.
+- Il database mantiene un registro (`modules_registry`) sincronizzato con il filesystem.
+- I moduli possono essere instanziati più volte e annidati tramite il page builder.
 
-### Colori Principali
-```css
-:root {
-  --primary: #23a8eb;      /* Colore principale */
-  --secondary: #dc335e;    /* Colore secondario */
-  --accent: #cbdf44;       /* Colore accent */
-  --info: #5DADE2;         /* Colore info */
-  --success: #00a8ff;      /* Colore success */
-  --warning: #F39C12;      /* Colore warning */
-  --error: #E74C3C;        /* Colore error */
-}
-```
+#### Moduli pubblici pronti all'uso
 
-### Font System
-```css
-:root {
-  --font-primary: 'Inter';           /* Font principale */
-  --font-display: 'Bebas Neue';      /* Font display */
-  --font-accent: 'Gloss And Bloom';  /* Font accent personalizzato */
-}
-```
+| Slug | Descrizione | Punti chiave |
+|------|-------------|--------------|
+| `hero` | Hero principale con overlay configurabile, CTA modulari e statistiche. | CTA annidate tramite modulo `button`, documentazione in `modules/hero/README.md`. |
+| `highlights` | Griglia dei punti di forza dell'evento. | Card responsive con icone Font Awesome e CTA finale. |
+| `event-schedule` | Timeline dei tre giorni di gara. | Supporta giornate multiple, location e call-to-action finale. |
+| `race-cards` | Cards gare collegate al database `races`. | Colori tematici per maratona, 30km e run tune. |
+| `results` | Tabella risultati collegata a `race_results`. | Supporta limiti configurabili e formati tempo dal renderer. |
+| `button`, `text`, `select`, ... | Componenti atomici riutilizzabili. | Pensati per essere annidati in moduli compositi. |
 
-### Personalizzazione
-- **Override per pagina**: Tramite database (campo `css_variables`)
-- **Override globali**: Modifica `variables.css`
-- **Responsive**: Variabili per breakpoint
-- **Font esterni**: Google Fonts + Font Awesome + Custom Fonts
+## 🛠️ Admin Control Center
 
-## 🧩 Moduli Disponibili
+L'admin è stato ripensato con un'interfaccia coerente con il design del sito (variabili CSS esistenti) e prevede:
 
-### 1. actionHero
-- **Descrizione**: Hero section con layout 2 colonne
-- **File**: `modules/hero/hero.php`
-- **Config**: title, subtitle, image, layout
+- **Dashboard** con statistiche e attività recenti.
+- **Gestione risultati** collegata alla tabella `races` (niente ID hard-coded).
+- **Gestione contenuti dinamici** con metadati JSON e flag `featured`.
+- **Gestione pagine** con modifica rapida di titolo, description e CSS variables.
+- **Gestione moduli** con toggle attiva/disattiva, manifest in linea e sincronizzazione diretta.
+- **Page Builder** link diretto per il drag&drop delle istanze.
 
-### 2. resultsTable
-- **Descrizione**: Tabella risultati gara (ordinabile, filtri)
-- **File**: `modules/results/results.php`
-- **Config**: race_id, limit, sortable
+Il sync dei moduli ora utilizza `admin/includes/module_sync.php` e può essere lanciato sia dalla UI sia visitando `admin/sync-modules.php` (che restituisce un report leggibile).
 
-### 3. menu
-- **Descrizione**: Menu navigazione (sticky, mobile-friendly)
-- **File**: `modules/menu/menu.php`
-- **Config**: items, sticky, mobile_breakpoint
+## 🧩 Creare o aggiornare moduli
 
-### 4. footer
-- **Descrizione**: Footer sito (4 colonne, social)
-- **File**: `modules/footer/footer.php`
-- **Config**: columns, social, copyright
-
-### 5. richText
-- **Descrizione**: Contenuti testuali ricchi
-- **File**: `modules/text/text.php`
-- **Config**: content, wrapper, content_id
-
-### 6. button
-- **Descrizione**: Pulsanti personalizzabili
-- **File**: `modules/button/button.php`
-- **Config**: text, variant, size, href, icon
-
-### 7. raceCards
-- **Descrizione**: Card gare con layout verticale/orizzontale
-- **File**: `modules/race-cards/race-cards.php`
-- **Config**: layout, race_meta
-
-### 8. select
-- **Descrizione**: Select personalizzato
-- **File**: `modules/select/select.php`
-- **Config**: options, placeholder, multiple
-
-## 🗄️ Database Schema
-
-### Tabelle Principali
-
-#### `pages`
-- Gestione pagine del sito
-- Campi: id, title, slug, description, status, css_variables
-
-#### `modules_registry`
-- Registro moduli disponibili
-- Campi: name, description, component_path, default_config, is_active
-
-#### `page_modules`
-- Moduli assegnati alle pagine (sistema tradizionale)
-- Campi: page_id, module_name, config, order_index, is_active
-
-#### `module_instances`
-- Istanze di moduli per il page builder
-- Campi: page_id, module_name, instance_name, config, order_index, is_active
-
-#### `race_results`
-- Risultati delle gare
-- Campi: id, race_id, position, name, time, category
-
-#### `races`
-- Gare disponibili
-- Campi: id, name, distance, status, date
-
-#### `dynamic_content`
-- Contenuti dinamici per moduli
-- Campi: id, content_type, content, is_active, updated_at
-
-### Setup Database
-1. **Setup automatico**: `admin/test-setup.php`
-2. **Pannello admin**: `admin/admin.php`
-3. **Page Builder**: `admin/page-builder.php`
-4. **Debug**: `debug.php` (se presente)
-
-## 🔧 Workflow Sviluppo
-
-### Aggiungere Nuovo Modulo
-1. **Crea cartella**: `modules/mio-modulo/`
-2. **File necessari**:
-   - `mio-modulo.php` (template PHP)
-   - `mio-modulo.css` (stili)
-   - `mio-modulo.js` (JavaScript, opzionale)
-   - `module.json` (manifest)
-   - `install.sql` (setup database)
-
-3. **Template modulo**:
-```php
-<?php
-$moduleData = $renderer->getModuleData('mioModulo', $config);
-?>
-<div class="mio-modulo">
-    <!-- Contenuto modulo -->
-</div>
-```
-
-4. **Registra modulo**: Inserisci in `modules_registry`
-
-### Personalizzazione Colori
-```css
-/* In assets/css/core/variables.css */
-:root {
-  --primary-color: #TUO_COLORE;
-  --secondary-color: #ALTRO_COLORE;
-}
-```
-
-### Override per Pagina (Database)
-```json
-{
-  "--primary-color": "#D81E05",
-  "--hero-bg": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-}
-```
-
-## 🌐 Deployment
-
-### Cloud (Senza Node.js)
-1. **Build locale**:
-   ```bash
-   npm run release
+1. Duplica una cartella esistente in `modules/` o creane una nuova.
+2. Aggiorna `module.json` con:
+   ```json
+   {
+     "slug": "my-module",
+     "component_path": "my-module/my-module.php",
+     "css_class": "my-module",
+     "default_config": {
+       "title": "Titolo",
+       "layout": "full"
+     },
+     "aliases": ["alias-opzionale"]
+   }
    ```
+3. Scrivi la vista PHP leggendo `$config` fornito dal renderer. Evita hardcoding di asset o testo.
+4. Sincronizza dal pannello admin o con `admin/sync-modules.php`.
+5. (Facoltativo) Aggiungi documentazione del modulo (`README.md` nella cartella) con schema dei campi → utile per automazioni LLM future.
 
-2. **Carica cartella `build/`**:
-   - Comprimi `build/` in ZIP
-   - Carica su server cloud
-   - Estrai nella cartella web
-   - Configura database
-   - Esegui `install.php` (se presente)
+### Linee guida moduli
 
-3. **Configurazione server**:
-   - Apache: `.htaccess` incluso
-   - Nginx: Configurazione manuale
-   - PHP 8.0+ richiesto
-   - MySQL 5.7+ richiesto
+- Usa sempre le variabili CSS già definite in `assets/css/core/variables.css`.
+- Non modificare il modulo `menu` esistente; puoi crearne varianti alternative in nuove cartelle.
+- Mantieni le funzioni idempotenti e prepara i dati nel controller PHP, non nelle viste.
+- Per form/select riutilizza librerie affidabili (es. moduli già testati) invece di reinventare componenti.
 
-### File di Configurazione
-- **.htaccess**: Cache, compressione, security headers
-- **config.example.php**: Template configurazione DB
-- **install.php**: Installazione automatica database
+## 🔄 Page Builder
 
-## 🎯 Caratteristiche Principali
+Il builder usa `module_instances` per salvare la composizione delle pagine e supporta il drag&drop con SortableJS. Ogni modulo può essere annidato richiamando `$renderer->renderModule()` dall'interno di un altro modulo. La UI consente di:
 
-### Sistema Modulare
-- **SSR**: Rendering server-side per SEO
-- **Drag & Drop**: Page builder visuale
-- **Istanze**: Moduli riutilizzabili con configurazioni
-- **Alias**: Nomi alternativi per moduli
+- Creare nuove istanze con nome univoco.
+- Aggiornare configurazioni partendo dal manifest (`default_config`).
+- Ordinare e rimuovere moduli senza side-effects.
 
-### Performance
-- **Bundle**: CSS/JS minificati in produzione
-- **Cache**: Headers per asset statici
-- **Compressione**: Gzip automatica
-- **Ottimizzazione**: Immagini compresse
+## 📚 Utility & Script
 
-### Accessibilità
-- **Skip Links**: Navigazione da tastiera
-- **ARIA**: Attributi per screen reader
-- **Contrasti**: Colori accessibili
-- **Focus**: Gestione focus visibile
+| Comando             | Descrizione |
+|---------------------|-------------|
+| `npm run dev`       | Watch + BrowserSync (configurabile via `BROWSERSYNC_PROXY`).
+| `npm run css:build` | Build solo CSS.
+| `npm run js:build`  | Bundle JS vanilla.
+| `npm run release`   | Prepara la cartella `build/` per il deploy.
 
-### Responsive
-- **Mobile First**: Design responsive
-- **Breakpoints**: CSS Variables per media queries
-- **Touch**: Interazioni touch-friendly
-- **Performance**: Ottimizzato per mobile
+## 🧪 Quality check
 
-## 🔒 Sicurezza
+- PHP: rispettare PSR-12 (usa `php -l` per lint veloce).
+- JS: ES2018+ senza optional chaining lato produzione pubblica (ammesso nell'admin se necessario).
+- CSS: niente nesting tipo `&` (solo CSS standard + variabili).
 
-### Headers
-- X-Content-Type-Options: nosniff
-- X-Frame-Options: DENY
-- X-XSS-Protection: 1; mode=block
+## 🤝 Workflow consigliato
 
-### Database
-- Prepared statements
-- Input sanitization
-- SQL injection protection
+1. Crea un branch `feature/<nome>`.
+2. Implementa il modulo/feature seguendo queste linee guida.
+3. Aggiorna la documentazione del modulo (manifest + README dedicato se serve).
+4. Esegui build/test localmente.
+5. Apri una PR descrivendo moduli coinvolti e impatto sull'admin.
 
-### File
-- Configurazioni sensibili escluse
-- Upload sicuro
-- Permessi corretti
+## 🧭 Note per automazioni future
 
-## 🆘 Troubleshooting
-
-### Problemi Comuni
-
-#### "Pagina non trovata"
-- Controlla `status = 'published'` nel database
-- Verifica slug della pagina
-
-#### Database vuoto
-- Usa `admin/test-setup.php`
-- Controlla credenziali in `config/database.php`
-
-#### Moduli mancanti
-- Verifica `modules_registry` nel database
-- Controlla file in `modules/`
-
-#### Path sbagliato
-- Usa `http://localhost/BM_layout/sito_modulare/`
-- Verifica configurazione Apache
-
-#### "Undefined variable $renderer"
-- Variabile passata automaticamente dal ModuleRenderer
-- Controlla include del file
-
-#### Percorsi moduli
-- Usa percorsi relativi: `hero/hero.php`
-- Non `modules/hero/hero.php`
-
-#### SQL LIMIT error
-- LIMIT non può essere parametro preparato
-- Usa concatenazione sicura
-
-### Debug
-1. **Errori PHP**: Controlla log Apache
-2. **Database**: Usa `admin/test-setup.php`
-3. **Moduli**: Verifica `modules_registry`
-4. **Build**: Controlla output `npm run release`
-
-## 📚 Documentazione Aggiuntiva
-
-- **Moduli**: `modules/README.md`
-- **CSS Variables**: `docs/COLORS_AND_FONTS.md`
-- **Page Builder**: `admin/page-builder.php`
-- **API Moduli**: `core/ModuleRenderer.php`
-
-## 🤝 Contribuire
-
-1. Fork del repository
-2. Crea branch feature: `git checkout -b feature/nuovo-modulo`
-3. Commit changes: `git commit -m 'Aggiungi nuovo modulo'`
-4. Push branch: `git push origin feature/nuovo-modulo`
-5. Crea Pull Request
-
-### Convenzioni
-- **Moduli**: Segui struttura esistente
-- **CSS**: Usa CSS Variables
-- **PHP**: PSR-12 coding standards
-- **JS**: ES6+ con fallback
-- **Commit**: Conventional commits
-
-## 📄 Licenza
-
-MIT License - Vedi file LICENSE per dettagli
-
-## 👥 Team
-
-- **Bologna Marathon Team**
-- **Sistema Modulare**: Sviluppato per bolognamarathon.run
+- Mantieni i manifest aggiornati: un LLM potrà leggere slug, campi e dipendenze per generare pagine da prompt.
+- Documenta eventuali nuovi componenti in `modules/<slug>/README.md` e inserisci esempi di configurazione JSON.
+- Evita logiche lato client invasive: il rendering deve rimanere SSR per garantire SEO e semplicità d'uso.
 
 ---
 
-**Bologna Marathon - Sistema Modulare** 🏃‍♂️
-
-*Versione 1.0.0 - Gennaio 2025*
+**Bologna Marathon – Sistema modulare** · progettato per essere mantenibile, modulare e pronto all'integrazione con sistemi di generazione automatica di contenuti.

@@ -1,0 +1,105 @@
+/**
+ * Highlights module styles
+ */
+
+.highlights-module {
+    position: relative;
+    padding-block: clamp(var(--space-2xl), 15vh, var(--space-3xl));
+}
+
+.highlights-module--dark {
+    background: radial-gradient(circle at top, rgba(35, 168, 235, 0.08), transparent 55%), var(--bg-primary);
+}
+
+.highlights-module--light {
+    background: #f7f7fb;
+    color: var(--text-dark);
+}
+
+.highlights-module--light .section-title {
+    color: var(--text-dark);
+}
+
+.highlights-grid {
+    display: grid;
+    gap: clamp(var(--space-lg), 4vw, var(--space-xl));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.highlight-card {
+    position: relative;
+    padding: clamp(var(--space-lg), 3vw, var(--space-xl));
+    border-radius: var(--radius-xl);
+    background: var(--bg-glass);
+    border: 1px solid var(--bg-glass-hover);
+    backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-height: 260px;
+}
+
+.highlights-module--light .highlight-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.highlight-card__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(35, 168, 235, 0.15);
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.highlights-module--light .highlight-card__icon {
+    background: rgba(35, 168, 235, 0.12);
+}
+
+.highlight-card__meta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+
+.highlights-module--light .highlight-card__meta {
+    color: var(--secondary);
+}
+
+.highlight-card__title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.highlight-card__description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.highlights-module--light .highlight-card__description {
+    color: rgba(17, 24, 39, 0.75);
+}
+
+.highlights-cta {
+    margin-top: clamp(var(--space-2xl), 6vw, var(--space-3xl));
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .highlight-card {
+        min-height: 220px;
+    }
+}

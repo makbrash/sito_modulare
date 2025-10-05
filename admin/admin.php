@@ -1,581 +1,535 @@
 <?php
+declare(strict_types=1);
+
 /**
- * Admin Panel - Bologna Marathon
- * Pagina semplice per gestione dati
+ * Pannello di amministrazione - Bologna Marathon
+ * Gestione modulare di pagine, contenuti e moduli riutilizzabili
  */
 
-require_once '../config/database.php';
+$db = require __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/module_sync.php';
 
-// Inizializza connessione database
-$database = new Database();
-$db = $database->getConnection();
+$view = $_GET['view'] ?? 'dashboard';
+$selectedRaceId = isset($_GET['race']) ? max(0, (int)$_GET['race']) : null;
+$flash = admin_get_flash();
 
-// Gestione azioni
-$action = $_GET['action'] ?? 'dashboard';
-$message = '';
-$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $intent = $_POST['intent'] ?? '';
+    $redirectView = $_POST['return_view'] ?? $view;
 
-// Inserimento nuovo risultato
-if ($_POST['action'] ?? '' === 'add_result') {
     try {
-        $sql = "INSERT INTO race_results (race_id, position, bib_number, runner_name, category, time_result) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            $_POST['race_id'],
-            $_POST['position'],
-            $_POST['bib_number'],
-            $_POST['runner_name'],
-            $_POST['category'],
-            $_POST['time_result']
-        ]);
-        $message = "Risultato aggiunto con successo!";
-    } catch (Exception $e) {
-        $error = "Errore: " . $e->getMessage();
-    }
-}
+        switch ($intent) {
+            case 'add_result':
+                $raceId = (int)($_POST['race_id'] ?? 0);
+                $position = (int)($_POST['position'] ?? 0);
+                $bib = trim((string)($_POST['bib_number'] ?? ''));
+                $runner = trim((string)($_POST['runner_name'] ?? ''));
+                $category = trim((string)($_POST['category'] ?? ''));
+                $time = trim((string)($_POST['time_result'] ?? ''));
 
-// Inserimento nuovo contenuto
-if ($_POST['action'] ?? '' === 'add_content') {
-    try {
-        $sql = "INSERT INTO dynamic_content (content_type, title, content, metadata) VALUES (?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            $_POST['content_type'],
-            $_POST['title'],
-            $_POST['content'],
-            json_encode(['featured' => $_POST['featured'] ?? false])
-        ]);
-        $message = "Contenuto aggiunto con successo!";
-    } catch (Exception $e) {
-        $error = "Errore: " . $e->getMessage();
-    }
-}
-
-// Aggiornamento pagina
-if ($_POST['action'] ?? '' === 'update_page') {
-    try {
-        $sql = "UPDATE pages SET title = ?, description = ?, css_variables = ? WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            $_POST['title'],
-            $_POST['description'],
-            $_POST['css_variables'],
-            $_POST['page_id']
-        ]);
-        $message = "Pagina aggiornata con successo!";
-    } catch (Exception $e) {
-        $error = "Errore: " . $e->getMessage();
-    }
-}
-
-// Installazione modulo (esegue install.sql del manifest)
-if ($action === 'modules' && isset($_GET['install'])) {
-    $slug = $_GET['install'];
-    $manifestPath = __DIR__ . '/../modules/' . $slug . '/module.json';
-    if (file_exists($manifestPath)) {
-        $manifest = json_decode(file_get_contents($manifestPath), true);
-        if (json_last_error() === JSON_ERROR_NONE && isset($manifest['install'])) {
-            $sqlPath = __DIR__ . '/../modules/' . $manifest['install'];
-            if (file_exists($sqlPath)) {
-                $sql = file_get_contents($sqlPath);
-                try {
-                    $db->exec($sql);
-                    $message = "Modulo '" . htmlspecialchars($slug) . "' installato con successo.";
-                } catch (Exception $e) {
-                    $error = "Errore installazione: " . $e->getMessage();
+                if ($raceId <= 0) {
+                    throw new InvalidArgumentException('Seleziona una gara valida prima di salvare un risultato.');
                 }
-            } else {
-                $error = "File install.sql non trovato per '" . htmlspecialchars($slug) . "'.";
-            }
-        } else {
-            $error = "Manifest non valido per '" . htmlspecialchars($slug) . "'.";
+
+                if ($position <= 0 || $runner === '' || $time === '') {
+                    throw new InvalidArgumentException('Compila tutti i campi obbligatori per il risultato.');
+                }
+
+                $stmt = $db->prepare('INSERT INTO race_results (race_id, position, bib_number, runner_name, category, time_result) VALUES (?, ?, ?, ?, ?, ?)');
+                $stmt->execute([$raceId, $position, $bib, $runner, $category, $time]);
+
+                admin_set_flash('success', 'Risultato inserito correttamente.');
+                break;
+
+            case 'add_content':
+                $contentType = trim((string)($_POST['content_type'] ?? ''));
+                $title = trim((string)($_POST['title'] ?? ''));
+                $content = trim((string)($_POST['content'] ?? ''));
+                $featured = admin_bool_from_request($_POST['featured'] ?? false);
+                $metadata = admin_parse_metadata($_POST['metadata'] ?? null, $featured);
+
+                if ($contentType === '' || $content === '') {
+                    throw new InvalidArgumentException('Specificare almeno il tipo di contenuto e il corpo testuale.');
+                }
+
+                $stmt = $db->prepare('INSERT INTO dynamic_content (content_type, title, content, metadata) VALUES (?, ?, ?, ?)');
+                $stmt->execute([$contentType, $title, $content, json_encode($metadata, JSON_UNESCAPED_UNICODE)]);
+
+                admin_set_flash('success', 'Contenuto creato con successo.');
+                break;
+
+            case 'update_page':
+                $pageId = (int)($_POST['page_id'] ?? 0);
+                $title = trim((string)($_POST['title'] ?? ''));
+                $description = trim((string)($_POST['description'] ?? ''));
+                $cssVariables = trim((string)($_POST['css_variables'] ?? ''));
+
+                if ($pageId <= 0) {
+                    throw new InvalidArgumentException('Pagina non valida.');
+                }
+
+                $decodedVariables = admin_decode_json($cssVariables);
+                $stmt = $db->prepare('UPDATE pages SET title = ?, description = ?, css_variables = ? WHERE id = ?');
+                $stmt->execute([$title, $description, json_encode($decodedVariables, JSON_UNESCAPED_UNICODE), $pageId]);
+
+                admin_set_flash('success', 'Pagina aggiornata con successo.');
+                break;
+
+            case 'toggle_module':
+                $moduleName = trim((string)($_POST['module_name'] ?? ''));
+                $isActive = admin_bool_from_request($_POST['is_active'] ?? false);
+
+                if ($moduleName === '') {
+                    throw new InvalidArgumentException('Modulo non valido.');
+                }
+
+                $stmt = $db->prepare('UPDATE modules_registry SET is_active = ? WHERE name = ?');
+                $stmt->execute([$isActive ? 1 : 0, $moduleName]);
+
+                admin_set_flash('success', sprintf("Modulo '%s' %s.", $moduleName, $isActive ? 'attivato' : 'disattivato'));
+                break;
+
+            case 'sync_modules':
+                admin_sync_modules($db);
+                admin_set_flash('success', 'Sincronizzazione moduli completata.');
+                break;
+
+            default:
+                admin_set_flash('error', 'Azione non riconosciuta.');
+                break;
         }
-    } else {
-        $error = "Manifest non trovato per '" . htmlspecialchars($slug) . "'.";
+    } catch (Throwable $exception) {
+        admin_set_flash('error', $exception->getMessage());
     }
+
+    $query = ['view' => $redirectView];
+    if ($redirectView === 'results' && $selectedRaceId) {
+        $query['race'] = $selectedRaceId;
+    }
+
+    header('Location: admin.php?' . http_build_query($query));
+    exit;
 }
 
-// Ottieni dati per visualizzazione
-$pages = $db->query("SELECT * FROM pages")->fetchAll();
-$results = $db->query("SELECT * FROM race_results ORDER BY race_id, position LIMIT 20")->fetchAll();
-$contents = $db->query("SELECT * FROM dynamic_content ORDER BY created_at DESC LIMIT 10")->fetchAll();
-$modules = $db->query("SELECT * FROM modules_registry")->fetchAll();
+$pages = admin_get_pages($db);
+$races = admin_get_races($db);
+$results = admin_get_results($db, 20, $selectedRaceId && $selectedRaceId > 0 ? $selectedRaceId : null);
+$contents = admin_get_latest_content($db);
+$modules = admin_get_modules($db);
+$stats = admin_get_stats($pages, $results, $contents, $modules);
+
+$moduleCards = array_map(function (array $module): array {
+    $manifest = admin_load_module_manifest($module['name']);
+    $defaultConfig = admin_decode_json($module['default_config'] ?? '');
+
+    return [
+        'data' => $module,
+        'manifest' => $manifest,
+        'default_config' => $defaultConfig,
+    ];
+}, $modules);
+
+$navItems = [
+    'dashboard' => ['label' => 'Dashboard', 'icon' => 'fa-solid fa-chart-line'],
+    'results' => ['label' => 'Risultati', 'icon' => 'fa-solid fa-stopwatch'],
+    'content' => ['label' => 'Contenuti', 'icon' => 'fa-solid fa-pen-to-square'],
+    'pages' => ['label' => 'Pagine', 'icon' => 'fa-solid fa-file-lines'],
+    'modules' => ['label' => 'Moduli', 'icon' => 'fa-solid fa-puzzle-piece'],
+    'page-builder' => ['label' => 'Page Builder', 'icon' => 'fa-solid fa-object-group', 'href' => 'page-builder.php'],
+];
+
+$allowedViews = ['dashboard', 'results', 'content', 'pages', 'modules'];
+if (!in_array($view, $allowedViews, true)) {
+    $view = 'dashboard';
+}
+
+$currentNav = $navItems[$view];
+
+function admin_is_active_view(string $current, string $view): bool
+{
+    return $current === $view;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Bologna Marathon</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-        
-        .admin-header {
-            background: #2C3E50;
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .admin-nav {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .admin-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .admin-nav a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .admin-nav a.active {
-            background: #D81E05;
-        }
-        
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .admin-section {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .admin-section h2 {
-            color: #2C3E50;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #D81E05;
-            padding-bottom: 0.5rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .form-group textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        
-        .btn {
-            background: #D81E05;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #B71C1C;
-        }
-        
-        .btn-secondary {
-            background: #6C757D;
-        }
-        
-        .btn-secondary:hover {
-            background: #5A6268;
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-success {
-            background: #D4EDDA;
-            color: #155724;
-            border: 1px solid #C3E6CB;
-        }
-        
-        .alert-error {
-            background: #F8D7DA;
-            color: #721C24;
-            border: 1px solid #F5C6CB;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        
-        .data-table th,
-        .data-table td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .data-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .data-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .stat-card h3 {
-            color: #D81E05;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-card p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .admin-nav {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <title>Admin Panel · Bologna Marathon</title>
+    <link rel="stylesheet" href="../assets/css/core/variables.css">
+    <link rel="stylesheet" href="../assets/css/core/reset.css">
+    <link rel="stylesheet" href="../assets/css/core/typography.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-gZf3kWk7VdzS4EAlnXrhIRbkIuAeGHNirMRHkRkNvztNFVQVw1Gc7YCOUMIqFZRMVAbwY/jGj33jjXNpM4sK8A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/admin.css">
 </head>
-<body>
-    <div class="admin-header">
-        <h1>🏃‍♂️ Admin Panel - Bologna Marathon</h1>
-        <div class="admin-nav">
-            <a href="?action=dashboard" class="<?= $action === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
-            <a href="?action=results" class="<?= $action === 'results' ? 'active' : '' ?>">Risultati</a>
-            <a href="?action=content" class="<?= $action === 'content' ? 'active' : '' ?>">Contenuti</a>
-            <a href="?action=pages" class="<?= $action === 'pages' ? 'active' : '' ?>">Pagine</a>
-            <a href="?action=modules" class="<?= $action === 'modules' ? 'active' : '' ?>">Moduli</a>
-            <a href="page-builder.php" class="<?= $action === 'page-builder' ? 'active' : '' ?>">Page Builder</a>
-            <a href="../index.php" target="_blank">👀 Vai al Sito</a>
-        </div>
-    </div>
-    
-    <div class="admin-container">
-        <?php if ($message): ?>
-            <div class="alert alert-success">✅ <?= htmlspecialchars($message) ?></div>
-        <?php endif; ?>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        
-        <?php if ($action === 'dashboard'): ?>
-            <div class="admin-section">
-                <h2>📊 Dashboard</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3><?= count($pages) ?></h3>
-                        <p>Pagine</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3><?= count($results) ?></h3>
-                        <p>Risultati</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3><?= count($contents) ?></h3>
-                        <p>Contenuti</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3><?= count($modules) ?></h3>
-                        <p>Moduli</p>
-                    </div>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <span class="admin-brand__badge">BM</span>
+                <div class="admin-brand__copy">
+                    <strong>Bologna Marathon</strong>
+                    <small>Control Center</small>
                 </div>
-                
-                <h3>🔗 Link Utili</h3>
-                <p>
-                    <a href="../index.php" target="_blank" class="btn">👀 Vai al Sito</a>
-                    <a href="test-setup.php" class="btn btn-secondary">🔧 Setup Database</a>
-                    <a href="../debug.php" class="btn btn-secondary">🐛 Debug</a>
-                </p>
             </div>
-        <?php endif; ?>
-        
-        <?php if ($action === 'results'): ?>
-            <div class="admin-section">
-                <h2>🏃‍♂️ Gestione Risultati</h2>
-                
-                <h3>➕ Aggiungi Nuovo Risultato</h3>
-                <form method="POST">
-                    <input type="hidden" name="action" value="add_result">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Gara ID</label>
-                            <select name="race_id" required>
-                                <option value="1">Marathon 2025</option>
-                                <option value="2">Half Marathon 2025</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Posizione</label>
-                            <input type="number" name="position" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Pettorale</label>
-                            <input type="text" name="bib_number" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoria</label>
-                            <select name="category" required>
-                                <option value="M">Maschile</option>
-                                <option value="F">Femminile</option>
-                                <option value="M40">M40</option>
-                                <option value="F40">F40</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nome Runner</label>
-                            <input type="text" name="runner_name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tempo (HH:MM:SS)</label>
-                            <input type="time" name="time_result" step="1" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn">➕ Aggiungi Risultato</button>
-                </form>
-                
-                <h3>📋 Ultimi Risultati</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Pos</th>
-                            <th>Pettorale</th>
-                            <th>Nome</th>
-                            <th>Categoria</th>
-                            <th>Tempo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($results as $result): ?>
-                        <tr>
-                            <td><?= $result['position'] ?></td>
-                            <td><?= htmlspecialchars($result['bib_number']) ?></td>
-                            <td><?= htmlspecialchars($result['runner_name']) ?></td>
-                            <td><?= htmlspecialchars($result['category']) ?></td>
-                            <td><?= $result['time_result'] ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($action === 'content'): ?>
-            <div class="admin-section">
-                <h2>📝 Gestione Contenuti</h2>
-                
-                <h3>➕ Aggiungi Nuovo Contenuto</h3>
-                <form method="POST">
-                    <input type="hidden" name="action" value="add_content">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tipo Contenuto</label>
-                            <select name="content_type" required>
-                                <option value="news">News</option>
-                                <option value="sponsor">Sponsor</option>
-                                <option value="info">Info</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Titolo</label>
-                            <input type="text" name="title" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Contenuto</label>
-                        <textarea name="content" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="featured" value="1">
-                            Contenuto in evidenza
-                        </label>
-                    </div>
-                    <button type="submit" class="btn">➕ Aggiungi Contenuto</button>
-                </form>
-                
-                <h3>📋 Ultimi Contenuti</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Titolo</th>
-                            <th>Contenuto</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($contents as $content): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($content['content_type']) ?></td>
-                            <td><?= htmlspecialchars($content['title']) ?></td>
-                            <td><?= htmlspecialchars(substr($content['content'], 0, 50)) ?>...</td>
-                            <td><?= date('d/m/Y', strtotime($content['created_at'])) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($action === 'modules'): ?>
-            <div class="admin-section">
-                <h2>🧩 Moduli</h2>
-                <p>Elenco dei moduli registrati nel sistema. Clicca su Installa per eseguire l'installazione del modulo (se il manifest contiene install.sql).</p>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Percorso</th>
-                            <th>Classe CSS</th>
-                            <th>Attivo</th>
-                            <th>Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($modules as $module): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($module['name']) ?></td>
-                            <td><?= htmlspecialchars($module['component_path']) ?></td>
-                            <td><?= htmlspecialchars($module['css_class']) ?></td>
-                            <td><?= $module['is_active'] ? '✅' : '❌' ?></td>
-                            <td>
-                                <?php $slug = htmlspecialchars($module['name']); ?>
-                                <a class="btn btn-secondary" href="?action=modules&install=<?= $slug ?>">Installa</a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                <p style="margin-top: 1rem;">
-                    <a href="sync-modules.php" class="btn">🔄 Sincronizza dal filesystem</a>
-                </p>
-            </div>
-        <?php endif; ?>
+            <nav class="admin-menu" aria-label="Sezioni amministrazione">
+                <?php foreach ($navItems as $key => $item): ?>
+                    <?php $href = $item['href'] ?? ('admin.php?view=' . $key); ?>
+                    <a class="admin-menu__link <?= admin_is_active_view($view, $key) ? 'is-active' : '' ?>" href="<?= htmlspecialchars($href) ?>">
+                        <i class="<?= htmlspecialchars($item['icon']) ?>" aria-hidden="true"></i>
+                        <span><?= htmlspecialchars($item['label']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+                <a class="admin-menu__link" href="../index.php" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                    <span>Vai al sito</span>
+                </a>
+            </nav>
+        </aside>
 
-        <?php if ($action === 'pages'): ?>
-            <div class="admin-section">
-                <h2>📄 Gestione Pagine</h2>
-                
-                <h3>✏️ Modifica Pagina Home</h3>
-                <?php $homePage = $pages[0] ?? null; ?>
-                <?php if ($homePage): ?>
-                <form method="POST">
-                    <input type="hidden" name="action" value="update_page">
-                    <input type="hidden" name="page_id" value="<?= $homePage['id'] ?>">
-                    <div class="form-group">
-                        <label>Titolo</label>
-                        <input type="text" name="title" value="<?= htmlspecialchars($homePage['title']) ?>" required>
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header__titles">
+                    <h1><?= htmlspecialchars($currentNav['label']) ?></h1>
+                    <p>Gestisci moduli, contenuti e pagine del sito bolognamarathon.run</p>
+                </div>
+                <div class="admin-header__actions">
+                    <form method="post" class="admin-inline-form">
+                        <input type="hidden" name="intent" value="sync_modules">
+                        <input type="hidden" name="return_view" value="<?= htmlspecialchars($view) ?>">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Sincronizza moduli</span>
+                        </button>
+                    </form>
+                    <a class="btn btn-primary" href="page-builder.php">
+                        <i class="fa-solid fa-object-group"></i>
+                        <span>Apri Page Builder</span>
+                    </a>
+                </div>
+            </header>
+
+            <?php if ($flash): ?>
+                <div class="admin-alert <?= $flash['type'] === 'success' ? 'is-success' : 'is-danger' ?>">
+                    <i class="fa-solid <?= $flash['type'] === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation' ?>" aria-hidden="true"></i>
+                    <span><?= htmlspecialchars($flash['message']) ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($view === 'dashboard'): ?>
+                <section class="panel">
+                    <h2 class="panel__title">Indicatori rapidi</h2>
+                    <div class="stats-grid">
+                        <article class="stat-card">
+                            <span class="stat-card__label">Pagine</span>
+                            <span class="stat-card__value"><?= $stats['pages'] ?></span>
+                        </article>
+                        <article class="stat-card">
+                            <span class="stat-card__label">Risultati</span>
+                            <span class="stat-card__value"><?= $stats['results'] ?></span>
+                        </article>
+                        <article class="stat-card">
+                            <span class="stat-card__label">Contenuti</span>
+                            <span class="stat-card__value"><?= $stats['contents'] ?></span>
+                        </article>
+                        <article class="stat-card">
+                            <span class="stat-card__label">Moduli</span>
+                            <span class="stat-card__value"><?= $stats['modules'] ?></span>
+                        </article>
                     </div>
-                    <div class="form-group">
-                        <label>Descrizione</label>
-                        <textarea name="description" required><?= htmlspecialchars($homePage['description']) ?></textarea>
+                </section>
+
+                <section class="panel">
+                    <h2 class="panel__title">Attività recenti</h2>
+                    <div class="panel__split">
+                        <div>
+                            <h3 class="panel__subtitle">Ultimi contenuti</h3>
+                            <ul class="list">
+                                <?php foreach (array_slice($contents, 0, 5) as $content): ?>
+                                    <li class="list__item">
+                                        <span><?= htmlspecialchars($content['title'] ?: $content['content_type']) ?></span>
+                                        <small><?= date('d/m/Y H:i', strtotime($content['created_at'])) ?></small>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="panel__subtitle">Ultimi moduli usati</h3>
+                            <ul class="list">
+                                <?php foreach (array_slice($modules, 0, 5) as $module): ?>
+                                    <li class="list__item">
+                                        <span><?= htmlspecialchars($module['name']) ?></span>
+                                        <small><?= $module['is_active'] ? 'Attivo' : 'Disattivato' ?></small>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>CSS Variables (JSON)</label>
-                        <textarea name="css_variables" required><?= htmlspecialchars($homePage['css_variables']) ?></textarea>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($view === 'results'): ?>
+                <section class="panel">
+                    <h2 class="panel__title">Nuovo risultato</h2>
+                    <form method="post" class="form-grid">
+                        <input type="hidden" name="intent" value="add_result">
+                        <input type="hidden" name="return_view" value="results">
+                        <div class="form-field">
+                            <label for="race_id">Gara</label>
+                            <select id="race_id" name="race_id" required>
+                                <option value="">Seleziona una gara</option>
+                                <?php foreach ($races as $race): ?>
+                                    <option value="<?= (int)$race['id'] ?>"><?= htmlspecialchars($race['name']) ?> · <?= date('d/m/Y', strtotime($race['date'])) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="position">Posizione</label>
+                            <input type="number" min="1" id="position" name="position" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="bib_number">Pettorale</label>
+                            <input type="text" id="bib_number" name="bib_number" placeholder="Es. 1023">
+                        </div>
+                        <div class="form-field">
+                            <label for="runner_name">Runner</label>
+                            <input type="text" id="runner_name" name="runner_name" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="category">Categoria</label>
+                            <input type="text" id="category" name="category" placeholder="Es. F40">
+                        </div>
+                        <div class="form-field">
+                            <label for="time_result">Tempo (HH:MM:SS)</label>
+                            <input type="time" id="time_result" name="time_result" step="1" required>
+                        </div>
+                        <div class="form-field form-field--full">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Aggiungi risultato</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__heading">
+                        <h2 class="panel__title">Risultati recenti</h2>
+                        <form class="admin-inline-form" method="get">
+                            <input type="hidden" name="view" value="results">
+                            <label for="race-filter" class="sr-only">Filtra per gara</label>
+                            <select id="race-filter" name="race" onchange="this.form.submit()">
+                                <option value="">Tutte le gare</option>
+                                <?php foreach ($races as $race): ?>
+                                    <option value="<?= (int)$race['id'] ?>" <?= $selectedRaceId === (int)$race['id'] ? 'selected' : '' ?>><?= htmlspecialchars($race['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </form>
                     </div>
-                    <button type="submit" class="btn">💾 Salva Modifiche</button>
-                </form>
-                <?php endif; ?>
-                
-                <h3>📋 Tutte le Pagine</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Slug</th>
-                            <th>Titolo</th>
-                            <th>Status</th>
-                            <th>Template</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($pages as $page): ?>
-                        <tr>
-                            <td><?= $page['id'] ?></td>
-                            <td><?= htmlspecialchars($page['slug']) ?></td>
-                            <td><?= htmlspecialchars($page['title']) ?></td>
-                            <td><?= $page['status'] ?></td>
-                            <td><?= htmlspecialchars($page['template']) ?></td>
-                        </tr>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Posizione</th>
+                                    <th>Runner</th>
+                                    <th>Categoria</th>
+                                    <th>Tempo</th>
+                                    <th>Gara</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($results as $result): ?>
+                                    <tr>
+                                        <td><?= (int)$result['position'] ?></td>
+                                        <td><?= htmlspecialchars($result['runner_name']) ?></td>
+                                        <td><?= htmlspecialchars($result['category']) ?></td>
+                                        <td><?= htmlspecialchars($result['time_result']) ?></td>
+                                        <td>#<?= (int)$result['race_id'] ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($view === 'content'): ?>
+                <section class="panel">
+                    <h2 class="panel__title">Nuovo contenuto dinamico</h2>
+                    <form method="post" class="form-grid">
+                        <input type="hidden" name="intent" value="add_content">
+                        <input type="hidden" name="return_view" value="content">
+                        <div class="form-field">
+                            <label for="content_type">Tipo</label>
+                            <input type="text" id="content_type" name="content_type" placeholder="es. news" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="title">Titolo</label>
+                            <input type="text" id="title" name="title" placeholder="Titolo opzionale">
+                        </div>
+                        <div class="form-field form-field--full">
+                            <label for="content">Contenuto</label>
+                            <textarea id="content" name="content" rows="4" required></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label for="metadata">Metadati JSON (opz.)</label>
+                            <textarea id="metadata" name="metadata" rows="3" placeholder='{"cta":"Iscriviti ora"}'></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-checkbox">
+                                <input type="checkbox" name="featured" value="1">
+                                <span>Metti in evidenza</span>
+                            </label>
+                        </div>
+                        <div class="form-field form-field--full">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Salva contenuto</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2 class="panel__title">Ultimi contenuti</h2>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Titolo</th>
+                                    <th>Creato</th>
+                                    <th>Metadati</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($contents as $content): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($content['content_type']) ?></td>
+                                        <td><?= htmlspecialchars($content['title'] ?: '—') ?></td>
+                                        <td><?= date('d/m/Y H:i', strtotime($content['created_at'])) ?></td>
+                                        <td>
+                                            <button class="btn btn-tertiary" data-json-toggle type="button">Vedi</button>
+                                            <pre class="json-preview" hidden><?= htmlspecialchars(json_encode(admin_decode_json($content['metadata']), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($view === 'pages'): ?>
+                <section class="panel">
+                    <h2 class="panel__title">Pagina home</h2>
+                    <?php $homePage = $pages[0] ?? null; ?>
+                    <?php if ($homePage): ?>
+                        <form method="post" class="form-grid">
+                            <input type="hidden" name="intent" value="update_page">
+                            <input type="hidden" name="return_view" value="pages">
+                            <input type="hidden" name="page_id" value="<?= (int)$homePage['id'] ?>">
+                            <div class="form-field">
+                                <label for="page-title">Titolo</label>
+                                <input type="text" id="page-title" name="title" value="<?= htmlspecialchars($homePage['title']) ?>" required>
+                            </div>
+                            <div class="form-field form-field--full">
+                                <label for="page-description">Descrizione</label>
+                                <textarea id="page-description" name="description" rows="3" required><?= htmlspecialchars($homePage['description']) ?></textarea>
+                            </div>
+                            <div class="form-field form-field--full">
+                                <label for="page-css">CSS Variables (JSON)</label>
+                                <textarea id="page-css" name="css_variables" rows="4" placeholder="{}"><?= htmlspecialchars($homePage['css_variables'] ?? '{}') ?></textarea>
+                            </div>
+                            <div class="form-field form-field--full">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Salva modifiche</span>
+                                </button>
+                            </div>
+                        </form>
+                    <?php else: ?>
+                        <p>Nessuna pagina pubblicata trovata.</p>
+                    <?php endif; ?>
+                </section>
+
+                <section class="panel">
+                    <h2 class="panel__title">Pagine disponibili</h2>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Slug</th>
+                                    <th>Titolo</th>
+                                    <th>Status</th>
+                                    <th>Template</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($pages as $page): ?>
+                                    <tr>
+                                        <td><?= (int)$page['id'] ?></td>
+                                        <td><?= htmlspecialchars($page['slug']) ?></td>
+                                        <td><?= htmlspecialchars($page['title']) ?></td>
+                                        <td><span class="badge <?= admin_status_class($page['status'] === 'published') ?>"><?= htmlspecialchars($page['status']) ?></span></td>
+                                        <td><?= htmlspecialchars($page['template']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($view === 'modules'): ?>
+                <section class="panel">
+                    <h2 class="panel__title">Moduli disponibili</h2>
+                    <div class="module-grid">
+                        <?php foreach ($moduleCards as $module): ?>
+                            <?php $data = $module['data']; ?>
+                            <article class="module-card <?= $data['is_active'] ? '' : 'is-inactive' ?>">
+                                <header class="module-card__header">
+                                    <div>
+                                        <h3><?= htmlspecialchars($data['name']) ?></h3>
+                                        <span class="module-card__path"><?= htmlspecialchars($data['component_path']) ?></span>
+                                    </div>
+                                    <form method="post" class="toggle-form">
+                                        <input type="hidden" name="intent" value="toggle_module">
+                                        <input type="hidden" name="return_view" value="modules">
+                                        <input type="hidden" name="module_name" value="<?= htmlspecialchars($data['name']) ?>">
+                                        <input type="hidden" name="is_active" value="<?= $data['is_active'] ? '0' : '1' ?>">
+                                        <button type="submit" class="btn <?= $data['is_active'] ? 'btn-secondary' : 'btn-primary' ?>" data-confirm>
+                                            <?= $data['is_active'] ? 'Disattiva' : 'Attiva' ?>
+                                        </button>
+                                    </form>
+                                </header>
+                                <dl class="module-meta">
+                                    <div>
+                                        <dt>Classe CSS</dt>
+                                        <dd><?= htmlspecialchars($data['css_class'] ?: '—') ?></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Config default</dt>
+                                        <dd><pre><?= htmlspecialchars(json_encode($module['default_config'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre></dd>
+                                    </div>
+                                </dl>
+                                <?php if (!empty($module['manifest'])): ?>
+                                    <details class="module-manifest">
+                                        <summary>Manifest</summary>
+                                        <pre><?= htmlspecialchars(json_encode($module['manifest'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
+                                    </details>
+                                <?php else: ?>
+                                    <p class="module-card__note">Manifest non disponibile.</p>
+                                <?php endif; ?>
+                            </article>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+                    </div>
+                </section>
+            <?php endif; ?>
+        </main>
     </div>
+    <script src="assets/js/admin.js"></script>
 </body>
 </html>

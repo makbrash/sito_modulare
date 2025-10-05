@@ -1,0 +1,1 @@
+-- Uninstall script placeholder for event-schedule module
