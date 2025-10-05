@@ -92,13 +92,16 @@ CREATE TABLE module_instances (
     instance_name VARCHAR(100) NOT NULL,
     config JSON,
     order_index INT DEFAULT 0,
+    parent_instance_id INT DEFAULT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_instance_id) REFERENCES module_instances(id) ON DELETE CASCADE,
     UNIQUE KEY unique_instance (page_id, instance_name),
     INDEX idx_page_order (page_id, order_index),
-    INDEX idx_module (module_name)
+    INDEX idx_module (module_name),
+    INDEX idx_parent (parent_instance_id)
 );
 
 -- Inserimento moduli base

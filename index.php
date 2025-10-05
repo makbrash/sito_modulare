@@ -29,13 +29,49 @@ try {
         $pageData = $renderer->renderPage('home');
     }
     
-    $page = $pageData['page'];
-    $modules = $pageData['modules'];
-    $cssVariables = $pageData['css_variables'];
-    $useInstances = $pageData['use_instances'] ?? false;
-    
+$page = $pageData['page'];
+$modules = $pageData['modules'];
+$cssVariables = $pageData['css_variables'];
+$useInstances = $pageData['use_instances'] ?? false;
+$moduleTree = $pageData['module_tree'] ?? [];
+
 } catch (Exception $e) {
     die("Errore: " . $e->getMessage());
+}
+
+/**
+ * Render ricorsivo delle istanze modulo con supporto annidamento
+ */
+function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
+{
+    $config = json_decode($node['config'] ?? '[]', true) ?? [];
+    $hasInlineHtml = isset($config['__inline_html']) && $config['__inline_html'] !== '';
+
+    echo '<div class="module-wrapper" data-module="' . htmlspecialchars($node['module_name']) . '"'
+        . ' data-instance="' . htmlspecialchars($node['instance_name']) . '"'
+        . ' data-instance-id="' . (int)$node['id'] . '"';
+
+    if (!empty($node['parent_instance_id'])) {
+        echo ' data-parent-id="' . (int)$node['parent_instance_id'] . '"';
+    }
+
+    echo '>';
+
+    if ($hasInlineHtml) {
+        echo $config['__inline_html'];
+    } else {
+        echo $renderer->renderModule($node['module_name'], $config);
+    }
+
+    if (!empty($node['children'])) {
+        echo '<div class="module-children">';
+        foreach ($node['children'] as $childNode) {
+            renderModuleInstanceNode($renderer, $childNode);
+        }
+        echo '</div>';
+    }
+
+    echo '</div>';
 }
 ?>
 <!DOCTYPE html>
@@ -136,16 +172,9 @@ try {
     <main id="main-content" class="site-main">
         <?php if ($useInstances): ?>
             <!-- Renderizza istanze di moduli (escluso menu) -->
-            <?php foreach ($modules as $instance): ?>
-                <?php if ($instance['module_name'] !== 'menu'): ?>
-                <div class="module-wrapper" data-module="<?= htmlspecialchars($instance['module_name']) ?>" 
-                     data-instance="<?= htmlspecialchars($instance['instance_name']) ?>">
-                    <?php
-                    $config = json_decode($instance['config'], true) ?? [];
-                    echo $renderer->renderModule($instance['module_name'], $config);
-                    ?>
-                </div>
-                <?php endif; ?>
+            <?php foreach ($moduleTree as $node): ?>
+                <?php if (($node['module_name'] ?? '') === 'menu') { continue; } ?>
+                <?php renderModuleInstanceNode($renderer, $node); ?>
             <?php endforeach; ?>
         <?php else: ?>
             <!-- Renderizza moduli tradizionali (escluso menu) -->
