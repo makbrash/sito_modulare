@@ -216,6 +216,13 @@ function copySiteFiles() {
     .pipe(gulp.dest('build/'));
 }
 
+// Copy SortableJS to build directory
+function copySortableJS() {
+    console.log('📦 Copying SortableJS to build...');
+    return gulp.src('node_modules/sortablejs/**/*')
+        .pipe(gulp.dest('build/node_modules/sortablejs/'));
+}
+
 // Copy production index to build as index.php
 function copyIndexProdAsIndex() {
     console.log('🔄 Copying index-prod.php to build/index.php...');
@@ -232,6 +239,7 @@ const release = gulp.series(
     setProdEnv,
     cleanBuild,
     copySiteFiles,
+    copySortableJS,
     copyIndexProdAsIndex,
     gulp.parallel(cssProd, buildJS, copyFonts, optimizeImages)
 );
@@ -241,6 +249,7 @@ exports.css = buildCSS;
 exports.js = buildJS;
 exports.images = optimizeImages;
 exports.fonts = copyFonts;
+exports.sortable = copySortableJS;
 exports.dev = gulp.series(gulp.parallel(cssDev, buildJS, copyFonts), serve);
 exports.build = gulp.series(
     cb => { process.env.NODE_ENV = 'production'; cb(); },
