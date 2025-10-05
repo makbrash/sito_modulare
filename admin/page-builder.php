@@ -1,185 +1,81 @@
 <?php
 /**
- * Page Builder - Bologna Marathon
- * Gestione drag&drop moduli per pagine dinamiche
+ * Page Builder - Interfaccia amministrativa
  */
 
-require_once '../config/database.php';
-require_once '../core/ModuleRenderer.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../core/ModuleRenderer.php';
 
-// Inizializza connessione database
 $database = new Database();
 $db = $database->getConnection();
 $renderer = new ModuleRenderer($db);
 
-// Gestione azioni AJAX
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    // Pulisci output buffer per evitare contaminazioni JSON
-    ob_clean();
-    header('Content-Type: application/json');
-    
-    // Disabilita error reporting per JSON
-    $old_error_reporting = error_reporting(0);
-    
-    try {
-        switch ($_POST['action']) {
-            case 'save_instance':
-                $pageId = (int)$_POST['page_id'];
-                $moduleName = $_POST['module_name'];
-                $instanceName = $_POST['instance_name'];
-                $config = json_decode($_POST['config'], true);
-                $orderIndex = (int)($_POST['order_index'] ?? 0);
-                $currentInstanceId = isset($_POST['current_instance_id']) ? (int)$_POST['current_instance_id'] : null;
-                
-                // Se abbiamo un ID istanza corrente, stiamo aggiornando
-                if ($currentInstanceId && $currentInstanceId !== 0) {
-                    // Verifica se esiste un'altra istanza con lo stesso nome (escludendo quella corrente)
-                    $stmt = $db->prepare("SELECT id FROM module_instances WHERE page_id = ? AND instance_name = ? AND id != ?");
-                    $stmt->execute([$pageId, $instanceName, $currentInstanceId]);
-                    $duplicate = $stmt->fetch();
-                    
-                    if ($duplicate) {
-                        echo json_encode(['success' => false, 'error' => 'Esiste già un\'istanza con questo nome sulla stessa pagina']);
-                        exit;
-                    }
-                    
-                    // Aggiorna istanza esistente
-                    $stmt = $db->prepare("UPDATE module_instances SET 
-                                        module_name = ?, 
-                                        instance_name = ?,
-                                        config = ?, 
-                                        order_index = ?, 
-                                        updated_at = CURRENT_TIMESTAMP 
-                                        WHERE id = ?");
-                    $stmt->execute([$moduleName, $instanceName, json_encode($config), $orderIndex, $currentInstanceId]);
-                    echo json_encode(['success' => true, 'id' => $currentInstanceId]);
-                } else {
-                    // Nuova istanza - verifica se esiste già un'istanza con lo stesso nome
-                    $stmt = $db->prepare("SELECT id FROM module_instances WHERE page_id = ? AND instance_name = ?");
-                    $stmt->execute([$pageId, $instanceName]);
-                    $existing = $stmt->fetch();
-                    
-                    if ($existing) {
-                        // Log per debug
-                        error_log("Tentativo di creare istanza duplicata: page_id=$pageId, instance_name=$instanceName");
-                        
-                        // Trova un nome alternativo
-                        $counter = 1;
-                        $baseName = preg_replace('/_\d+$/', '', $instanceName);
-                        do {
-                            $counter++;
-                            $newInstanceName = $baseName . '_' . $counter;
-                            $stmt = $db->prepare("SELECT id FROM module_instances WHERE page_id = ? AND instance_name = ?");
-                            $stmt->execute([$pageId, $newInstanceName]);
-                            $existing = $stmt->fetch();
-                        } while ($existing && $counter < 100); // Limite di sicurezza
-                        
-                        echo json_encode(['success' => false, 'error' => "Esiste già un'istanza con questo nome. Prova con: $newInstanceName"]);
-                        exit;
-                    }
-                    
-                    // Inserisci nuova istanza
-                    $stmt = $db->prepare("INSERT INTO module_instances (page_id, module_name, instance_name, config, order_index) 
-                                        VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$pageId, $moduleName, $instanceName, json_encode($config), $orderIndex]);
-                    echo json_encode(['success' => true, 'id' => $db->lastInsertId()]);
-                }
-                exit;
-                
-            case 'update_order':
-                $updates = json_decode($_POST['updates'], true);
-                $db->beginTransaction();
-                
-                foreach ($updates as $update) {
-                    $stmt = $db->prepare("UPDATE module_instances SET order_index = ? WHERE id = ? AND page_id = ?");
-                    $stmt->execute([$update['order_index'], $update['id'], $update['page_id']]);
-                }
-                
-                $db->commit();
-                echo json_encode(['success' => true]);
-                exit;
-                
-            case 'delete_instance':
-                $stmt = $db->prepare("DELETE FROM module_instances WHERE id = ? AND page_id = ?");
-                $stmt->execute([(int)$_POST['instance_id'], (int)$_POST['page_id']]);
-                
-                echo json_encode(['success' => true]);
-                exit;
-                
-            case 'get_module_preview':
-                $moduleName = $_POST['module_name'];
-                $config = json_decode($_POST['config'], true);
-                
-                $output = $renderer->renderModule($moduleName, $config);
-                echo json_encode(['success' => true, 'html' => $output]);
-                exit;
-                
-            case 'get_module_config':
-                $moduleName = $_POST['module_name'];
-                $instanceId = (int)$_POST['instance_id'] ?? null;
-                
-                // Ottieni configurazione attuale se esiste
-                $currentConfig = [];
-                if ($instanceId) {
-                    $stmt = $db->prepare("SELECT config FROM module_instances WHERE id = ?");
-                    $stmt->execute([$instanceId]);
-                    $instance = $stmt->fetch();
-                    if ($instance) {
-                        $currentConfig = json_decode($instance['config'], true) ?? [];
-                    }
-                }
-                
-                // Ottieni informazioni modulo dal manifest
-                $manifestPath = __DIR__ . "/../modules/$moduleName/module.json";
-                $manifest = [];
-                if (file_exists($manifestPath)) {
-                    $manifest = json_decode(file_get_contents($manifestPath), true) ?? [];
-                }
-                
-                $defaultConfig = $manifest['default_config'] ?? [];
-                $config = array_merge($defaultConfig, $currentConfig);
-                
-                echo json_encode([
-                    'success' => true, 
-                    'config' => $config,
-                    'manifest' => $manifest
-                ]);
-                exit;
+$pageId = (int)($_GET['page_id'] ?? 0);
+
+$pagesStmt = $db->query('SELECT id, title, slug FROM pages ORDER BY title');
+$pages = $pagesStmt->fetchAll() ?: [];
+
+if ($pageId <= 0 && count($pages) > 0) {
+    $pageId = (int)$pages[0]['id'];
+}
+
+$currentPage = null;
+if ($pageId > 0) {
+    $pageStmt = $db->prepare('SELECT id, title, slug FROM pages WHERE id = ?');
+    $pageStmt->execute([$pageId]);
+    $currentPage = $pageStmt->fetch();
+}
+
+$modulesStmt = $db->query('SELECT name FROM modules_registry WHERE is_active = 1 ORDER BY name');
+$availableModules = [];
+while ($module = $modulesStmt->fetch()) {
+    $manifest = $renderer->getModuleManifest($module['name']) ?? [];
+    $availableModules[] = [
+        'name' => $module['name'],
+        'label' => $manifest['name'] ?? $module['name'],
+        'description' => $manifest['description'] ?? '',
+        'category' => $manifest['category'] ?? 'Generico',
+        'has_ui' => !empty($manifest['ui_schema']),
+        'tags' => $manifest['tags'] ?? [],
+    ];
+}
+
+$instances = [];
+if ($pageId > 0) {
+    $instancesStmt = $db->prepare('SELECT id, module_name, instance_name, config, order_index, is_active FROM module_instances WHERE page_id = ? ORDER BY order_index');
+    $instancesStmt->execute([$pageId]);
+    while ($instance = $instancesStmt->fetch()) {
+        if ((int)$instance['is_active'] !== 1) {
+            continue;
         }
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        exit;
-    } finally {
-        // Ripristina error reporting
-        error_reporting($old_error_reporting);
+        $config = json_decode($instance['config'], true) ?? [];
+        $merged = $renderer->mergeConfigWithDefaults($instance['module_name'], $config);
+        $html = '';
+        try {
+            $html = $renderer->renderModule($instance['module_name'], $merged);
+        } catch (Throwable $exception) {
+            $html = '<div class="pb-module-error">' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</div>';
+        }
+
+        $instances[] = [
+            'id' => (int)$instance['id'],
+            'module' => $instance['module_name'],
+            'instance_name' => $instance['instance_name'],
+            'order_index' => (int)$instance['order_index'],
+            'html' => $html,
+        ];
     }
 }
 
-// Gestione richieste GET
-$pageId = (int)($_GET['page_id'] ?? 1);
-$action = $_GET['action'] ?? 'builder';
+$initialPayload = [
+    'pages' => $pages,
+    'currentPageId' => $pageId,
+    'currentPage' => $currentPage,
+    'moduleInstances' => $instances,
+    'availableModules' => $availableModules,
+];
 
-// Ottieni lista pagine
-$pages = $db->query("SELECT * FROM pages ORDER BY title")->fetchAll();
-
-// Ottieni pagina corrente
-$currentPage = null;
-if ($pageId) {
-    $stmt = $db->prepare("SELECT * FROM pages WHERE id = ?");
-    $stmt->execute([$pageId]);
-    $currentPage = $stmt->fetch();
-}
-
-// Ottieni moduli disponibili
-$availableModules = $db->query("SELECT * FROM modules_registry WHERE is_active = 1 ORDER BY name")->fetchAll();
-
-// Ottieni istanze moduli per la pagina corrente
-$moduleInstances = [];
-if ($currentPage) {
-    $stmt = $db->prepare("SELECT * FROM module_instances WHERE page_id = ? ORDER BY order_index");
-    $stmt->execute([$pageId]);
-    $moduleInstances = $stmt->fetchAll();
-}
+$initialJson = htmlspecialchars(json_encode($initialPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -193,7 +89,6 @@ if ($currentPage) {
     <link rel="stylesheet" href="../assets/css/core/reset.css">
     <link rel="stylesheet" href="../assets/css/core/typography.css">
     <link rel="stylesheet" href="../assets/css/core/fonts.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
     
     <!-- Font Awesome per icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -681,7 +576,7 @@ if ($currentPage) {
     </div>
     
     <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="../node_modules/sortablejs/Sortable.min.js"></script>
     <script>
         let currentPageId = <?= $pageId ?>;
         let selectedInstance = null;
@@ -993,13 +888,13 @@ if ($currentPage) {
             
             // Carica configurazione dal server
             const formData = new FormData();
-            formData.append('action', 'get_module_config');
+            formData.append('action', 'get-module-config');
             formData.append('module_name', moduleName);
             if (instanceId && instanceId !== 'temp') {
                 formData.append('instance_id', instanceId);
             }
             
-            fetch('', {
+            fetch('api/page_builder.php', {
                 method: 'POST',
                 body: formData
             })
@@ -1374,7 +1269,7 @@ if ($currentPage) {
         // Salva istanza nel database
         function saveInstance(moduleName, instanceName, config, orderIndex, instanceId) {
             const formData = new FormData();
-            formData.append('action', 'save_instance');
+            formData.append('action', 'save-instance');
             formData.append('page_id', currentPageId);
             formData.append('module_name', moduleName);
             formData.append('instance_name', instanceName);
@@ -1395,7 +1290,7 @@ if ($currentPage) {
                 saveButton.disabled = true;
             }
             
-            fetch('', {
+            fetch('api/page_builder.php', {
                 method: 'POST',
                 body: formData
             })
@@ -1504,10 +1399,10 @@ if ($currentPage) {
             if (updates.length === 0) return;
             
             const formData = new FormData();
-            formData.append('action', 'update_order');
+            formData.append('action', 'update-order');
             formData.append('updates', JSON.stringify(updates));
             
-            fetch('', {
+            fetch('api/page_builder.php', {
                 method: 'POST',
                 body: formData
             })
@@ -1564,11 +1459,11 @@ if ($currentPage) {
             }
             
             const formData = new FormData();
-            formData.append('action', 'delete_instance');
+            formData.append('action', 'delete-instance');
             formData.append('instance_id', instanceId);
             formData.append('page_id', currentPageId);
             
-            fetch('', {
+            fetch('api/page_builder.php', {
                 method: 'POST',
                 body: formData
             })
@@ -1701,11 +1596,11 @@ if ($currentPage) {
             }
             
             const formData = new FormData();
-            formData.append('action', 'get_module_preview');
+            formData.append('action', 'preview-module');
             formData.append('module_name', moduleName);
             formData.append('config', JSON.stringify(config));
             
-            fetch('', {
+            fetch('api/page_builder.php', {
                 method: 'POST',
                 body: formData
             })

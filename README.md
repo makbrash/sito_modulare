@@ -1,166 +1,153 @@
-# 🏃‍♂️ Bologna Marathon · Sistema Modulare
+# 🏁 Bologna Marathon – Sistema Modulare
 
-Piattaforma SSR modulare per bolognamarathon.run. Il progetto è pensato per funzionare su hosting PHP/MySQL tradizionali (nessun runtime Node richiesto in produzione) e mette a disposizione un sistema di moduli riutilizzabili affiancato da un page builder drag&drop.
+Sistema SSR modulare per la Bologna Marathon con page builder visuale, moduli riutilizzabili e pipeline di rilascio cloud friendly.
 
-## 📦 Stack & Requisiti
+## 🌐 Architettura in breve
 
-| Ambito            | Tecnologie |
-|-------------------|------------|
-| Runtime           | PHP 8.1+, MySQL 5.7+
-| Front-end         | CSS Variables + Vanilla JS
-| Tooling locale    | Node 18+, Gulp 4 (solo per build CSS/JS)
-| Compatibilità     | Hosting condivisi senza Node.js
+| Layer | Descrizione |
+| --- | --- |
+| **Frontend** | PHP SSR, CSS Variables e JavaScript vanilla. Nessuna dipendenza runtime su Node in produzione. |
+| **Admin** | Page builder drag & drop basato su moduli annidabili, API JSON e manifest dei moduli. |
+| **Backend** | PHP 8+, MySQL 5.7+. Tutte le query usano prepared statement. |
+| **Build** | Gulp 4 per bundling CSS/JS e generazione cartella `build/` deployable. |
 
-Per lo sviluppo locale è consigliato un ambiente tipo XAMPP o Valet.
-
-## 🚀 Avvio rapido
-
-```bash
-# 1. Clona il repository
-git clone <repository-url>
-cd sito_modulare
-
-# 2. Installa le dipendenze front-end (per sviluppo)
-npm install
-
-# 3. Avvia il backend (Apache/MySQL) e importa il database
-mysql -u root -p < database/schema.sql
-
-# 4. Popola dati di esempio (opzionale)
-mysql -u root -p < database/test_data.sql
-
-# 5. Avvia il watcher front-end
-npm run dev
-
-# 6. Visita
-# Sito    → http://localhost/BM_layout/sito_modulare/index.php
-# Admin   → http://localhost/BM_layout/sito_modulare/admin/admin.php
-```
-
-### Build per il cloud
-
-```bash
-npm run release
-```
-
-Genera la cartella `build/` con asset minificati e `index.php` già ottimizzato per l'upload su hosting senza Node.
-
-## 🧠 Architettura
+## 📁 Struttura principale
 
 ```
 sito_modulare/
-├─ admin/                 # Control center e page builder
-│  ├─ assets/             # CSS e JS dedicati all'admin
-│  ├─ includes/           # Helpers riutilizzabili (bootstrap, sync, util)
-│  ├─ admin.php           # Dashboard modulare
-│  ├─ page-builder.php    # Drag&drop per le istanze modulo
-│  └─ sync-modules.php    # Report visivo per la sincronizzazione moduli
-├─ core/ModuleRenderer.php# Motore SSR dei moduli
-├─ modules/               # Moduli riutilizzabili (hero, menu, button...)
-├─ assets/                # CSS/JS core del sito pubblico
-├─ database/              # Schema SQL e dati di esempio
-├─ build/                 # Output produzione (generato)
-├─ index.php              # Entry point principale (dev)
-└─ index-prod.php         # Template produzione
+├── admin/                # Interfaccia e API page builder
+│   ├── api/              # Endpoint JSON per moduli e pagine
+│   └── page-builder.php  # UI amministrativa
+├── assets/
+│   ├── css/              # CSS core + admin
+│   └── js/               # JS core + admin
+├── core/ModuleRenderer.php
+├── modules/              # Moduli con manifest e assets dedicati
+├── database/             # Schema SQL e dati di esempio
+├── build/                # Output pronto per il cloud (no Node richiesto)
+└── gulpfile.js           # Pipeline di build
 ```
 
-### Registro moduli
+## ⚙️ Setup rapido (locale)
 
-- Ogni modulo vive in `modules/<slug>/` e include:
-  - `module.json` → manifest con slug, path componente, config di default, alias.
-  - `<slug>.php` → vista SSR invocata dal `ModuleRenderer`.
-  - Asset opzionali (CSS/JS) caricati manualmente.
-- Il database mantiene un registro (`modules_registry`) sincronizzato con il filesystem.
-- I moduli possono essere instanziati più volte e annidati tramite il page builder.
+1. **Prerequisiti**
+   - PHP ≥ 8.0
+   - MySQL ≥ 5.7
+   - Node.js ≥ 16 (solo per build locale)
+   - Composer *non* necessario
 
-#### Moduli pubblici pronti all'uso
-
-| Slug | Descrizione | Punti chiave |
-|------|-------------|--------------|
-| `hero` | Hero principale con overlay configurabile, CTA modulari e statistiche. | CTA annidate tramite modulo `button`, documentazione in `modules/hero/README.md`. |
-| `highlights` | Griglia dei punti di forza dell'evento. | Card responsive con icone Font Awesome e CTA finale. |
-| `event-schedule` | Timeline dei tre giorni di gara. | Supporta giornate multiple, location e call-to-action finale. |
-| `race-cards` | Cards gare collegate al database `races`. | Colori tematici per maratona, 30km e run tune. |
-| `results` | Tabella risultati collegata a `race_results`. | Supporta limiti configurabili e formati tempo dal renderer. |
-| `button`, `text`, `select`, ... | Componenti atomici riutilizzabili. | Pensati per essere annidati in moduli compositi. |
-
-## 🛠️ Admin Control Center
-
-L'admin è stato ripensato con un'interfaccia coerente con il design del sito (variabili CSS esistenti) e prevede:
-
-- **Dashboard** con statistiche e attività recenti.
-- **Gestione risultati** collegata alla tabella `races` (niente ID hard-coded).
-- **Gestione contenuti dinamici** con metadati JSON e flag `featured`.
-- **Gestione pagine** con modifica rapida di titolo, description e CSS variables.
-- **Gestione moduli** con toggle attiva/disattiva, manifest in linea e sincronizzazione diretta.
-- **Page Builder** link diretto per il drag&drop delle istanze.
-
-Il sync dei moduli ora utilizza `admin/includes/module_sync.php` e può essere lanciato sia dalla UI sia visitando `admin/sync-modules.php` (che restituisce un report leggibile).
-
-## 🧩 Creare o aggiornare moduli
-
-1. Duplica una cartella esistente in `modules/` o creane una nuova.
-2. Aggiorna `module.json` con:
-   ```json
-   {
-     "slug": "my-module",
-     "component_path": "my-module/my-module.php",
-     "css_class": "my-module",
-     "default_config": {
-       "title": "Titolo",
-       "layout": "full"
-     },
-     "aliases": ["alias-opzionale"]
-   }
+2. **Installazione**
+   ```bash
+   git clone <repo>
+   cd sito_modulare
+   npm install
    ```
-3. Scrivi la vista PHP leggendo `$config` fornito dal renderer. Evita hardcoding di asset o testo.
-4. Sincronizza dal pannello admin o con `admin/sync-modules.php`.
-5. (Facoltativo) Aggiungi documentazione del modulo (`README.md` nella cartella) con schema dei campi → utile per automazioni LLM future.
 
-### Linee guida moduli
+3. **Database**
+   - Aggiorna le credenziali in `config/database.php`
+   - Importa `database/schema.sql` (contiene dati di esempio)
+   - Verifica con `admin/test-setup.php`
 
-- Usa sempre le variabili CSS già definite in `assets/css/core/variables.css`.
-- Non modificare il modulo `menu` esistente; puoi crearne varianti alternative in nuove cartelle.
-- Mantieni le funzioni idempotenti e prepara i dati nel controller PHP, non nelle viste.
-- Per form/select riutilizza librerie affidabili (es. moduli già testati) invece di reinventare componenti.
+4. **Sviluppo**
+   ```bash
+   npm run dev        # BrowserSync + watch CSS/JS
+   ```
 
-## 🔄 Page Builder
+5. **Build cloud**
+   ```bash
+   npm run release    # Genera cartella build/ completa
+   ```
 
-Il builder usa `module_instances` per salvare la composizione delle pagine e supporta il drag&drop con SortableJS. Ogni modulo può essere annidato richiamando `$renderer->renderModule()` dall'interno di un altro modulo. La UI consente di:
+La cartella `build/` contiene tutto il necessario per il deploy (PHP + asset minificati). Nessuna dipendenza Node in produzione.
 
-- Creare nuove istanze con nome univoco.
-- Aggiornare configurazioni partendo dal manifest (`default_config`).
-- Ordinare e rimuovere moduli senza side-effects.
+## 🧩 Page Builder (admin/page-builder.php)
 
-## 📚 Utility & Script
+### Funzionalità principali
+- Drag & drop con SortableJS (supporto ordinamento dinamico)
+- Moduli annidabili basati su manifest JSON (`modules/<slug>/module.json`)
+- Configuratore dinamico generato da `ui_schema`
+- Anteprima live con rendering server-side
+- API RESTful (`admin/api/page_builder.php`) per CRUD istanze moduli
 
-| Comando             | Descrizione |
-|---------------------|-------------|
-| `npm run dev`       | Watch + BrowserSync (configurabile via `BROWSERSYNC_PROXY`).
-| `npm run css:build` | Build solo CSS.
-| `npm run js:build`  | Bundle JS vanilla.
-| `npm run release`   | Prepara la cartella `build/` per il deploy.
+### Workflow
+1. **Seleziona una pagina** dal menù a tendina
+2. **Aggiungi moduli** dalla libreria (riutilizzabili e annidabili)
+3. **Configura il modulo** tramite form generato da `ui_schema`
+4. **Salva** per creare/aggiornare l'istanza (`module_instances`)
+5. **Trascina** per riordinare (persistenza automatica dell'ordine)
+6. **Anteprima** apre rendering lato server in modal oppure pagina pubblica
 
-## 🧪 Quality check
+### UI Schema (estratto)
+   ```json
+"ui_schema": {
+  "title": {
+    "type": "text",
+    "label": "Titolo",
+    "placeholder": "Titolo sezione",
+    "help": "Usato nell'hero principale"
+  },
+  "menu_items": {
+    "type": "array",
+    "label": "Voci menu",
+    "item_schema": {
+      "label": { "type": "text", "label": "Etichetta" },
+      "url":   { "type": "url",  "label": "URL" }
+    }
+  }
+}
+```
 
-- PHP: rispettare PSR-12 (usa `php -l` per lint veloce).
-- JS: ES2018+ senza optional chaining lato produzione pubblica (ammesso nell'admin se necessario).
-- CSS: niente nesting tipo `&` (solo CSS standard + variabili).
+Ogni campo supporta `type`, `label`, `placeholder`, `default`, `help`, `options` (per select) e strutture `array` con `item_schema` annidato.
 
-## 🤝 Workflow consigliato
+## 🧱 Moduli
 
-1. Crea un branch `feature/<nome>`.
-2. Implementa il modulo/feature seguendo queste linee guida.
-3. Aggiorna la documentazione del modulo (manifest + README dedicato se serve).
-4. Esegui build/test localmente.
-5. Apri una PR descrivendo moduli coinvolti e impatto sull'admin.
+- Ogni modulo vive in `modules/<slug>/`
+- File obbligatori: `module.json`, template PHP, CSS/JS opzionali
+- `module.json` deve includere almeno:
+  ```json
+  {
+    "name": "Hero",
+    "slug": "hero",
+    "component_path": "hero/hero.php",
+    "default_config": { ... },
+    "ui_schema": { ... }
+  }
+  ```
+- I campi `default_config` e `ui_schema` vengono uniti lato server con la configurazione salvata
+- Documenta ogni modulo con README o schema per facilitare automazione LLM futura
 
-## 🧭 Note per automazioni future
+### Consigli
+- Riutilizza moduli esistenti quando possibile
+- Evita hardcoding di colori: usa `assets/css/core/variables.css`
+- Mantieni compatibilità con CSS del menu principale
+- Per select/form usa componenti validati dalla community (es. [Shoelace](https://shoelace.style/)) integrandoli via manifest `assets.vendors`
 
-- Mantieni i manifest aggiornati: un LLM potrà leggere slug, campi e dipendenze per generare pagine da prompt.
-- Documenta eventuali nuovi componenti in `modules/<slug>/README.md` e inserisci esempi di configurazione JSON.
-- Evita logiche lato client invasive: il rendering deve rimanere SSR per garantire SEO e semplicità d'uso.
+## 🛠️ Maintenance & Quality
+
+- **PHP**: segui PSR-12, niente `try/catch` attorno agli `include`
+- **JS**: ES2015+, nessun transpiler necessario
+- **CSS**: niente nesting tipo `&`, usa classi esplicite
+- **Database**: tutte le tabelle già indicizzate, mantieni `module_instances.instance_name` univoco per pagina
+- **Logs**: eventuali errori AJAX restituiscono JSON con messaggi significativi
+
+### Test veloci
+- `php -l admin/page-builder.php` (lint)
+- `npm run release` (verifica build)
+- Controlla anteprima moduli dalla UI admin
+
+## 🚀 Deploy su cloud
+
+1. Esegui `npm run release`
+2. Carica il contenuto di `build/` sul server PHP
+3. Imposta credenziali DB su `build/config/database.php`
+4. (Opzionale) configura cache HTTP e compressione da `.htaccess`
+
+> **Nota:** la produzione non richiede Node.js. Tutti gli asset sono già precompilati.
+
+## 📄 Licenza
+
+MIT License – consulta il file `LICENSE` per i dettagli.
 
 ---
 
-**Bologna Marathon – Sistema modulare** · progettato per essere mantenibile, modulare e pronto all'integrazione con sistemi di generazione automatica di contenuti.
+Per ulteriori dettagli su singoli moduli consulta `modules/README.md` e mantieni aggiornate le documentazioni per supportare future integrazioni automatizzate.

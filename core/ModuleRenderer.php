@@ -79,15 +79,14 @@ class ModuleRenderer {
         if (!$moduleInfo) {
             throw new Exception("Modulo non trovato: $moduleName");
         }
-        
+
         $componentPath = $this->modulesPath . $moduleInfo['component_path'];
         if (!file_exists($componentPath)) {
             throw new Exception("Componente non trovato: $componentPath");
         }
-        
+
         // Merge config default con config passato
-        $defaultConfig = json_decode($moduleInfo['default_config'], true) ?? [];
-        $finalConfig = array_merge($defaultConfig, $config);
+        $finalConfig = $this->mergeConfigWithDefaults($moduleName, $config);
         
         // Buffer per catturare l'output
         ob_start();
@@ -98,6 +97,54 @@ class ModuleRenderer {
         $output = ob_get_clean();
         
         return $output;
+    }
+
+    /**
+     * Restituisce il manifest JSON di un modulo.
+     */
+    public function getModuleManifest($moduleName) {
+        $slug = $this->resolveModuleName($moduleName);
+        $this->loadModuleManifests();
+        return $this->cache['manifests'][$slug] ?? null;
+    }
+
+    /**
+     * Restituisce la configurazione di default dichiarata dal modulo.
+     */
+    public function getModuleDefaultConfig($moduleName) {
+        $manifest = $this->getModuleManifest($moduleName);
+        if (is_array($manifest) && isset($manifest['default_config'])) {
+            if (is_array($manifest['default_config'])) {
+                return $manifest['default_config'];
+            }
+
+            $decoded = json_decode(json_encode($manifest['default_config']), true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        $moduleInfo = $this->getModuleInfo($moduleName);
+        if ($moduleInfo && !empty($moduleInfo['default_config'])) {
+            $decoded = json_decode($moduleInfo['default_config'], true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Unisce configurazione personalizzata con i default del modulo.
+     */
+    public function mergeConfigWithDefaults($moduleName, array $config = []) {
+        $defaults = $this->getModuleDefaultConfig($moduleName);
+        if (empty($defaults)) {
+            return $config;
+        }
+
+        return array_replace_recursive($defaults, $config);
     }
     
     /**
