@@ -1,0 +1,25 @@
+# Linee guida Cursor per Sito Modulare
+
+## Stile & convenzioni
+- Linguaggio primario: **PHP 8.1+**, **JavaScript ES2021**, **CSS vanilla** con variabili globali (`assets/css/core/variables.css`).
+- Evita CSS nesting (`&`) e preprocessori: mantieni compatibilità con la pipeline esistente.
+- I file core (`assets/css/core/*`) e il modulo `modules/menu` non vanno modificati salvo bug critici.
+- Prediligi funzioni pure e servizi riutilizzabili. Usa i repository in `admin/includes` per dialogare col DB.
+
+## Moduli
+- Ogni modulo richiede `module.json`, template PHP e README interno con esempi di configurazione.
+- Le configurazioni devono essere serializzabili in JSON; evita oggetti complessi o callable.
+- Gli slot annidati si gestiscono con `$renderer->renderChildren($config, $slot)`.
+- Mantieni gli asset (CSS/JS) del modulo isolati nella relativa cartella.
+
+## Admin & API
+- Gli endpoint vivono in `admin/api/index.php`. Aggiungi nuove risorse seguendo il pattern dello `switch` su `resource`.
+- Riutilizza i servizi (`ModuleService`, `PageService`, etc.) invece di usare PDO diretto.
+- L'interfaccia JS è in `admin/assets/app.js`: mantieni componenti puri, nessuna libreria esterna se non documentata.
+- Le nuove feature del builder devono supportare drag & drop e aggiornare l'ispettore senza ricarichi pagina.
+
+## Deploy
+- Il target cloud deve funzionare senza Node.js. Gli strumenti di build (Gulp) restano opzionali e solo per sviluppo locale.
+
+## Documentazione
+- Aggiorna `README.md` e i README dei moduli quando introduci nuove funzionalità, campi o dipendenze.

@@ -74,30 +74,82 @@ class ModuleRenderer {
     public function renderModule($moduleName, $config = []) {
         // Traccia modulo annidato
         $this->nestedModules[$moduleName] = true;
-        
+
         $moduleInfo = $this->getModuleInfo($moduleName);
         if (!$moduleInfo) {
             throw new Exception("Modulo non trovato: $moduleName");
         }
-        
+
         $componentPath = $this->modulesPath . $moduleInfo['component_path'];
         if (!file_exists($componentPath)) {
             throw new Exception("Componente non trovato: $componentPath");
         }
-        
+
         // Merge config default con config passato
         $defaultConfig = json_decode($moduleInfo['default_config'], true) ?? [];
-        $finalConfig = array_merge($defaultConfig, $config);
-        
+        $finalConfig = array_merge($defaultConfig, is_array($config) ? $config : []);
+
         // Buffer per catturare l'output
         ob_start();
         // Passa les variabili necessarie al modulo
         $renderer = $this;
         $config = $finalConfig;
+        $module = $moduleInfo;
         include $componentPath;
         $output = ob_get_clean();
-        
+
         return $output;
+    }
+
+    /**
+     * Renderizza i moduli annidati per uno slot specifico.
+     */
+    public function renderChildren(array $config, string $slot = 'default'): string
+    {
+        $children = $this->getChildrenForSlot($config, $slot);
+        if (empty($children)) {
+            return '';
+        }
+
+        $output = '';
+        foreach ($children as $child) {
+            $childModule = $child['module'] ?? $child['module_name'] ?? null;
+            if (!$childModule) {
+                continue;
+            }
+
+            $childConfig = $child['config'] ?? [];
+            $output .= $this->renderModule($childModule, $childConfig);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Restituisce i figli configurati per uno slot.
+     */
+    public function getChildrenForSlot(array $config, string $slot = 'default'): array
+    {
+        if (!isset($config['children'])) {
+            return [];
+        }
+
+        $children = $config['children'];
+
+        if (isset($children[$slot]) && is_array($children[$slot])) {
+            return $children[$slot];
+        }
+
+        if ($slot === 'default' && is_array($children) && self::isSequential($children)) {
+            return $children;
+        }
+
+        return [];
+    }
+
+    private static function isSequential(array $array): bool
+    {
+        return array_keys($array) === range(0, count($array) - 1);
     }
     
     /**
@@ -131,7 +183,13 @@ class ModuleRenderer {
                 ORDER BY pm.order_index";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$pageId]);
-        return $stmt->fetchAll();
+        $modules = $stmt->fetchAll();
+
+        foreach ($modules as &$module) {
+            $module['config'] = $this->decodeConfig($module['config'] ?? null);
+        }
+
+        return $modules;
     }
     
     /**
@@ -144,7 +202,31 @@ class ModuleRenderer {
                 ORDER BY mi.order_index";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$pageId]);
-        return $stmt->fetchAll();
+        $instances = $stmt->fetchAll();
+
+        foreach ($instances as &$instance) {
+            $instance['config'] = $this->decodeConfig($instance['config'] ?? null);
+        }
+
+        return $instances;
+    }
+
+    private function decodeConfig($config): array
+    {
+        if (is_array($config)) {
+            return $config;
+        }
+
+        if (!is_string($config) || $config === '') {
+            return [];
+        }
+
+        $decoded = json_decode($config, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return [];
+        }
+
+        return $decoded ?: [];
     }
     
     /**
