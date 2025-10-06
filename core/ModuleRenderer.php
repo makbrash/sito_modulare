@@ -23,23 +23,20 @@ class ModuleRenderer {
         if (!$page) {
             throw new Exception("Pagina non trovata: $slug");
         }
-
+        
         if ($useInstances) {
             $modules = $this->getPageModuleInstances($page['id']);
-            $moduleTree = $this->buildModuleInstanceTree($modules);
         } else {
             $modules = $this->getPageModules($page['id']);
-            $moduleTree = [];
         }
-
+        
         $cssVariables = $this->getCSSVariables($page);
-
+        
         return [
             'page' => $page,
             'modules' => $modules,
             'css_variables' => $cssVariables,
-            'use_instances' => $useInstances,
-            'module_tree' => $moduleTree,
+            'use_instances' => $useInstances
         ];
     }
     
@@ -61,15 +58,13 @@ class ModuleRenderer {
         }
         
         $modules = $this->getPageModuleInstances($pageId);
-        $moduleTree = $this->buildModuleInstanceTree($modules);
         $cssVariables = $this->getCSSVariables($page);
-
+        
         return [
             'page' => $page,
             'modules' => $modules,
             'css_variables' => $cssVariables,
-            'use_instances' => true,
-            'module_tree' => $moduleTree,
+            'use_instances' => true
         ];
     }
     
@@ -92,11 +87,7 @@ class ModuleRenderer {
 
         // Merge config default con config passato
         $finalConfig = $this->mergeConfigWithDefaults($moduleName, $config);
-
-        if (!empty($finalConfig['__inline_html']) && is_string($finalConfig['__inline_html'])) {
-            return $finalConfig['__inline_html'];
-        }
-
+        
         // Buffer per catturare l'output
         ob_start();
         // Passa les variabili necessarie al modulo
@@ -197,67 +188,10 @@ class ModuleRenderer {
         $sql = "SELECT mi.*
                 FROM module_instances mi
                 WHERE mi.page_id = ? AND mi.is_active = 1
-                ORDER BY COALESCE(mi.parent_instance_id, 0), mi.order_index";
+                ORDER BY mi.order_index";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$pageId]);
         return $stmt->fetchAll();
-    }
-
-    /**
-     * Costruisce albero annidato delle istanze di moduli
-     */
-    public function buildModuleInstanceTree(array $instances): array
-    {
-        if (empty($instances)) {
-            return [];
-        }
-
-        $byParent = [];
-        foreach ($instances as $instance) {
-            $parentId = $instance['parent_instance_id'] ?? null;
-            if ($parentId !== null) {
-                $parentId = (int)$parentId;
-            }
-
-            $byParent[$parentId ?? 0][] = $instance;
-        }
-
-        $build = function ($parentId) use (&$build, &$byParent) {
-            $result = [];
-            $bucketKey = $parentId ?? 0;
-            if (!isset($byParent[$bucketKey])) {
-                return $result;
-            }
-
-            foreach ($byParent[$bucketKey] as $instance) {
-                $node = $instance;
-                $node['children'] = $build((int)$instance['id']);
-                $result[] = $node;
-            }
-
-            return $result;
-        };
-
-        return $build(null);
-    }
-
-    /**
-     * Appiattisce un albero di istanze in lista
-     */
-    public function flattenModuleInstanceTree(array $tree): array
-    {
-        $flat = [];
-        foreach ($tree as $node) {
-            $nodeCopy = $node;
-            $children = $nodeCopy['children'] ?? [];
-            unset($nodeCopy['children']);
-            $flat[] = $nodeCopy;
-            if (!empty($children)) {
-                $flat = array_merge($flat, $this->flattenModuleInstanceTree($children));
-            }
-        }
-
-        return $flat;
     }
     
     /**
