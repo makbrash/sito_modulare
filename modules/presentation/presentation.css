@@ -1,0 +1,74 @@
+/**
+ * Modulo: Presentation
+ * File: presentation.css
+ * 
+ * Usa il sistema CSS esistente: h1, h2, p, .card-tag, .container, .row, .col-*
+ */
+
+
+/* Block principale */
+.presentation {
+  background: var(--gradient-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Contenuto */
+.presentation_content {
+  /* padding: var(--space-); */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* height: 100%; */
+  padding: var(--space-3xl) var(--space-md);
+  max-width: 900px;
+  margin: auto;
+}
+
+
+/* Wrapper immagine */
+.presentation_image-wrapper {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Immagine */
+.presentation_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Statistiche - usa .card-tag esistente */
+.presentation_stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  /* margin-top: var(--space-lg); */
+  flex-direction: row;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .presentation_image-wrapper {
+    height: 50vh;
+    min-height: 300px;
+  }
+  
+  .presentation_stats {
+    /* flex-direction: column; */
+    gap: var(--space-xs);
+  }
+}
+
+/* Page Builder Overrides */
+.page-builder .presentation {
+  min-height: 400px;
+}
+
+.page-builder .presentation_image-wrapper {
+  height: 400px;
+}

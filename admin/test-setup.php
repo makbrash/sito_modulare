@@ -95,6 +95,13 @@ if ($action === 'setup' && $success) {
             throw new Exception("File test_data.sql non trovato: $testDataPath");
         }
         
+        // Leggi e esegui temi
+        $themesPath = __DIR__ . '/../database/theme_identities.sql';
+        if (file_exists($themesPath)) {
+            $themes = file_get_contents($themesPath);
+            $pdo->exec($themes);
+        }
+        
         $setupSuccess = true;
         $setupMessage = $hasTables ? "Dati aggiornati (tabelle già esistenti)" : "Database e dati creati con successo";
         

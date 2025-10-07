@@ -157,7 +157,25 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const result = await response.json();
+                // Prova a decodificare JSON in modo robusto
+                let result;
+                const contentType = response.headers.get('content-type') || '';
+                try {
+                    if (contentType.includes('application/json')) {
+                        result = await response.json();
+                    } else {
+                        const text = await response.text();
+                        try {
+                            result = JSON.parse(text);
+                        } catch (e) {
+                            throw new Error(text && text.trim().length < 200 ? text : 'Risposta non valida dal server');
+                        }
+                    }
+                } catch (parseError) {
+                    // Fallback finale a testo grezzo
+                    const text = await response.text().catch(() => '');
+                    throw new Error(text && text.trim() ? text.trim() : 'Errore durante la lettura della risposta');
+                }
 
                 if (result.success) {
                     this.showSuccess();

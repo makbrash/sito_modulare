@@ -1,0 +1,170 @@
+{
+  "name": "presentation",
+  "slug": "presentation",
+  "aliases": ["presentation", "hero-presentation"],
+  "version": "1.0.0",
+  "description": "Sezione presentazione con layout 2 colonne (50% ciascuna) - contenuto a sinistra e immagine fullscreen a destra",
+  "category": "hero",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "presentation/presentation.php",
+  "default_config": {
+    "title": "DOVE LO SPORT INCONTRA",
+    "subtitle": "LA STORIA",
+    "description1": "La Maratona di Bologna è un grande evento dove lo sport si fonde con la storia, la cultura, l'arte, la musica e il buon cibo di una delle città più antiche d'Europa.",
+    "description2": "Tre giorni di festa in Piazza Maggiore, una delle piazze più belle d'Italia, offrendo a tutti i partecipanti diverse opportunità per visitare e scoprire una città unica.",
+    "image_url": "assets/images/marathon-start.jpg",
+    "image_alt": "Maratona di Bologna",
+    "variant": "primary",
+    "background_color": "var(--gradient-dark)",
+    "text_color": "var(--color-white)",
+    "accent_color": "var(--primary)",
+    "stats": [
+      {
+        "icon": "🏃‍♂️",
+        "number": "10.000+",
+        "label": "Runner"
+      },
+      {
+        "icon": "🌍",
+        "number": "50+",
+        "label": "Nazioni"
+      },
+      {
+        "icon": "🎵",
+        "number": "3",
+        "label": "Giorni di Eventi"
+      }
+    ]
+  },
+  "assets": {
+    "css": ["presentation/presentation.css"],
+    "js": ["presentation/presentation.js"],
+    "vendors": []
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "title": {
+      "type": "text",
+      "label": "Titolo Principale",
+      "placeholder": "DOVE LO SPORT INCONTRA",
+      "required": true,
+      "default": "DOVE LO SPORT INCONTRA"
+    },
+    "subtitle": {
+      "type": "text",
+      "label": "Sottotitolo (Accent)",
+      "placeholder": "LA STORIA",
+      "required": true,
+      "default": "LA STORIA"
+    },
+    "description1": {
+      "type": "textarea",
+      "label": "Descrizione Principale",
+      "placeholder": "Prima descrizione del contenuto...",
+      "rows": 3,
+      "required": true,
+      "default": "La Maratona di Bologna è un grande evento dove lo sport si fonde con la storia, la cultura, l'arte, la musica e il buon cibo di una delle città più antiche d'Europa."
+    },
+    "description2": {
+      "type": "textarea",
+      "label": "Descrizione Secondaria",
+      "placeholder": "Seconda descrizione del contenuto...",
+      "rows": 3,
+      "required": false,
+      "default": "Tre giorni di festa in Piazza Maggiore, una delle piazze più belle d'Italia, offrendo a tutti i partecipanti diverse opportunità per visitare e scoprire una città unica."
+    },
+    "image_url": {
+      "type": "image",
+      "label": "Immagine Principale",
+      "placeholder": "URL dell'immagine",
+      "required": true,
+      "default": "assets/images/marathon-start.jpg"
+    },
+    "image_alt": {
+      "type": "text",
+      "label": "Alt Text Immagine",
+      "placeholder": "Descrizione dell'immagine per accessibilità",
+      "required": true,
+      "default": "Maratona di Bologna"
+    },
+    "image_position": {
+      "type": "select",
+      "label": "Posizione Immagine",
+      "options": [
+        { "value": "left", "label": "Sinistra" },
+        { "value": "right", "label": "Destra" }
+      ],
+      "default": "right"
+    },
+    "variant": {
+      "type": "select",
+      "label": "Variante Stile",
+      "options": [
+        { "value": "primary", "label": "Primario (Blu)" },
+        { "value": "secondary", "label": "Secondario (Marrone)" },
+        { "value": "accent", "label": "Accent (Viola)" }
+      ],
+      "default": "primary"
+    },
+    "background_color": {
+      "type": "color",
+      "label": "Colore Sfondo",
+      "default": "var(--gradient-dark)"
+    },
+    "text_color": {
+      "type": "color",
+      "label": "Colore Testo",
+      "default": "var(--color-white)"
+    },
+    "accent_color": {
+      "type": "color",
+      "label": "Colore Accent",
+      "default": "var(--primary)"
+    },
+    "stats": {
+      "type": "array",
+      "label": "Statistiche",
+      "item_schema": {
+        "icon": {
+          "type": "text",
+          "label": "Icona Font Awesome",
+          "placeholder": "fas fa-running",
+          "required": true,
+          "default": "fas fa-running"
+        },
+        "number": {
+          "type": "text",
+          "label": "Numero",
+          "placeholder": "10.000+",
+          "required": true,
+          "default": "10.000+"
+        },
+        "label": {
+          "type": "text",
+          "label": "Etichetta",
+          "placeholder": "Runner",
+          "required": true,
+          "default": "Runner"
+        }
+      },
+      "default": [
+        {
+          "icon": "fas fa-running",
+          "number": "10.000+",
+          "label": "Runner"
+        },
+        {
+          "icon": "fas fa-globe",
+          "number": "50+",
+          "label": "Nazioni"
+        },
+        {
+          "icon": "fas fa-music",
+          "number": "3",
+          "label": "Giorni di Eventi"
+        }
+      ]
+    }
+  }
+}

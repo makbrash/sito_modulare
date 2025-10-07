@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Splash Logo Module</title>
+    
+    <!-- CSS Core -->
+    <link rel="stylesheet" href="assets/css/core/variables.css">
+    <link rel="stylesheet" href="assets/css/core/colors.css">
+    <link rel="stylesheet" href="assets/css/core/reset.css">
+    
+    <!-- Splash Logo Module CSS -->
+    <link rel="stylesheet" href="modules/splash-logo/splash-logo.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-primary, Arial, sans-serif);
+            background: var(--bg-primary, #0b0b15);
+            color: var(--text-primary, #ffffff);
+        }
+        
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        h1 {
+            font-family: var(--font-display, 'Bebas Neue', sans-serif);
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: var(--primary, #23a8eb);
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .info h2 {
+            color: var(--primary, #23a8eb);
+            margin-bottom: 1rem;
+        }
+        
+        .button {
+            background: var(--primary, #23a8eb);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        
+        .button:hover {
+            background: var(--secondary, #1583b9);
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Logo Module -->
+    <div class="splash-logo" data-duration="2500" data-module="splashLogo">
+        <div class="splash-logo__overlay">
+            <div class="splash-logo__content">
+                <img src="assets/images/splash.svg" 
+                     alt="Bologna Marathon Logo" 
+                     class="splash-logo__image"
+                     style="width: 100px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenuto Principale -->
+    <div class="content">
+        <h1>Test Splash Logo Module</h1>
+        
+        <div class="info">
+            <h2>✨ Funzionalità</h2>
+            <ul>
+                <li>Overlay full-screen con gradient dark</li>
+                <li>Logo fade-in con animazione scale</li>
+                <li>Lampeggio dolce del logo (pulse)</li>
+                <li>Fade-out automatico dopo 2.5 secondi</li>
+                <li>Auto-rimozione dal DOM</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h2>🎬 Sequenza Animazioni</h2>
+            <ol>
+                <li><strong>0.0s - 0.6s</strong>: Logo fade-in + scale da 0.8 a 1.0</li>
+                <li><strong>0.6s - 1.7s</strong>: Logo lampeggia dolcemente</li>
+                <li><strong>1.7s - 2.5s</strong>: Overlay fade-out</li>
+                <li><strong>2.5s</strong>: Elemento rimosso dal DOM</li>
+            </ol>
+        </div>
+        
+        <div class="info">
+            <h2>🧪 Test Interattivi</h2>
+            <button class="button" onclick="location.reload()">
+                🔄 Ricarica Pagina (Test Splash)
+            </button>
+            <button class="button" onclick="testManualHide()">
+                ⏭️ Nascondi Splash Manualmente
+            </button>
+        </div>
+        
+        <div class="info">
+            <h2>📊 Stato</h2>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <!-- Splash Logo Module JavaScript -->
+    <script src="modules/splash-logo/splash-logo.js"></script>
+    
+    <script>
+        // Test manuale nascondimento
+        function testManualHide() {
+            const splash = document.querySelector('.splash-logo');
+            if (splash && window.SplashLogo) {
+                const instance = new window.SplashLogo(splash);
+                instance.hide();
+                updateStatus('✅ Splash nascosto manualmente');
+            } else {
+                updateStatus('❌ Splash già rimosso o non presente');
+            }
+        }
+        
+        // Aggiorna status
+        function updateStatus(message) {
+            const status = document.getElementById('status');
+            const time = new Date().toLocaleTimeString();
+            status.innerHTML += `<p><strong>${time}</strong>: ${message}</p>`;
+        }
+        
+        // Listener evento custom
+        document.addEventListener('splash-logo:hidden', function(e) {
+            updateStatus(`✨ Splash completamente nascosto (timestamp: ${e.detail.timestamp})`);
+        });
+        
+        // Status iniziale
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('📄 Pagina caricata - DOM ready');
+        });
+        
+        window.addEventListener('load', function() {
+            updateStatus('🎉 Tutti i contenuti caricati');
+        });
+    </script>
+</body>
+</html>
+

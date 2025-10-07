@@ -15,6 +15,9 @@ $db = $database->getConnection();
 $renderer = new ModuleRenderer($db);
 
 try {
+    // Reset moduli annidati per nuova pagina
+    $renderer->resetNestedModules();
+    
     // Controlla se è richiesta una pagina specifica per ID
     $pageId = isset($_GET['id_pagina']) ? (int)$_GET['id_pagina'] : null;
     
@@ -26,13 +29,58 @@ try {
         $pageData = $renderer->renderPage('home');
     }
     
-    $page = $pageData['page'];
-    $modules = $pageData['modules'];
-    $cssVariables = $pageData['css_variables'];
-    $useInstances = $pageData['use_instances'] ?? false;
-    
+$page = $pageData['page'];
+$modules = $pageData['modules'];
+$cssVariables = $pageData['css_variables'];
+$useInstances = $pageData['use_instances'] ?? false;
+$moduleTree = $pageData['module_tree'] ?? [];
+
+// Ottieni tema della pagina
+$pageTheme = $renderer->getPageTheme($page['id']);
+// Evita duplicazione del prefisso "race-"
+if (strpos($pageTheme, 'race-') === 0) {
+    $bodyClass = $pageTheme;
+} else {
+    $bodyClass = "race-{$pageTheme}";
+}
+
 } catch (Exception $e) {
     die("Errore: " . $e->getMessage());
+}
+
+/**
+ * Render ricorsivo delle istanze modulo con supporto annidamento
+ */
+function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
+{
+    $config = json_decode($node['config'] ?? '[]', true) ?? [];
+    $hasInlineHtml = isset($config['__inline_html']) && $config['__inline_html'] !== '';
+
+    echo '<div class="module-wrapper" data-module="' . htmlspecialchars($node['module_name']) . '"'
+        . ' data-instance="' . htmlspecialchars($node['instance_name']) . '"'
+        . ' data-instance-id="' . (int)$node['id'] . '"';
+
+    if (!empty($node['parent_instance_id'])) {
+        echo ' data-parent-id="' . (int)$node['parent_instance_id'] . '"';
+    }
+
+    echo '>';
+
+    if ($hasInlineHtml) {
+        echo $config['__inline_html'];
+    } else {
+        echo $renderer->renderModule($node['module_name'], $config);
+    }
+
+    if (!empty($node['children'])) {
+        echo '<div class="module-children">';
+        foreach ($node['children'] as $childNode) {
+            renderModuleInstanceNode($renderer, $childNode);
+        }
+        echo '</div>';
+    }
+
+    echo '</div>';
 }
 ?>
 <!DOCTYPE html>
@@ -43,15 +91,56 @@ try {
     <title><?= htmlspecialchars($page['title']) ?></title>
     <meta name="description" content="<?= htmlspecialchars($page['description']) ?>">
     
-    <!-- CSS Build -->
-    <link rel="stylesheet" href="assets/dist/css/main.min.css">
+    <!-- CSS DEV/PROD -->
     <?php
-        // Includi CSS vendor dai manifest dei moduli presenti nella pagina
-        $vendorAssets = $renderer->collectVendorAssets($modules);
-        if (!empty($vendorAssets['css'])) {
-            foreach ($vendorAssets['css'] as $href) {
-                echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
+        // DEV se NON stiamo eseguendo dalla cartella build
+        $isDev = (strpos(__DIR__, DIRECTORY_SEPARATOR . 'build') === false);
+        if ($isDev) {
+            // DEV: carica core + CSS moduli deduplicati
+            $coreCss = [
+                'assets/css/core/variables.css',
+                'assets/css/core/colors.css',
+                'assets/css/core/reset.css',
+                'assets/css/core/typography.css',
+                'assets/css/core/layout.css',
+                'assets/css/core/fonts.css',
+            ];
+            foreach ($coreCss as $href) {
+                if (file_exists(__DIR__ . '/' . $href)) {
+                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
+                }
             }
+            // Vendor CSS
+            $vendorAssets = $renderer->collectVendorAssets($modules);
+            if (!empty($vendorAssets['css'])) {
+                foreach ($vendorAssets['css'] as $href) {
+                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
+                }
+            }
+            
+            // Splash Logo CSS (sempre incluso)
+            echo '<link rel="stylesheet" href="modules/splash-logo/splash-logo.css">';
+
+            // Pre-rendering per tracciare moduli annidati
+            ob_start();
+            foreach ($modules as $module) {
+                if ($module['module_name'] !== 'menu') {
+                    $config = json_decode($module['config'], true) ?? [];
+                    $renderer->renderModule($module['module_name'], $config);
+                }
+            }
+            ob_end_clean();
+            
+            // Ora raccogli asset con moduli annidati tracciati
+            $moduleAssets = $renderer->collectModuleAssets($modules);
+            if (!empty($moduleAssets['css'])) {
+                foreach ($moduleAssets['css'] as $href) {
+                    echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
+                }
+            }
+        } else {
+            // PROD: un solo bundle
+            echo '<link rel="stylesheet" href="build/assets/css/main.min.css">';
         }
     ?>
     
@@ -69,10 +158,14 @@ try {
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;800&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 </head>
-<body class="page-<?= $page['template'] ?>">
-    <!-- Skip Link -->
+<body class="page-<?= $page['template'] ?> <?= htmlspecialchars($bodyClass) ?>">
+    <!-- Splash Logo Module -->
+    <?php echo $renderer->renderModule('splashLogo', []); ?>
+    
+    <!-- Skip Link per accessibilità -->
     <a href="#main-content" class="skip-link">Salta al contenuto principale</a>
     
     <?php
@@ -95,16 +188,9 @@ try {
     <main id="main-content" class="site-main">
         <?php if ($useInstances): ?>
             <!-- Renderizza istanze di moduli (escluso menu) -->
-            <?php foreach ($modules as $instance): ?>
-                <?php if ($instance['module_name'] !== 'menu'): ?>
-                <div class="module-wrapper" data-module="<?= htmlspecialchars($instance['module_name']) ?>" 
-                     data-instance="<?= htmlspecialchars($instance['instance_name']) ?>">
-                    <?php
-                    $config = json_decode($instance['config'], true) ?? [];
-                    echo $renderer->renderModule($instance['module_name'], $config);
-                    ?>
-                </div>
-                <?php endif; ?>
+            <?php foreach ($moduleTree as $node): ?>
+                <?php if (($node['module_name'] ?? '') === 'menu') { continue; } ?>
+                <?php renderModuleInstanceNode($renderer, $node); ?>
             <?php endforeach; ?>
         <?php else: ?>
             <!-- Renderizza moduli tradizionali (escluso menu) -->
@@ -122,16 +208,39 @@ try {
     </main>
     
     
-    
-    <!-- JavaScript Build -->
-    <script src="assets/dist/js/app.min.js"></script>
-    <?php
-        // Includi JS vendor dai manifest dei moduli presenti nella pagina
-        if (!empty($vendorAssets['js'])) {
-            foreach ($vendorAssets['js'] as $src) {
-                echo '<script src="' . htmlspecialchars($src) . '"></script>';
+    <!-- JavaScript DEV/PROD -->
+    <?php if ($isDev): ?>
+        <?php
+            // Vendor JS
+            $vendorAssets = $vendorAssets ?? $renderer->collectVendorAssets($modules);
+            if (!empty($vendorAssets['js'])) {
+                foreach ($vendorAssets['js'] as $src) {
+                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
+                }
             }
-        }
-    ?>
+
+            $moduleAssets = $moduleAssets ?? $renderer->collectModuleAssets($modules);
+            // Core JS (se esiste)
+            $coreJs = [
+                'assets/js/core/app.js'
+            ];
+            foreach ($coreJs as $src) {
+                if (file_exists(__DIR__ . '/' . $src)) {
+                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
+                }
+            }
+            
+            // Splash Logo JS (sempre incluso)
+            echo '<script src="modules/splash-logo/splash-logo.js"></script>';
+            // JS moduli deduplicati
+            if (!empty($moduleAssets['js'])) {
+                foreach ($moduleAssets['js'] as $src) {
+                    echo '<script src="' . htmlspecialchars($src) . '"></script>';
+                }
+            }
+        ?>
+    <?php else: ?>
+        <script src="build/assets/js/app.min.js"></script>
+    <?php endif; ?>
 </body>
 </html>

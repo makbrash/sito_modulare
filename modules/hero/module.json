@@ -1,18 +1,113 @@
 {
   "name": "Hero",
   "slug": "hero",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "component_path": "hero/hero.php",
   "css_class": "hero-module",
-  "default_config": { "layout": "2col", "height": "100vh" },
+  "description": "Hero con layout 2 colonne: testo sticky + cards tematiche per gare",
   "aliases": ["actionHero"],
+  "default_config": {
+    "height": "fit-content",
+    "layout": "2col",
+    "eyebrow": {
+      "label": "2 MARZO 2026",
+      "icon": "fas fa-calendar-alt"
+    },
+    "title": "THERMAL BOLOGNA MARATHON",
+    "subtitle": "Corri Attraverso la Storia",
+    "description": "Tre percorsi unici nel cuore di Bologna. Scegli la tua sfida e vivi un'esperienza indimenticabile tra storia, cultura e sport.",
+    "background": {
+      "image": "assets/images/hero-bg.jpg",
+      "position": "center",
+      "size": "cover"
+    },
+    "cards": [
+      {
+        "type": "marathon",
+        "title": "MARATONA",
+        "distance": "42.195 KM",
+        "tag": "GARA REGINA",
+        "description": "La sfida più grande attraverso il centro storico di Bologna",
+        "details": [
+          { "icon": "fas fa-clock", "text": "Tempo limite: 6 ore" },
+          { "icon": "fas fa-euro-sign", "text": "Quota: €65" },
+          { "icon": "fas fa-medal", "text": "Medaglia finisher" },
+          { "icon": "fas fa-tshirt", "text": "T-shirt tecnica" }
+        ],
+        "button": "ISCRIVITI ALLA MARATONA"
+      },
+      {
+        "type": "portici",
+        "title": "30K DEI PORTICI",
+        "distance": "30 KM",
+        "tag": "PATRIMONIO UNESCO",
+        "description": "Un percorso unico tra i portici patrimonio UNESCO",
+        "details": [
+          { "icon": "fas fa-clock", "text": "Tempo limite: 4 ore" },
+          { "icon": "fas fa-euro-sign", "text": "Quota: €45" },
+          { "icon": "fas fa-landmark", "text": "Portici UNESCO" },
+          { "icon": "fas fa-star", "text": "Esperienza unica" }
+        ],
+        "button": "ISCRIVITI AI 30K PORTICI"
+      },
+      {
+        "type": "run-tune-up",
+        "title": "RUN TUNE UP",
+        "distance": "21.097 KM",
+        "tag": "ACCESSIBILE A TUTTI",
+        "description": "La mezza maratona perfetta per tutti i livelli",
+        "details": [
+          { "icon": "fas fa-clock", "text": "Tempo limite: 3 ore" },
+          { "icon": "fas fa-euro-sign", "text": "Quota: €35" },
+          { "icon": "fas fa-users", "text": "Per tutti i livelli" },
+          { "icon": "fas fa-map-marker-alt", "text": "Centro storico" }
+        ],
+        "button": "ISCRIVITI AL RUN TUNE UP"
+      },
+      {
+        "type": "5k",
+        "title": "5KM CITY RUN",
+        "distance": "5 KM",
+        "tag": "SOLIDARIETÀ",
+        "description": "Corsa solidale per tutti",
+        "details": [
+          { "icon": "fas fa-heart", "text": "Solidarietà" },
+          { "icon": "fas fa-users", "text": "Per tutti" }
+        ]
+      },
+      {
+        "type": "kids",
+        "title": "KIDS RUN",
+        "distance": "1 KM",
+        "tag": "BAMBINI",
+        "description": "Divertimento per i più piccoli",
+        "details": [
+          { "icon": "fas fa-child", "text": "Bambini" },
+          { "icon": "fas fa-smile", "text": "Divertimento" }
+        ]
+      }
+    ]
+  },
   "assets": {
-    "css": [],
-    "js": [],
+    "css": ["hero/hero.css"],
+    "js": ["hero/hero.js"],
     "vendors": []
   },
   "dependencies": [],
+  "ui_schema": {
+    "height": { "type": "text", "label": "Altezza", "placeholder": "fit-content, 100vh, etc." },
+    "layout": { "type": "select", "label": "Layout", "options": [
+      { "value": "2col", "label": "2 Colonne" },
+      { "value": "1col", "label": "1 Colonna" }
+    ]},
+    "eyebrow.label": { "type": "text", "label": "Data/Etiquette", "placeholder": "2 MARZO 2026" },
+    "eyebrow.icon": { "type": "text", "label": "Icona", "placeholder": "fas fa-calendar-alt" },
+    "title": { "type": "text", "label": "Titolo Principale" },
+    "subtitle": { "type": "text", "label": "Sottotitolo" },
+    "description": { "type": "textarea", "label": "Descrizione", "rows": 3 },
+    "background.image": { "type": "text", "label": "Immagine di sfondo" },
+    "cards": { "type": "repeater", "label": "Cards Gare" }
+  },
   "install": "hero/install.sql",
   "uninstall": "hero/uninstall.sql"
 }
-

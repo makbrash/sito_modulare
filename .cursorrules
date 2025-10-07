@@ -6,7 +6,7 @@ Sistema modulare per il sito ufficiale della Bologna Marathon (bolognamarathon.r
 - **Tipo**: Sito sportivo modulare
 - **Tecnologie**: PHP 8+, MySQL, CSS Variables, JavaScript vanilla
 - **Architettura**: SSR (Server-Side Rendering) modulare
-- **Path**: `http://localhost/BM_layout/sito_modulare/`
+- **Path**: `http://localhost/sito_modulare/`
 
 ## 📁 STRUTTURA PROGETTO
 ```
@@ -81,7 +81,7 @@ sito_modulare/
 1. **Setup automatico**: `admin/test-setup.php`
 2. **Pannello admin**: `admin/admin.php`
 3. **Debug**: `debug.php`
-4. **Path corretto**: `http://localhost/BM_layout/sito_modulare/`
+4. **Path corretto**: `http://localhost/sito_modulare/`
 
 ## 🚀 WORKFLOW SVILUPPO
 
@@ -120,20 +120,28 @@ $moduleData = $renderer->getModuleData('mioModulo', $config);
 
 ### Setup Iniziale
 1. **Avvia XAMPP** (Apache + MySQL)
-2. **Setup database**: `http://localhost/BM_layout/sito_modulare/admin/test-setup.php`
-3. **Test pagina**: `http://localhost/BM_layout/sito_modulare/index.php`
+2. **Setup database**: `http://localhost/sito_modulare/admin/test-setup.php`
+3. **Test pagina**: `http://localhost/sito_modulare/index.php`
 
 ### File di Test
 - **Versione semplice**: `index-simple.php` (senza database)
 - **Debug database**: `debug.php`
 - **Test setup**: `test.php`
 
-### Build System (Opzionale)
+### Build System
 ```bash
 npm install
-npm run build
-npm run watch
+npm run dev        # Watch mode senza server
+npm run serve      # Watch mode con BrowserSync
+npm run build      # Build solo asset
+npm run release    # Build completo per cloud deployment
 ```
+
+**⚠️ IMPORTANTE**: NON eseguire build automatici durante lo sviluppo. 
+Il build è necessario SOLO:
+- Su richiesta esplicita dell'utente
+- Prima del deploy su cloud
+- Per testare versione produzione
 
 ## 🎯 OBIETTIVI PROGETTO
 - **Sistema modulare** riutilizzabile
@@ -144,24 +152,109 @@ npm run watch
 - **AI-friendly** per generazione automatica pagine
 
 ## 📝 NOTE IMPORTANTI
-- **Path corretto**: `http://localhost/BM_layout/sito_modulare/`
+- **Path corretto**: `http://localhost/sito_modulare/`
 - **Database**: MySQL su XAMPP
 - **Status pagina**: Deve essere "published" per essere visibile
 - **Moduli**: Ogni modulo ha PHP + CSS + JS nella stessa cartella
 - **CSS Variables**: Sistema di personalizzazione principale
+- **Build**: SOLO su richiesta esplicita, mai automatico durante sviluppo
+- **Sviluppo**: Modifica file direttamente, usa `npm run dev` per live-reload
 
 ## 🚨 PROBLEMI COMUNI
 1. **"Pagina non trovata"**: Controlla status = 'published'
 2. **Database vuoto**: Usa `admin/test-setup.php`
 3. **Moduli mancanti**: Verifica `modules_registry`
-4. **Path sbagliato**: Usa `http://localhost/BM_layout/sito_modulare/`
+4. **Path sbagliato**: Usa `http://localhost/sito_modulare/`
 5. **"Undefined variable $renderer"**: Variabile passata automaticamente dal ModuleRenderer
 6. **Percorsi moduli**: Devono essere relativi (es. `hero/hero.php` non `modules/hero/hero.php`)
 7. **SQL LIMIT error**: LIMIT non può essere parametro preparato, usa concatenazione sicura
 
+## 🧩 SVILUPPO MODULI
+
+### Guida Completa
+- **Documentazione**: `MODULE-DEVELOPMENT-GUIDE.md` (guida completa)
+- **Regole**: `MODULE-RULES.md` (regole specifiche)
+- **Template**: `MODULE-TEMPLATE.md` (template completo)
+- **Checklist**: `MODULE-CHECKLIST.md` (checklist validazione)
+- **Esempi**: `modules/README.md` (esempi pratici)
+
+### Struttura Modulo Obbligatoria
+```
+modules/mio-modulo/
+├── mio-modulo.php          # Template PHP (OBBLIGATORIO)
+├── mio-modulo.css          # Stili CSS (OBBLIGATORIO)
+├── module.json             # Manifest modulo (OBBLIGATORIO)
+├── mio-modulo.js           # JavaScript (OPZIONALE)
+├── install.sql             # Setup database (OPZIONALE)
+└── README.md               # Documentazione (OPZIONALE)
+```
+
+### Regole CSS CRITICHE
+- **MAI stili annidati** (`&:hover`, `&::before`)
+- **SOLO CSS classico** esplicito
+- **CSS Variables** obbligatorie
+- **BEM methodology** per classi
+- **Mobile-first** responsive
+
+### Template PHP Standard
+```php
+<?php
+$moduleData = $renderer->getModuleData('mioModulo', $config);
+$title = $config['title'] ?? $moduleData['title'] ?? 'Default';
+?>
+<div class="mio-modulo mio-modulo--<?= htmlspecialchars($variant) ?>">
+    <!-- Contenuto -->
+</div>
+```
+
+### Manifest module.json
+```json
+{
+  "name": "mio-modulo",
+  "slug": "mio-modulo",
+  "component_path": "mio-modulo/mio-modulo.php",
+  "default_config": {},
+  "ui_schema": {}
+}
+```
+
+### Page Builder Integration
+- **CSS Override** per disabilitare `position: fixed`
+- **UI Schema** completo per configurazione
+- **Drag & Drop** support
+- **Real-time preview** funzionante
+
 ## 🔄 PROSSIMI PASSI
-1. **Test sistema** con `index-simple.php`
+1. **Test sistema** con `index.php`
 2. **Setup database** con `admin/test-setup.php`
-3. **Personalizza colori** in `variables.css`
+3. **Personalizza colori** con Theme Editor
 4. **Aggiungi moduli** secondo necessità
 5. **Deploy** su server produzione
+
+## 📚 DOCUMENTAZIONE CONSOLIDATA
+
+### Guide Principali
+- **`MODULE-DEVELOPMENT-GUIDE.md`** - Guida completa sviluppo moduli
+- **`LAYOUT-SYSTEM.md`** - Sistema layout responsive
+- **`THEME-SYSTEM-FINAL.md`** - Sistema temi dinamici
+- **`BUILD-SYSTEM.md`** - Sistema build e deploy
+- **`DOCUMENTATION-INDEX.md`** - Indice completo documentazione
+
+### Strumenti Admin
+- **`admin/theme-editor.php`** - Gestione temi e colori
+- **`admin/page-builder.php`** - Costruttore pagine modulare
+- **`admin/test-setup.php`** - Setup database
+
+## 🎨 SISTEMA TEMI AGGIORNATO
+- **Theme Editor**: Gestione completa temi dinamici
+- **CSS Variables**: Sistema automatico di generazione
+- **Override Sezioni**: Supporto per classi specifiche
+- **Database**: Struttura compatibile con entrambe le versioni
+
+## 🧩 REGOLE MODULI CONSOLIDATE
+- **Struttura**: `modulo.php`, `modulo.css`, `module.json`
+- **CSS**: SOLO CSS classico, MAI stili annidati
+- **BEM**: Metodologia obbligatoria per classi
+- **Responsive**: Mobile-first design
+- **Database**: Prepared statements obbligatori
+- **Sicurezza**: Sanitizzazione output obbligatoria

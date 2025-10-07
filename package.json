@@ -4,24 +4,30 @@
   "description": "Sistema modulare per Bologna Marathon",
   "main": "index.php",
   "scripts": {
-    "build": "gulp build",
-    "watch": "gulp watch",
     "dev": "gulp dev",
-    "css:build": "gulp css",
-    "js:build": "gulp js",
-    "images:optimize": "gulp images",
-    "deploy": "node build-deploy.js",
-    "build:cloud": "node build-cloud.js",
-    "test-watch": "echo 'Modifica un file SCSS e salva per testare il watcher'"
+    "serve": "gulp serve",
+    "build": "gulp build",
+    "release": "gulp release",
+    "rollback": "gulp rollback",
+    "validate": "gulp validate",
+    "clean": "gulp clean",
+    "css": "gulp css",
+    "js": "gulp js",
+    "images": "gulp images",
+    "fonts": "gulp fonts"
   },
   "devDependencies": {
     "browser-sync": "^3.0.4",
+    "cross-env": "^7.0.3",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^8.0.0",
+    "gulp-clean": "^0.4.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
     "gulp-if": "^3.0.0",
     "gulp-imagemin": "^8.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.1.4",
     "gulp-sass": "^5.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-uglify": "^3.0.2",
@@ -46,5 +52,8 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "dependencies": {
+    "sortablejs": "^1.15.6"
+  }
 }

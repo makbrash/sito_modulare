@@ -1,0 +1,67 @@
+{
+  "name": "splash-logo",
+  "slug": "splash-logo",
+  "aliases": ["splashLogo", "splash_logo"],
+  "version": "1.0.0",
+  "description": "Overlay animato con logo che appare all'inizio del caricamento pagina",
+  "category": "layout",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "splash-logo/splash-logo.php",
+  "default_config": {
+    "logo_url": "assets/images/splash.svg",
+    "duration": 2500,
+    "logo_size": 100,
+    "pulse_speed": 2
+  },
+  "assets": {
+    "css": ["splash-logo/splash-logo.css"],
+    "js": ["splash-logo/splash-logo.js"],
+    "vendors": []
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "logo_url": {
+      "type": "text",
+      "label": "URL Logo",
+      "placeholder": "assets/images/splash.svg",
+      "required": true,
+      "default": "assets/images/splash.svg",
+      "description": "Percorso del file SVG o immagine del logo"
+    },
+    "duration": {
+      "type": "number",
+      "label": "Durata (ms)",
+      "placeholder": "2500",
+      "required": true,
+      "default": 2500,
+      "min": 500,
+      "max": 5000,
+      "step": 100,
+      "description": "Durata totale dello splash in millisecondi"
+    },
+    "logo_size": {
+      "type": "number",
+      "label": "Larghezza Logo (px)",
+      "placeholder": "100",
+      "required": true,
+      "default": 100,
+      "min": 50,
+      "max": 500,
+      "step": 10,
+      "description": "Larghezza del logo in pixel"
+    },
+    "pulse_speed": {
+      "type": "number",
+      "label": "Velocità Lampeggio (s)",
+      "placeholder": "2",
+      "required": true,
+      "default": 2,
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "description": "Velocità dell'animazione lampeggio in secondi"
+    }
+  }
+}
+

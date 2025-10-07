@@ -7,8 +7,8 @@
   "default_config": { "limit": 50, "sortable": true },
   "aliases": ["resultsTable"],
   "assets": {
-    "css": [],
-    "js": ["assets/js/modules/results.js"],
+    "css": ["modules/results/results.css"],
+    "js": ["modules/results/results.js"],
     "vendors": []
   },
   "dependencies": [],

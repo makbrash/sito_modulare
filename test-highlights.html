@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modulo Highlights - Swiper</title>
+    
+    <!-- CSS Core -->
+    <link rel="stylesheet" href="assets/css/core/variables.css">
+    <link rel="stylesheet" href="assets/css/core/reset.css">
+    <link rel="stylesheet" href="assets/css/core/typography.css">
+    <link rel="stylesheet" href="assets/css/core/layout.css">
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    
+    <!-- Modulo Highlights CSS -->
+    <link rel="stylesheet" href="modules/highlights/highlights.css">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-info h1 {
+            margin: 0 0 10px 0;
+            color: #23a8eb;
+        }
+        .test-info p {
+            margin: 5px 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="test-info">
+        <h1>🧪 Test Modulo Highlights</h1>
+        <p><strong>Versione Swiper:</strong> <span id="swiper-version">Caricamento...</span></p>
+        <p><strong>Stato Inizializzazione:</strong> <span id="init-status">In attesa...</span></p>
+        <div id="test-results"></div>
+    </div>
+
+    <!-- MODULO HIGHLIGHTS -->
+    <div class="highlights" data-module="highlights" data-config='{}'>
+        <div class="container-fluid">
+            <h2 class="highlights_title">TEST HIGHLIGHTS - Ultime NEWS</h2>
+            
+            <div class="swiper highlights_swiper">
+                <div class="swiper-wrapper">
+                    <!-- Slide 1 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 1"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">Presentata la Termal Bologna Marathon 2025</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 2 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 2"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">Chiusure strade del 2 Marzo</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 3 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 3"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">DOCUFILM "THE SECRET IS BOLOGNA"</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 4 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 4"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">INFORMAZIONI UTILI - TERMAL BOLOGNA MARATHON 2025</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 5 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 5"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">30 Km dei Portici SOLD OUT!</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 6 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 6"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">Nuova edizione 2025 record di iscritti</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 7 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 7"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">Percorso confermato nel centro storico</h3>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Slide 8 -->
+                    <div class="swiper-slide">
+                        <a href="#" class="highlight_card">
+                            <div class="highlight_image-wrapper">
+                                <img src="assets/images/marathon-start.jpg" 
+                                     alt="News 8"
+                                     class="highlight_image"
+                                     loading="lazy">
+                            </div>
+                            <div class="highlight_content">
+                                <h3 class="highlight_title">Partnership con sponsor internazionali</h3>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="highlights_navigation">
+                    <button class="highlights_btn highlights_btn--prev" aria-label="Slide precedente">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="highlights_btn highlights_btn--next" aria-label="Slide successiva">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Test pre-caricamento
+        document.getElementById('swiper-version').textContent = typeof Swiper !== 'undefined' ? 'NON ANCORA CARICATA' : 'NON DISPONIBILE';
+        document.getElementById('init-status').textContent = 'Attendere caricamento Swiper...';
+    </script>
+    
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- Modulo Highlights JS -->
+    <script src="modules/highlights/highlights.js"></script>
+    
+    <!-- Script di test -->
+    <script>
+        setTimeout(() => {
+            const results = document.getElementById('test-results');
+            let html = '';
+            
+            // Test 1: Swiper caricato
+            if (typeof Swiper !== 'undefined') {
+                html += '<div class="status success">✅ Swiper library caricata correttamente</div>';
+                document.getElementById('swiper-version').textContent = 'v11 (CDN)';
+            } else {
+                html += '<div class="status error">❌ Swiper library NON caricata</div>';
+                document.getElementById('swiper-version').textContent = 'NON DISPONIBILE';
+            }
+            
+            // Test 2: Classe Highlights disponibile
+            if (typeof window.Highlights !== 'undefined') {
+                html += '<div class="status success">✅ Classe Highlights disponibile</div>';
+            } else {
+                html += '<div class="status error">❌ Classe Highlights NON disponibile</div>';
+            }
+            
+            // Test 3: Modulo inizializzato
+            const highlightsEl = document.querySelector('.highlights');
+            if (highlightsEl) {
+                html += '<div class="status success">✅ Elemento .highlights trovato nel DOM</div>';
+            } else {
+                html += '<div class="status error">❌ Elemento .highlights NON trovato</div>';
+            }
+            
+            // Test 4: Swiper istanza creata
+            const swiperEl = document.querySelector('.highlights_swiper');
+            if (swiperEl && swiperEl.swiper) {
+                html += '<div class="status success">✅ Swiper istanza creata correttamente</div>';
+                html += '<div class="status success">📊 SlidesPerView: ' + swiperEl.swiper.params.slidesPerView + '</div>';
+                html += '<div class="status success">📊 Totale slide: ' + swiperEl.swiper.slides.length + '</div>';
+                document.getElementById('init-status').textContent = 'INIZIALIZZATO CORRETTAMENTE';
+            } else {
+                html += '<div class="status error">❌ Swiper istanza NON creata</div>';
+                document.getElementById('init-status').textContent = 'ERRORE INIZIALIZZAZIONE';
+            }
+            
+            // Test 5: Bottoni navigazione
+            const prevBtn = document.querySelector('.highlights_btn--prev');
+            const nextBtn = document.querySelector('.highlights_btn--next');
+            if (prevBtn && nextBtn) {
+                html += '<div class="status success">✅ Bottoni navigazione presenti</div>';
+            } else {
+                html += '<div class="status error">❌ Bottoni navigazione mancanti</div>';
+            }
+            
+            // Test 6: CSS caricato
+            const card = document.querySelector('.highlight_card');
+            if (card) {
+                const styles = window.getComputedStyle(card);
+                const width = styles.width;
+                html += '<div class="status success">✅ CSS caricato - Larghezza card: ' + width + '</div>';
+            }
+            
+            results.innerHTML = html;
+        }, 1000);
+    </script>
+</body>
+</html>
+

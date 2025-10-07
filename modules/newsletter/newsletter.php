@@ -172,12 +172,15 @@ $subtitle = htmlspecialchars($subtitle);
                                    aria-label="Nome per WhatsApp">
                         </div>
                         
-                        <button type="button" 
-                                class="newsletter__button newsletter__button--whatsapp" 
-                                data-whatsapp-number="<?= htmlspecialchars($whatsappNumber) ?>">
+                        <a href="#"
+                           class="newsletter__button newsletter__button--whatsapp"
+                           data-whatsapp-number="<?= htmlspecialchars($whatsappNumber) ?>"
+                           target="_blank"
+                           rel="noopener"
+                           aria-label="Apri WhatsApp per registrazione">
                             <i class="fab fa-whatsapp newsletter__button-icon"></i>
                             <span class="newsletter__button-text"><?= htmlspecialchars($whatsappButtonText) ?></span>
-                        </button>
+                        </a>
                         
                         <p class="newsletter__note">Messaggio: "Ciao sono [Nome], vorrei registrarmi"</p>
                     </div>

@@ -6,7 +6,7 @@
   "css_class": "site-footer",
   "default_config": { "columns": 4, "social": true },
   "aliases": [],
-  "assets": { "css": [], "js": [], "vendors": [] },
+  "assets": { "css": ["modules/footer/footer.css"], "js": [], "vendors": [] },
   "dependencies": [],
   "install": "footer/install.sql",
   "uninstall": "footer/uninstall.sql"

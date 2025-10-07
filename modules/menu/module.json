@@ -1,17 +1,16 @@
 {
-  "name": "Menu",
+  "name": "Menu Bologna Marathon",
   "slug": "menu",
-  "version": "2.0.0",
-  "description": "Menu di navigazione responsive con logo e voci personalizzabili",
+  "version": "3.0.0",
+  "description": "Menu moderno con search box AI, countdown timer e design elegante per Bologna Marathon",
   "component_path": "menu/menu.php",
   "css_class": "main-menu",
   "default_config": {
     "logo": "assets/images/logo-bologna-marathon.svg",
     "logo_alt": "Bologna Marathon",
-    "style": "horizontal",
-    "sticky": true,
-    "sticky_offset": "0px",
-    "background": "transparent",
+    "marathon_title": "TERMAL BOLOGNA MARATHON",
+    "countdown_date": "2024-04-14T09:00:00",
+    "search_placeholder": "Chiedi a Ingrid",
     "menu_items": [
       { "label": "Home", "url": "#home", "target": "_self" },
       { "label": "La Gara", "url": "#gara", "target": "_self" },
@@ -32,29 +31,25 @@
       "label": "Alt Text Logo",
       "placeholder": "Testo alternativo per il logo"
     },
-    "style": {
-      "type": "select",
-      "label": "Stile Menu",
-      "options": [
-        { "value": "horizontal", "label": "Orizzontale" },
-        { "value": "vertical", "label": "Verticale" },
-        { "value": "hamburger", "label": "Hamburger Mobile" }
-      ]
-    },
-    "sticky": {
-      "type": "boolean",
-      "label": "Menu Fisso"
-    },
-    "sticky_offset": {
+    "marathon_title": {
       "type": "text",
-      "label": "Offset Sticky",
-      "placeholder": "es. 20px",
-      "condition": { "depends_on": "sticky", "value": true }
+      "label": "Titolo Maratona",
+      "placeholder": "TERMAL BOLOGNA MARATHON",
+      "default": "TERMAL BOLOGNA MARATHON"
     },
-    "background": {
-      "type": "color",
-      "label": "Colore Sfondo",
-      "default": "transparent"
+    "countdown_date": {
+      "type": "datetime",
+      "label": "Data Countdown",
+      "placeholder": "2024-04-14T09:00:00",
+      "default": "2024-04-14T09:00:00",
+      "help": "Data e ora della prossima maratona per il countdown"
+    },
+    "search_placeholder": {
+      "type": "text",
+      "label": "Placeholder Search Box",
+      "placeholder": "Chiedi a Ingrid",
+      "default": "Chiedi a Ingrid",
+      "help": "Testo placeholder per la search box AI"
     },
     "menu_items": {
       "type": "array",
@@ -83,8 +78,8 @@
   },
   "aliases": ["navigation", "navbar"],
   "assets": {
-    "css": ["assets/scss/modules/_menu.scss"],
-    "js": ["assets/js/modules/menu.js"],
+    "css": ["modules/menu/menu.css"],
+    "js": ["modules/menu/menu.js"],
     "vendors": []
   },
   "dependencies": [],

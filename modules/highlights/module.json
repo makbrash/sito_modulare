@@ -1,0 +1,115 @@
+{
+  "name": "highlights",
+  "slug": "highlights",
+  "aliases": ["highlights", "news-slider", "news-highlights"],
+  "version": "1.1.0",
+  "description": "Sezione news con slider Swiper responsive ottimizzato - 6 slide desktop XL, 5 desktop, 4 laptop, 3 tablet, 2.5 tablet small, 2 smartphone, 1.5 mobile",
+  "category": "content",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "highlights/highlights.php",
+  "default_config": {
+    "title": "Ultime NEWS",
+    "highlights": [
+      {
+        "image": "assets/images/marathon-start.jpg",
+        "title": "Presentata la Termal Bologna Marathon 2025: in 10.000 runner attesi",
+        "url": "#"
+      },
+      {
+        "image": "assets/images/marathon-start.jpg",
+        "title": "Termal Bologna Marathon: tutte le chiusure delle strade del 2 Marzo",
+        "url": "#"
+      },
+      {
+        "image": "assets/images/marathon-start.jpg",
+        "title": "DOCUFILM \"THE SECRET IS BOLOGNA\"",
+        "url": "#"
+      },
+      {
+        "image": "assets/images/marathon-start.jpg",
+        "title": "INFORMAZIONI UTILI - TERMAL BOLOGNA MARATHON 2025",
+        "url": "#"
+      },
+      {
+        "image": "assets/images/marathon-start.jpg",
+        "title": "Anche la 30 Km dei Portici è SOLD OUT!",
+        "url": "#"
+      }
+    ]
+  },
+  "assets": {
+    "css": ["modules/highlights/highlights.css"],
+    "js": ["modules/highlights/highlights.js"],
+    "vendors": [
+      {
+        "css": ["https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"],
+        "js": ["https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"]
+      }
+    ]
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "title": {
+      "type": "text",
+      "label": "Titolo Sezione",
+      "placeholder": "Ultime NEWS",
+      "required": true,
+      "default": "Ultime NEWS"
+    },
+    "highlights": {
+      "type": "array",
+      "label": "News Highlights",
+      "item_schema": {
+        "image": {
+          "type": "image",
+          "label": "Immagine",
+          "placeholder": "URL dell'immagine",
+          "required": true,
+          "default": "assets/images/marathon-start.jpg"
+        },
+        "title": {
+          "type": "text",
+          "label": "Titolo News",
+          "placeholder": "Titolo della news",
+          "required": true,
+          "default": "Titolo della news"
+        },
+        "url": {
+          "type": "url",
+          "label": "Link",
+          "placeholder": "URL del link",
+          "required": true,
+          "default": "#"
+        }
+      },
+      "default": [
+        {
+          "image": "assets/images/marathon-start.jpg",
+          "title": "Presentata la Termal Bologna Marathon 2025: in 10.000 runner attesi",
+          "url": "#"
+        },
+        {
+          "image": "assets/images/marathon-start.jpg",
+          "title": "Termal Bologna Marathon: tutte le chiusure delle strade del 2 Marzo",
+          "url": "#"
+        },
+        {
+          "image": "assets/images/marathon-start.jpg",
+          "title": "DOCUFILM \"THE SECRET IS BOLOGNA\"",
+          "url": "#"
+        },
+        {
+          "image": "assets/images/marathon-start.jpg",
+          "title": "INFORMAZIONI UTILI - TERMAL BOLOGNA MARATHON 2025",
+          "url": "#"
+        },
+        {
+          "image": "assets/images/marathon-start.jpg",
+          "title": "Anche la 30 Km dei Portici è SOLD OUT!",
+          "url": "#"
+        }
+      ]
+    }
+  }
+}

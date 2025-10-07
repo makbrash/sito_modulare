@@ -1,0 +1,210 @@
+/**
+ * Modulo: Highlights
+ * File: highlights.css
+ * 
+ * Usa il sistema CSS esistente: h2, h3, .container-fluid
+ */
+
+/* Block principale */
+.highlights {
+  background: var(--gradient-dark);
+  padding: var(
+  --space-xl) 0;
+  width: 100%;
+  padding-bottom: 0;
+}
+
+/* Titolo */
+.highlights_title {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+/* Swiper container */
+.highlights_swiper {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  /* padding: 0 60px; */ /* Spazio per i bottoni */
+}
+
+/* Rimuovi margini extra */
+.highlights_swiper * {
+  box-sizing: border-box;
+}
+
+.highlights_swiper .swiper-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  /* overflow: hidden; */
+}
+
+.highlights_swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  /* NO WIDTH FIXED - Swiper calcola automaticamente basandosi su slidesPerView */
+}
+
+/* Card highlight */
+.highlight_card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-normal);
+  width: 100%; /* Occupa tutto lo spazio della slide */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-primary);
+  /* border-right: 1px solid #fff; */
+  padding-bottom: var(--space-xl);
+}
+
+a.highlight_card {
+}
+.highlight_card:hover .highlight_image-wrapper {
+}
+
+/* Wrapper immagine */
+.highlight_image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* Aspect ratio 1:1 */
+  overflow: hidden;
+  /* border-radius: var(--radius-md); */
+  margin: 0;
+}
+
+/* Immagine con zoom hover */
+.highlight_image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.highlight_card:hover .highlight_image {
+  transform: scale(1.1);
+}
+
+/* Contenuto */
+.highlight_content {
+  padding: var(--space-sm) var(--space-md);
+  margin: 0;
+  /* padding-top: var(--text-h5); */
+  border-right: 1px solid #ffffff14;
+  height: inherit;
+}
+
+/* Titolo news */
+.highlight_title {
+  /* font-size: var(--text-lg); */
+  /* font-weight: 600; */
+  /* line-height: 1.4; */
+  /* color: var(--text-primary); */
+  margin: 0;
+  transition: color var(--transition-normal);
+}
+
+.highlight_card:hover .highlight_title {
+  color: var(--primary);
+  /* font-weight: 600; */
+}
+
+/* Navigation */
+.highlights_navigation {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+  left: 0;
+  right: 0;
+}
+
+.highlights_btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--primary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  pointer-events: all;
+  backdrop-filter: blur(10px);
+}
+
+.highlights_btn:hover {
+  background: var(--primary);
+  color: var(--bg-primary);
+  transform: scale(1.1);
+}
+
+.highlights_btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.highlights_btn--prev {
+  left: var(--space-md);
+}
+
+.highlights_btn--next {
+  right: var(--space-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .highlights {
+    padding: var(--space-3xl) 0;
+  }
+  
+  .highlights_swiper {
+    /* padding: 0 50px; */ /* Meno spazio per mobile */
+  }
+  
+  .highlights_btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .highlights_btn--prev {
+    left: var(--space-sm);
+  }
+  
+  .highlights_btn--next {
+    right: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .highlights_swiper {
+    /* padding: 0 40px; */ /* Ancora meno spazio per small mobile */
+  }
+  
+  .highlight_title {
+    font-size: var(--text-base);
+  }
+}
+
+/* Page Builder Overrides */
+.page-builder .highlights {
+  padding: var(--space-md) 0;
+}
+
+.page-builder .highlight_image-wrapper {
+  padding-top: 75%; /* Aspect ratio leggermente diverso per preview */
+}

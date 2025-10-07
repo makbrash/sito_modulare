@@ -7,8 +7,8 @@
   "default_config": { "placeholder": "Seleziona...", "multiple": false, "options": [] },
   "aliases": [],
   "assets": {
-    "css": ["assets/dist/css/main.min.css"],
-    "js": ["assets/js/modules/select.js"],
+    "css": ["modules/select/select.css"],
+    "js": ["modules/select/select.js"],
     "vendors": [
       {
         "name": "select2",

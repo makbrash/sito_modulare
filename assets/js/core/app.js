@@ -172,7 +172,7 @@ class BolognaMarathonApp {
         // Intersection Observer per animazioni
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            rootMargin: '0px 0px -100px 0px'
         };
         
         const observer = new IntersectionObserver((entries) => {
@@ -183,9 +183,27 @@ class BolognaMarathonApp {
             });
         }, observerOptions);
         
-        // Osserva elementi animabili
-        const animateElements = document.querySelectorAll('.hero-module, .results-table, .module-wrapper');
-        animateElements.forEach(el => {
+        // Osserva elementi animabili (escludendo menu, hero e primo blocco)
+        const animateElements = document.querySelectorAll('.results-table, .module-wrapper:not([data-module="actionHero"]):not([data-module="menu"]):not(.no-animate)');
+        
+        // Filtra ulteriormente per escludere il primo blocco dopo il menu
+        const filteredElements = Array.from(animateElements).filter((el, index) => {
+            // Escludi il primo elemento dopo il menu
+            if (index === 0) return false;
+            return true;
+        });
+        
+        // Applica stato iniziale a tutti gli elementi prima di osservarli
+        filteredElements.forEach(el => {
+            // Applica stile iniziale solo se l'elemento non è già visibile nel viewport
+            const rect = el.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+            
+            if (!isVisible) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(60px)';
+            }
+            
             observer.observe(el);
         });
     }
@@ -244,56 +262,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.bolognaMarathon = new BolognaMarathonApp();
 });
 
-// CSS per lightbox
+// CSS per lightbox e controllo animazioni
 const lightboxCSS = `
 <style>
-.lightbox {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: var(--z-modal, 1050);
-    animation: fadeIn 0.3s ease;
+/* Disabilita animazioni per elementi specifici */
+.no-animate,
+.module-wrapper[data-module="menu"],
+.module-wrapper[data-module="actionHero"] {
+    animation: none !important;
+    transform: none !important;
 }
 
-.lightbox-content {
-    position: relative;
-    max-width: 90%;
-    max-height: 90%;
-}
+/* Stato iniziale per elementi animabili - Applicato via JS dopo DOMContentLoaded */
 
-.lightbox img {
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: var(--border-radius-lg);
-}
 
-.lightbox-close {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background: var(--white);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-fast);
-}
-
-.lightbox-close:hover {
-    background: var(--primary-color);
-    color: var(--white);
-}
 
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -301,13 +283,13 @@ const lightboxCSS = `
 }
 
 .animate-in {
-    animation: slideInUp 0.6s ease forwards;
+    animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
 }
 
 @keyframes slideInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(60px);
     }
     to {
         opacity: 1;

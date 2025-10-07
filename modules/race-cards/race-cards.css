@@ -1,0 +1,149 @@
+/**
+ * Race Cards Module CSS
+ * Stili per il modulo race cards - Design completo e definito
+ */
+
+.race-cards-module {
+    padding: var(--space-3xl) 0;
+    background: var(--bg-primary);
+}
+
+.race-cards-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+}
+
+.race-card {
+    position: relative;
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--bg-glass-hover);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+}
+
+.race-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.card-number {
+    position: absolute;
+    top: calc(16px - (var(--space-lg)));
+    right: calc(26px - (var(--space-lg)));
+    font-family: var(
+    --font-display);
+    font-size: 9rem;
+    font-weight: 900;
+    opacity: 0.1;
+    color: var(
+    --primary);
+    z-index: 1;
+    height: auto;
+    line-height: 1;
+}
+
+
+.race-cards-module .card-tag {
+    position: static;
+    /* right: var(--space-md); */
+    /* top: var(--space-2xl); */
+}
+
+.card-content {
+    position: relative;
+    z-index: 3;
+    margin-top: var(--space-lg);
+}
+
+.card-title {
+    font-family: var(--font-display);
+    /* font-size: var(--text-h2); */
+    /* font-weight: 900; */
+    /* color: var(--text-primary); */
+    margin: var(--space-xs) 0 var(--space-xs) 0;
+    text-transform: uppercase;
+}
+
+.card-distance {
+    font-family: var(--font-display);
+    /* font-size: var(--text-h3); */
+    font-weight: 700;
+    /* margin-bottom: var(--space-md); */
+}
+
+
+.card-description {
+    color: var(--text-secondary);
+
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    max-width: 439px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .race-cards-container {
+        grid-template-columns: 1fr;
+        padding: 0 var(--space-md);
+    }
+    
+    .card-number {
+        font-size: 11rem;
+    }
+    
+    h3 {
+        /* font-size: 3rem; */
+    }
+    
+    .card-tag {
+    font-size: .65rem;
+    padding: var(--space-xs) var(--space-sm);
+    top: 41px;
+    right: -20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .race-card {
+        padding: var(--space-lg);
+    }
+    
+    .card-number {
+        font-size: 10.75rem;
+    }
+    
+    h3 {
+        font-size: 2.8rem;
+    }
+    
+    .card-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+

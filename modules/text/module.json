@@ -10,7 +10,7 @@
   },
   "aliases": ["richText"],
   "assets": {
-    "css": [],
+    "css": ["modules/text/text.css"],
     "js": [],
     "vendors": []
   },

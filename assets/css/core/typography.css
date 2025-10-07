@@ -1,0 +1,76 @@
+body {
+	font-family: var(--font-primary);
+	font-size: 18px;
+	line-height: 1.5;
+	color: var(--text-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	line-height: .9;
+	margin-bottom: var(--space-md);
+}
+
+h1 {font-size:var(--text-h1);}
+h2 {font-size:var(--text-h1);}
+h3 {font-size:var(--text-h3);}
+h4 {font-size:var(--text-h4);}
+h5 {font-size:var(--text-h5);}
+h6 {font-size:var(--text-h6);}
+
+
+
+/* Responsive */
+
+
+@media (max-width: 768px) {
+	h1 {font-size: 4rem;}
+	h2 {font-size: 4rem;}
+	h3 {font-size:var(--text-h3);}
+	h4 {font-size:var(--text-h4);}
+	h5 {font-size:var(--text-h5);}
+	h6 {font-size:var(--text-h6);}
+}
+
+@media (max-width: 480px) {
+	h1 {font-size:2.5rem;}
+	h2 {font-size: 2.5rem;}
+	h3 {font-size:var(--text-h3);}
+	h4 {font-size:var(--text-h4);}
+	h5 {font-size:var(--text-h5);}
+	h6 {font-size:var(--text-h6);}
+}
+
+
+
+h1 strong, h1 b,
+h2 strong, h2 b,
+h3 strong, h3 b,
+h4 strong, h4 b,
+h5 strong, h5 b,
+h6 strong, h6 b {
+    color: var(--title-strong-color);
+    /* font-weight: inherit; */
+    text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2), 0 0 28px rgba(var(--primary-rgb), 0.1), 0 0 72px rgba(var(--primary-rgb), 0.05);
+}
+
+/* Mantieni il peso del font per strong/bold */
+h1 strong, h2 strong, h3 strong, h4 strong, h5 strong, h6 strong {
+    font-weight: inherit;
+    font-size: inherit;
+}
+
+h1 b, h2 b, h3 b, h4 b, h5 b, h6 b {
+    font-weight: 700;
+}
+
+p {margin-bottom: var(--space-md);line-height: inherit;}
+
+a { color: var(--primary); transition: color var(--transition-fast); }
+a:hover {color: var(--primary);}
+
+
+
+
+

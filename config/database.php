@@ -4,6 +4,10 @@
  * Sistema modulare Bologna Marathon
  */
 
+// Configurazioni globali
+define('MODULES_PATH', __DIR__ . '/../modules/');
+define('ASSETS_PATH', __DIR__ . '/../assets/');
+
 class Database {
     private $host = 'localhost';
     private $db_name = 'bologna_marathon';

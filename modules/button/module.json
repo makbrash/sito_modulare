@@ -11,7 +11,7 @@
     "href": "#"
   },
   "aliases": [],
-  "assets": { "css": [], "js": ["assets/js/modules/button.js"], "vendors": [] },
+  "assets": { "css": ["modules/button/button.css"], "js": ["modules/button/button.js"], "vendors": [] },
   "dependencies": [],
   "install": "button/install.sql",
   "uninstall": "button/uninstall.sql"

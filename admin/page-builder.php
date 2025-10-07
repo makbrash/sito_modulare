@@ -145,6 +145,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     'manifest' => $manifest
                 ]);
                 exit;
+                
+            case 'update_page_theme':
+                $pageId = (int)$_POST['page_id'];
+                $theme = $_POST['theme'];
+                
+                $success = $renderer->updatePageTheme($pageId, $theme);
+                echo json_encode(['success' => $success]);
+                exit;
         }
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -188,385 +196,46 @@ if ($currentPage) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Builder - Bologna Marathon</title>
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="../assets/dist/css/main.min.css">
+    <!-- CSS Core -->
+    <link rel="stylesheet" href="../assets/css/core/variables.css">
+    <link rel="stylesheet" href="../assets/css/core/colors.css">
+    <link rel="stylesheet" href="../assets/css/core/reset.css">
+    <link rel="stylesheet" href="../assets/css/core/typography.css">
+    <link rel="stylesheet" href="../assets/css/core/fonts.css">
+    
+    <!-- CSS Moduli -->
+    <?php
+    // Carica CSS di tutti i moduli disponibili
+    foreach ($availableModules as $module) {
+        $moduleName = $module['name'];
+        $cssPath = "../modules/$moduleName/$moduleName.css";
+        if (file_exists($cssPath)) {
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($cssPath) . '">';
+        }
+    }
+    ?>
+    
+    <!-- CSS Page Builder -->
+    <link rel="stylesheet" href="../assets/css/admin/page-builder.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
     
     <!-- Font Awesome per icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .page-builder {
-            display: grid;
-            grid-template-columns: 300px 1fr 300px;
-            height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        /* Page Builder Overrides - Disabilita classi fixed */
+        .page-canvas [class*="fixed"],
+        .page-canvas .sticky{
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: auto !important;
+            transform: none !important;
         }
         
-        .sidebar {
-            background: #ffffff;
-            border-right: 1px solid #dee2e6;
-            padding: 1rem;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-            max-width: 300px;
-            box-sizing: border-box;
-        }
-        
-        .sidebar h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 0.5rem;
-        }
-        
-        .sidebar p {
-            color: #495057;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            background: white;
-        }
-        
-        .page-canvas {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            overflow-x: hidden;
-            background: #f5f5f5;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .module-instance {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            position: relative;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .module-instance:hover {
-            border-color: #007bff;
-            box-shadow: 0 4px 12px rgba(0,123,255,0.15);
-        }
-        
-        .module-instance:hover .module-header {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .module-header {
-            background: rgba(0,123,255,0.9);
-            color: white;
-            padding: 0.5rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            opacity: 0;
-            transform: translateY(-100%);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            z-index: 1000000;
-        }
-        
-        .module-content {
-            padding: 0;
-            min-height: 80px;
-            max-width: 100%;
-            overflow: hidden;
-        }
-        
-        .module-content * {
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-        }
-        
-        .module-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-small {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.85rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-edit { background: #28a745; color: white; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-preview { background: #007bff; color: white; }
-        
-        .btn-small:hover { 
-            opacity: 0.9; 
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .module-list {
-            margin-bottom: 2rem;
-        }
-        
-        .module-item {
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #495057;
-            font-weight: 500;
-        }
-        
-        .module-item:hover {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-        }
-        
-        .module-item i {
-            color: #6c757d;
-            transition: color 0.3s ease;
-        }
-        
-        .module-item:hover i {
-            color: white;
-        }
-        
-        .config-panel {
-            background: #ffffff;
-            border-left: 1px solid #dee2e6;
-            padding: 1rem;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-shadow: -2px 0 4px rgba(0,0,0,0.1);
-            max-width: 300px;
-            box-sizing: border-box;
-        }
-        
-        .config-panel h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 0.5rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 0.9rem;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background: white;
-            color: #495057;
-            transition: all 0.3s ease;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-        
-        .form-group textarea {
-            height: 80px;
-            resize: vertical;
-        }
-        
-        .drag-placeholder {
-            border: 2px dashed #007bff;
-            background: rgba(0,123,255,0.1);
-            border-radius: 8px;
-            height: 100px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #007bff;
-            font-weight: 500;
-        }
-        
-        .selected-instance {
-            border-color: #28a745 !important;
-            box-shadow: 0 0 0 3px rgba(40,167,69,0.25);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-        }
-        
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-        
-        .page-selector {
-            margin-bottom: 1rem;
-        }
-        
-        .page-selector select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background: white;
-            color: #495057;
-            font-weight: 500;
-        }
-        
-        .page-selector select:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-        
-        .preview-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .preview-content {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 80%;
-            max-height: 80%;
-            overflow: auto;
-            position: relative;
-        }
-        
-        .preview-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        /* Stili per campi array dinamici */
-        .array-field {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: #f8f9fa;
-        }
-        
-        .array-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .btn-add {
-            background: #28a745;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        
-        .array-item {
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            overflow: hidden;
-        }
-        
-        .array-item-header {
-            background: #e9ecef;
-            padding: 0.5rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 500;
-            color: #495057;
-        }
-        
-        .array-item-fields {
-            padding: 1rem;
-        }
-        
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: normal;
-            margin-bottom: 0;
-        }
-        
-        .checkbox-label input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-        }
+ 
     </style>
 </head>
 <body>
@@ -589,12 +258,33 @@ if ($currentPage) {
                 </select>
             </div>
             
+            <div class="theme-selector" style="margin-bottom: 1rem;">
+                <label for="theme-selector" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50;">Tema Pagina</label>
+                <select id="theme-selector" onchange="updatePageTheme(this.value)">
+                    <?php 
+                    $availableThemes = $renderer->getAvailableThemes();
+                    $currentTheme = $renderer->getPageTheme($pageId);
+                    foreach ($availableThemes as $theme): ?>
+                        <option value="<?= htmlspecialchars($theme['class_name']) ?>" 
+                                <?= $theme['class_name'] == $currentTheme ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($theme['alias']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <div id="theme-indicator" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #e9ecef; border-radius: 4px; font-size: 0.8rem; color: #495057;">
+                    <i class="fas fa-palette"></i> Tema attivo: <span id="current-theme-name"><?= htmlspecialchars($currentTheme) ?></span>
+                </div>
+            </div>
+            
             <div style="margin: 1rem 0;">
                 <button class="btn-small btn-preview" onclick="previewPage()" style="width: 100%; margin-bottom: 0.5rem;">
                     <i class="fas fa-eye"></i> Anteprima
                 </button>
                 <a href="../index.php?id_pagina=<?= $pageId ?>" target="_blank" class="btn-small btn-preview" style="width: 100%; display: block; text-align: center; margin-bottom: 0.5rem;">
                     <i class="fas fa-external-link-alt"></i> Vedi Pagina
+                </a>
+                <a href="theme-editor.php" class="btn-small btn-secondary" style="width: 100%; display: block; text-align: center; margin-bottom: 0.5rem;">
+                    <i class="fas fa-palette"></i> Gestisci Temi
                 </a>
             </div>
             
@@ -870,6 +560,56 @@ if ($currentPage) {
             setTimeout(reattachModuleListeners, 100);
         });
         
+        // Inizializza tema al caricamento
+        function initializeTheme() {
+            // Prima pulisci completamente tutte le classi tema dal page-canvas
+            const pageCanvas = document.getElementById('page-canvas');
+            const allThemeClasses = [
+                'race-marathon', 'race-portici', 'race-run-tune-up', 'race-5k',
+                'theme-marathon', 'theme-portici', 'theme-run-tune-up', 'theme-5k',
+                'marathon', 'portici', 'run-tune-up', '5k'
+            ];
+            
+            // Pulisci classi tema dal page-canvas
+            if (pageCanvas) {
+                allThemeClasses.forEach(className => {
+                    pageCanvas.classList.remove(className);
+                });
+            }
+            
+            console.log('Pulizia iniziale classi tema completata');
+            console.log('Classi page-canvas dopo pulizia:', pageCanvas ? pageCanvas.className : 'N/A');
+            
+            const themeSelector = document.getElementById('theme-selector');
+            if (themeSelector) {
+                const currentTheme = themeSelector.value;
+                applyThemeToBody(currentTheme);
+                console.log(`Tema inizializzato: ${currentTheme}`);
+            }
+        }
+        
+        // Inizializza tema quando il DOM è pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+        });
+        
+        // Funzione di debug per verificare le classi tema
+        function debugThemeClasses() {
+            const pageCanvas = document.getElementById('page-canvas');
+            
+            const canvasThemeClasses = pageCanvas ? (pageCanvas.className.match(/race-\w+|theme-\w+|\b(marathon|portici|run-tune-up|5k)\b/g) || []) : [];
+            
+            console.log('Classi tema attive sul page-canvas:', canvasThemeClasses);
+            console.log('Classi complete del page-canvas:', pageCanvas ? pageCanvas.className : 'N/A');
+            
+            return {
+                canvas: canvasThemeClasses
+            };
+        }
+        
+        // Aggiungi funzione globale per debug
+        window.debugThemeClasses = debugThemeClasses;
+        
         // Carica pagina
         function loadPage(pageId) {
             window.location.href = `?page_id=${pageId}`;
@@ -1128,6 +868,10 @@ if ($currentPage) {
                         html += `<input type="color" id="config-${fieldName}" value="${value}">`;
                         break;
                         
+                    case 'datetime':
+                        html += `<input type="datetime-local" id="config-${fieldName}" value="${value}" placeholder="${fieldConfig.placeholder || ''}">`;
+                        break;
+                        
                     case 'image':
                         html += `<input type="url" id="config-${fieldName}" value="${value}" placeholder="${fieldConfig.placeholder || 'URL dell\'immagine'}">`;
                         break;
@@ -1341,6 +1085,20 @@ if ($currentPage) {
                 if (input) {
                     if (input.type === 'checkbox') {
                         config[fieldName] = input.checked;
+                    } else if (input.type === 'datetime-local') {
+                        // Converti datetime-local in formato ISO
+                        if (input.value) {
+                            const date = new Date(input.value);
+                            config[fieldName] = date.toISOString();
+                        } else {
+                            config[fieldName] = '';
+                        }
+                    } else if (input.type === 'url') {
+                        // Validazione URL
+                        if (input.value && !isValidUrl(input.value)) {
+                            console.warn(`URL non valido per ${fieldName}:`, input.value);
+                        }
+                        config[fieldName] = input.value;
                     } else {
                         config[fieldName] = input.value;
                     }
@@ -1737,6 +1495,12 @@ if ($currentPage) {
                         
                         // Riattacca gli event listener dopo l'aggiornamento del DOM
                         reattachModuleListeners();
+                        
+                        // Applica il tema corrente alla preview
+                        const themeSelector = document.getElementById('theme-selector');
+                        if (themeSelector) {
+                            applyThemeToBody(themeSelector.value);
+                        }
                     }
                 } else {
                     console.error('Errore preview:', data.error);
@@ -1769,6 +1533,132 @@ if ($currentPage) {
         // Chiudi modal anteprima
         function closePreview() {
             document.getElementById('preview-modal').style.display = 'none';
+        }
+        
+        // Aggiorna tema pagina
+        function updatePageTheme(theme) {
+            console.log(`Cambio tema richiesto: ${theme}`);
+            
+            // Applica il tema al body in tempo reale per la preview
+            applyThemeToBody(theme);
+            
+            // Verifica che il tema sia stato applicato correttamente
+            setTimeout(() => {
+                const themeDebug = debugThemeClasses();
+                const canvasClasses = themeDebug.canvas;
+                
+                if (canvasClasses.length > 1) {
+                    console.warn('ATTENZIONE: Multiple classi tema rilevate sul page-canvas:', canvasClasses);
+                } else if (canvasClasses.length === 0 && theme !== 'marathon') {
+                    console.warn('ATTENZIONE: Nessuna classe tema applicata al page-canvas per:', theme);
+                } else {
+                    console.log('Tema applicato correttamente al page-canvas:', canvasClasses);
+                }
+            }, 100);
+            
+            const formData = new FormData();
+            formData.append('action', 'update_page_theme');
+            formData.append('page_id', currentPageId);
+            formData.append('theme', theme);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostra messaggio di successo
+                    const themeSelector = document.getElementById('theme-selector');
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = 'background: #d4edda; color: #155724; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.9rem;';
+                    successMsg.innerHTML = '<i class="fas fa-check"></i> Tema aggiornato con successo!';
+                    themeSelector.parentNode.insertBefore(successMsg, themeSelector.nextSibling);
+                    
+                    // Rimuovi messaggio dopo 3 secondi
+                    setTimeout(() => {
+                        if (successMsg.parentNode) {
+                            successMsg.remove();
+                        }
+                    }, 3000);
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante l\'aggiornamento del tema: ' + error.message);
+            });
+        }
+        
+        // Applica tema SOLO al page-canvas per preview in tempo reale
+        function applyThemeToBody(theme) {
+            const pageCanvas = document.getElementById('page-canvas');
+            
+            // Lista completa di tutte le possibili classi tema
+            const allThemeClasses = [
+                'race-marathon', 'race-portici', 'race-run-tune-up', 'race-5k',
+                'theme-marathon', 'theme-portici', 'theme-run-tune-up', 'theme-5k',
+                'marathon', 'portici', 'run-tune-up', '5k'
+            ];
+            
+            console.log(`Pulizia classi tema per: ${theme}`);
+            console.log('Classi page-canvas prima della pulizia:', pageCanvas ? pageCanvas.className : 'N/A');
+            
+            // Rimuovi TUTTE le classi tema esistenti dal page-canvas
+            if (pageCanvas) {
+                allThemeClasses.forEach(className => {
+                    pageCanvas.classList.remove(className);
+                });
+            }
+            
+            // Aggiungi la nuova classe tema al page-canvas per l'anteprima
+            if (pageCanvas) {
+                if (theme && theme !== 'marathon') {
+                    // Converti il nome tema in classe CSS corretta
+                    const cssClass = theme.startsWith('race-') ? theme : `race-${theme}`;
+                    pageCanvas.classList.add(cssClass);
+                    console.log(`Tema applicato al page-canvas: ${cssClass}`);
+                    console.log(`Classi page-canvas dopo applicazione:`, pageCanvas.className);
+                } else {
+                    console.log('Tema page-canvas reset a default (marathon)');
+                    console.log(`Classi page-canvas dopo reset:`, pageCanvas.className);
+                }
+            }
+            
+            // Aggiorna indicatore tema
+            updateThemeIndicator(theme);
+        }
+        
+        // Aggiorna indicatore tema
+        function updateThemeIndicator(theme) {
+            const themeIndicator = document.getElementById('current-theme-name');
+            if (themeIndicator) {
+                const themeName = theme || 'marathon';
+                themeIndicator.textContent = themeName;
+                
+                // Aggiorna anche il colore dell'indicatore per feedback visivo
+                const indicator = document.getElementById('theme-indicator');
+                if (indicator) {
+                    // Rimuovi classi colore esistenti
+                    indicator.classList.remove('theme-portici', 'theme-run-tune-up', 'theme-5k');
+                    
+                    // Aggiungi classe colore se non è marathon
+                    if (theme && theme !== 'marathon') {
+                        indicator.classList.add(theme);
+                    }
+                }
+            }
+        }
+        
+        // Validazione URL
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
         }
     </script>
 </body>

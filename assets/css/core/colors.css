@@ -1,0 +1,287 @@
+/* ========================================
+   CSS COLORS SYSTEM - BOLOGNA MARATHON
+   ======================================== */
+
+/* Tema Base - Marathon (Default) */
+:root {
+    --primary: #23a8eb;
+    --secondary: #1583b9;
+    --accent: #22d3ee;
+    --info: #5dade2;
+    --success: #52bd7b;
+    --warning: #f39c12;
+    --error: #e74c3c;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 35, 168, 235;
+    --secondary-rgb: 21, 131, 185;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* ========================================
+   TEMI DINAMICI - GENERATI DA DATABASE
+   ======================================== */
+
+/* Tema 30K Portici */
+.race-portici {
+    --primary: #dc335e;
+    --secondary: #af1b40;
+    --accent: #22d3ee;
+    --info: #e95177;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 220, 51, 94;
+    --secondary-rgb: 175, 27, 64;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Tema 5K */
+.race-5k {
+    --primary: #ff6b35;
+    --secondary: #e55a2b;
+    --accent: #22d3ee;
+    --info: #ff8c5a;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 255, 107, 53;
+    --secondary-rgb: 229, 90, 43;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Tema Kids Run */
+.race-kidsrun {
+    --primary: #007b5f;
+    --secondary: #005a47;
+    --accent: #22d3ee;
+    --info: #00a67a;
+    --success: #52bd7b;
+    --warning: #f39c12;
+    --error: #e74c3c;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 0, 123, 95;
+    --secondary-rgb: 0, 90, 71;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Tema Run Tune Up */
+.race-run-tune-up {
+    --primary: #cbdf44;
+    --secondary: #a0b229;
+    --accent: #22d3ee;
+    --info: #d0d95a;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 203, 223, 68;
+    --secondary-rgb: 160, 178, 41;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* ========================================
+   OVERRIDE TEMI - PER SEZIONI SPECIFICHE
+   ======================================== */
+
+/* Override per sezione Marathon */
+.theme-marathon,
+.theme-race-marathon {
+    --primary: #23a8eb;
+    --secondary: #1583b9;
+    --accent: #22d3ee;
+    --info: #5dade2;
+    --success: #52bd7b;
+    --warning: #f39c12;
+    --error: #e74c3c;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 35, 168, 235;
+    --secondary-rgb: 21, 131, 185;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Override per sezione 30K Portici */
+.theme-portici,
+.theme-race-portici {
+    --primary: #dc335e;
+    --secondary: #af1b40;
+    --accent: #22d3ee;
+    --info: #e95177;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 220, 51, 94;
+    --secondary-rgb: 175, 27, 64;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Override per sezione 5K */
+.theme-5k,
+.theme-race-5k {
+    --primary: #ff6b35;
+    --secondary: #e55a2b;
+    --accent: #22d3ee;
+    --info: #ff8c5a;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 255, 107, 53;
+    --secondary-rgb: 229, 90, 43;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Override per sezione Kids Run */
+.theme-kidsrun,
+.theme-race-kidsrun {
+    --primary: #007b5f;
+    --secondary: #005a47;
+    --accent: #22d3ee;
+    --info: #00a67a;
+    --success: #52bd7b;
+    --warning: #f39c12;
+    --error: #e74c3c;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 0, 123, 95;
+    --secondary-rgb: 0, 90, 71;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+
+/* Override per sezione Run Tune Up */
+.theme-run-tune-up,
+.theme-race-run-tune-up {
+    --primary: #cbdf44;
+    --secondary: #a0b229;
+    --accent: #22d3ee;
+    --info: #d0d95a;
+    --success: #52bd7b;
+    --warning: #F39C12;
+    --error: #E74C3C;
+    --countdown-color: #00ffff;
+
+    /* RGB values for rgba() functions */
+    --primary-rgb: 203, 223, 68;
+    --secondary-rgb: 160, 178, 41;
+    --accent-rgb: 34, 211, 238;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(45deg, var(--primary), var(--secondary));
+    --gradient-button: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    --gradient-button-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Typography - Strong/Bold sui titoli */
+    --title-strong-color: var(--primary);
+    --title-bold-color: var(--primary);
+}
+

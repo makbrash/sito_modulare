@@ -1,0 +1,121 @@
+/**
+ * Splash Logo Module CSS
+ * Overlay animato con logo lampeggiante
+ */
+
+.splash-logo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.8s ease-out;
+}
+
+.splash-logo.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-logo__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: splashFadeOut 0.8s ease-out forwards;
+    animation-delay: 1.7s;
+}
+
+.splash-logo__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: logoFadeIn 0.6s ease-out forwards;
+}
+
+.splash-logo__image {
+    width: auto;
+    height: auto;
+    max-width: 80vw;
+    max-height: 40vh;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+    animation: logoPulse 2s ease-in-out infinite;
+}
+
+/* Animazione fade-in del logo */
+@keyframes logoFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animazione fade-out dell'overlay */
+@keyframes splashFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Animazione lampeggiante dolce del logo */
+@keyframes logoPulse {
+    0% {
+        opacity: 1;
+        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+    }
+    50% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.5));
+    }
+    100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .splash-logo__image {
+        max-width: 70vw;
+        max-height: 30vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .splash-logo__image {
+        max-width: 60vw;
+        max-height: 25vh;
+    }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .splash-logo__image {
+        animation: none;
+    }
+    
+    .splash-logo__overlay {
+        animation-duration: 0.3s;
+    }
+    
+    .splash-logo__content {
+        animation-duration: 0.3s;
+    }
+}
+

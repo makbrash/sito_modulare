@@ -29,26 +29,26 @@ $cards = $moduleData['cards'] ?? [];
             
             switch($slug) {
                 case 'marathon':
-                    $cardClass = 'marathon-card';
-                    $tagClass = 'marathon-tag';
+                    $cardClass = 'theme-marathon';
+                    $tagClass = 'theme-marathon';
                     $distanceClass = 'marathon-distance';
                     $buttonClass = 'marathon-button';
                     break;
                 case 'portici':
-                    $cardClass = 'portici-card';
-                    $tagClass = 'portici-tag';
+                    $cardClass = 'theme-portici';
+                    $tagClass = 'theme-portici';
                     $distanceClass = 'portici-distance';
                     $buttonClass = 'portici-button';
                     break;
                 case 'runtune':
-                    $cardClass = 'runtune-card';
-                    $tagClass = 'runtune-tag';
+                    $cardClass = 'theme-run-tune-up';
+                    $tagClass = 'theme-run-tune-up';
                     $distanceClass = 'runtune-distance';
                     $buttonClass = 'runtune-button';
                     break;
                 default:
-                    $cardClass = 'generic-card';
-                    $tagClass = 'generic-tag';
+                    $cardClass = 'theme-generic';
+                    $tagClass = 'theme-generic';
                     $distanceClass = 'generic-distance';
                     $buttonClass = 'generic-button';
             }

@@ -4,6 +4,11 @@
  * Gestisce le iscrizioni alla newsletter classica
  */
 
+// Evita output HTML/notice che romperebbero il JSON
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+ob_start();
+
 // Headers per CORS e JSON
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -13,12 +18,15 @@ header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
 // Gestione preflight OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    // Pulisci eventuale output catturato e termina
+    if (ob_get_length()) { ob_end_clean(); }
     exit;
 }
 
 // Solo POST accettato
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+    if (ob_get_length()) { ob_clean(); }
     echo json_encode([
         'success' => false,
         'message' => 'Metodo non consentito'
@@ -69,6 +77,17 @@ try {
 
     // Connessione al database
     require_once __DIR__ . '/../config/database.php';
+    $database = new Database();
+    $db = $database->getConnection();
+    if (!$db) {
+        http_response_code(500);
+        if (ob_get_length()) { ob_clean(); }
+        echo json_encode([
+            'success' => false,
+            'message' => 'Errore di connessione al database'
+        ]);
+        exit;
+    }
 
     // Verifica se l'email esiste già
     $stmt = $db->prepare("SELECT id FROM newsletter_subscribers WHERE email = ?");
@@ -99,6 +118,7 @@ try {
 
     // Successo
     http_response_code(200);
+    if (ob_get_length()) { ob_clean(); }
     echo json_encode([
         'success' => true,
         'message' => 'Iscrizione completata con successo!',
@@ -113,6 +133,7 @@ try {
     error_log('Newsletter Subscribe Error: ' . $e->getMessage());
     
     http_response_code(500);
+    if (ob_get_length()) { ob_clean(); }
     echo json_encode([
         'success' => false,
         'message' => 'Errore del server. Riprova più tardi.'
@@ -123,6 +144,7 @@ try {
     error_log('Newsletter Subscribe Error: ' . $e->getMessage());
     
     http_response_code(500);
+    if (ob_get_length()) { ob_clean(); }
     echo json_encode([
         'success' => false,
         'message' => 'Errore durante l\'iscrizione. Riprova.'

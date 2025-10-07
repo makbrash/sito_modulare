@@ -6,7 +6,7 @@
   "css_class": "race-cards-module",
   "default_config": { "layout": "vertical" },
   "aliases": ["raceCards"],
-  "assets": { "css": [], "js": [], "vendors": [] },
+  "assets": { "css": ["modules/race-cards/race-cards.css"], "js": [], "vendors": [] },
   "dependencies": [],
   "install": "race-cards/install.sql",
   "uninstall": "race-cards/uninstall.sql"
