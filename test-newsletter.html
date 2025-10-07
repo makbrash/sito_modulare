@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modulo Newsletter Multi-Platform - Bologna Marathon</title>
+    <base href="http://localhost/sito_modulare/">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS Core -->
+    <link rel="stylesheet" href="assets/css/core/reset.css">
+    <link rel="stylesheet" href="assets/css/core/variables.css">
+    <link rel="stylesheet" href="assets/css/core/colors.css">
+    <link rel="stylesheet" href="assets/css/core/fonts.css">
+    <link rel="stylesheet" href="assets/css/core/typography.css">
+    <link rel="stylesheet" href="assets/css/core/layout.css">
+    
+    <!-- CSS Modulo Newsletter -->
+    <link rel="stylesheet" href="modules/newsletter/newsletter.css">
+    
+    <style>
+        body {
+            background: var(--bg-primary);
+            padding: var(--space-2xl) 0;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: var(--space-4xl);
+        }
+        
+        .test-header__title {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            text-transform: uppercase;
+        }
+        
+        .test-header__subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .test-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-3xl);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .test-info__title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: var(--space-md);
+        }
+        
+        .test-info__list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .test-info__item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            padding: var(--space-sm) 0;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .test-info__item::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: var(--space-4xl) 0;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="test-header">
+            <h1 class="test-header__title">
+                Newsletter Multi-Platform
+            </h1>
+            <p class="test-header__subtitle">
+                Modulo unificato con tab navigation per scegliere tra 4 modalità di registrazione
+            </p>
+        </div>
+        
+        <!-- Test Info -->
+        <div class="test-info">
+            <h2 class="test-info__title">🎯 Come Funziona</h2>
+            <ul class="test-info__list">
+                <li class="test-info__item">
+                    <strong>📧 Email:</strong> Form classico con nome, email e privacy checkbox
+                </li>
+                <li class="test-info__item">
+                    <strong>💬 WhatsApp Chat:</strong> Campo nome + pulsante che invia "Ciao sono [Nome], vorrei registrarmi"
+                </li>
+                <li class="test-info__item">
+                    <strong>📢 Canale WhatsApp:</strong> Link diretto al canale ufficiale (1.2K+ membri)
+                </li>
+                <li class="test-info__item">
+                    <strong>🤖 Ingrid AI:</strong> Chat con l'assistente virtuale su WhatsApp - "Chiedi qualsiasi cosa"
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Newsletter Module -->
+        <div class="newsletter newsletter--primary" 
+             data-module="newsletter" 
+             data-default-tab="email"
+             data-config='{}'>
+            
+            <div class="newsletter__container">
+                <div class="newsletter__content">
+                    
+                    <!-- Header -->
+                    <div class="newsletter__header">
+                        <h2 class="newsletter__title">Resta in Contatto</h2>
+                        <p class="newsletter__subtitle">Scegli il tuo canale preferito per ricevere aggiornamenti</p>
+                    </div>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="newsletter__tabs">
+                        <button class="newsletter__tab newsletter__tab--active" data-tab="email" type="button">
+                            <svg class="newsletter__tab-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 4H17C17.55 4 18 4.45 18 5V15C18 15.55 17.55 16 17 16H3C2.45 16 2 15.55 2 15V5C2 4.45 2.45 4 3 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18 5L10 10.5L2 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="newsletter__tab-text">Email</span>
+                        </button>
+                        
+                        <button class="newsletter__tab" data-tab="whatsapp" type="button">
+                            <svg class="newsletter__tab-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M14.56 12.19c-.25-.12-1.47-.73-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.48-.01-.16 0-.43.06-.66.31-.23.25-.87.85-.87 2.07s.89 2.4 1.01 2.56c.13.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.17-.48-.29m-4.51 6.17h-.01c-.83 0-1.66-.22-2.38-.64l-.17-.1-1.75.46.47-1.71-.12-.18c-.47-.74-.71-1.6-.71-2.48 0-2.57 2.09-4.66 4.66-4.66 1.25 0 2.42.49 3.3 1.37.88.88 1.37 2.05 1.37 3.29 0 2.57-2.09 4.66-4.66 4.66m3.97-8.61c-1.05-1.05-2.45-1.63-3.97-1.63-3.09 0-5.61 2.52-5.61 5.61 0 .99.26 1.95.75 2.8L4 19l3.54-.93c.81.44 1.72.67 2.65.67h.01c3.09 0 5.61-2.52 5.61-5.61 0-1.51-.59-2.92-1.64-3.98"/>
+                            </svg>
+                            <span class="newsletter__tab-text">WhatsApp</span>
+                        </button>
+                        
+                        <button class="newsletter__tab" data-tab="channel" type="button">
+                            <svg class="newsletter__tab-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M10 2V4M10 16V18M18 10H16M4 10H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span class="newsletter__tab-text">Canale</span>
+                        </button>
+                        
+                        <button class="newsletter__tab" data-tab="ingrid" type="button">
+                            <svg class="newsletter__tab-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 11C12.2091 11 14 9.20914 14 7C14 4.79086 12.2091 3 10 3C7.79086 3 6 4.79086 6 7C6 9.20914 7.79086 11 10 11Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M3 18C3 15.2386 5.68629 13 9 13H11C14.3137 13 17 15.2386 17 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="15" cy="5" r="2" fill="currentColor"/>
+                            </svg>
+                            <span class="newsletter__tab-text">Ingrid AI</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Tab Panels -->
+                    <div class="newsletter__panels">
+                        
+                        <!-- Panel Email -->
+                        <div class="newsletter__panel newsletter__panel--active" data-panel="email">
+                            <form class="newsletter__form" method="POST" action="api/newsletter-subscribe.php">
+                                <div class="newsletter__form-group">
+                                    <input type="text" 
+                                           name="name" 
+                                           class="newsletter__input" 
+                                           placeholder="Nome *"
+                                           required
+                                           aria-label="Nome">
+                                </div>
+                                
+                                <div class="newsletter__form-group">
+                                    <input type="email" 
+                                           name="email" 
+                                           class="newsletter__input" 
+                                           placeholder="Email *"
+                                           required
+                                           aria-label="Email">
+                                </div>
+                                
+                                <div class="newsletter__form-group newsletter__form-group--checkbox">
+                                    <label class="newsletter__checkbox-label">
+                                        <input type="checkbox" 
+                                               name="privacy" 
+                                               class="newsletter__checkbox" 
+                                               required
+                                               aria-label="Privacy">
+                                        <span class="newsletter__checkbox-text">
+                                            Accetto la
+                                            <a href="/privacy-policy" 
+                                               class="newsletter__privacy-link" 
+                                               target="_blank"
+                                               rel="noopener">
+                                                Privacy Policy
+                                            </a>
+                                        </span>
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="newsletter__button newsletter__button--email">
+                                    <span class="newsletter__button-text">Iscriviti via Email</span>
+                                    <svg class="newsletter__button-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                
+                                <div class="newsletter__message newsletter__message--success" style="display: none;">
+                                    <svg class="newsletter__message-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="newsletter__message-text">Iscrizione completata con successo!</span>
+                                </div>
+                                
+                                <div class="newsletter__message newsletter__message--error" style="display: none;">
+                                    <svg class="newsletter__message-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="newsletter__message-text">Errore durante l'iscrizione. Riprova.</span>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Panel WhatsApp Chat -->
+                        <div class="newsletter__panel" data-panel="whatsapp">
+                            <div class="newsletter__whatsapp">
+                                <p class="newsletter__description">Inviaci un messaggio WhatsApp per registrarti</p>
+                                
+                                <div class="newsletter__form-group">
+                                    <input type="text" 
+                                           id="whatsapp-name" 
+                                           class="newsletter__input" 
+                                           placeholder="Il tuo nome *"
+                                           aria-label="Nome per WhatsApp">
+                                </div>
+                                
+                                <button type="button" 
+                                        class="newsletter__button newsletter__button--whatsapp" 
+                                        data-whatsapp-number="393514383455">
+                                    <svg class="newsletter__button-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                    <span class="newsletter__button-text">Invia Messaggio WhatsApp</span>
+                                </button>
+                                
+                                <p class="newsletter__note">Messaggio: "Ciao sono [Nome], vorrei registrarmi"</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Panel Canale WhatsApp -->
+                        <div class="newsletter__panel" data-panel="channel">
+                            <div class="newsletter__channel">
+                                <p class="newsletter__description">Segui il nostro canale ufficiale per aggiornamenti in tempo reale</p>
+                                
+                                <a href="https://whatsapp.com/channel/0029Vb2BgN0GOj9uUN5Zjp3Z" 
+                                   class="newsletter__button newsletter__button--channel"
+                                   target="_blank"
+                                   rel="noopener">
+                                    <svg class="newsletter__button-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                    <span class="newsletter__button-text">Unisciti al Canale</span>
+                                </a>
+                                
+                                <div class="newsletter__features">
+                                    <div class="newsletter__feature">
+                                        <svg class="newsletter__feature-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 5V10L13 13M19 10C19 14.9706 14.9706 19 10 19C5.02944 19 1 14.9706 1 10C1 5.02944 5.02944 1 10 1C14.9706 1 19 5.02944 19 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class="newsletter__feature-text">Aggiornamenti in tempo reale</span>
+                                    </div>
+                                    <div class="newsletter__feature">
+                                        <svg class="newsletter__feature-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M9 12L11 14L15 10M20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class="newsletter__feature-text">Notizie esclusive</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="newsletter__note">Unisciti agli oltre 1.2K membri del nostro canale</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Panel Ingrid AI -->
+                        <div class="newsletter__panel" data-panel="ingrid">
+                            <div class="newsletter__ingrid">
+                                <div class="newsletter__ingrid-avatar">
+                                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                        <circle cx="30" cy="30" r="30" fill="url(#ingrid-gradient)"/>
+                                        <path d="M30 32C35.5228 32 40 27.5228 40 22C40 16.4772 35.5228 12 30 12C24.4772 12 20 16.4772 20 22C20 27.5228 24.4772 32 30 32Z" fill="white" opacity="0.9"/>
+                                        <path d="M15 46C15 39.3726 20.3726 34 27 34H33C39.6274 34 45 39.3726 45 46" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+                                        <circle cx="42" cy="18" r="6" fill="#CBDF44"/>
+                                        <defs>
+                                            <linearGradient id="ingrid-gradient" x1="0" y1="0" x2="60" y2="60">
+                                                <stop stop-color="var(--primary)"/>
+                                                <stop offset="1" stop-color="var(--secondary)"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                
+                                <h3 class="newsletter__ingrid-title">Chatta con Ingrid</h3>
+                                <p class="newsletter__description">Chiedi qualsiasi cosa ad Ingrid, la nostra assistente AI su WhatsApp</p>
+                                
+                                <a href="https://wa.me/393514383455?text=Ciao!%20Sono%20Ingrid,%20come%20posso%20aiutarti?" 
+                                   class="newsletter__button newsletter__button--ingrid"
+                                   target="_blank"
+                                   rel="noopener">
+                                    <svg class="newsletter__button-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                    <span class="newsletter__button-text">Chatta con Ingrid</span>
+                                </a>
+                                
+                                <div class="newsletter__ingrid-features">
+                                    <span class="newsletter__ingrid-tag">🤖 Assistenza 24/7</span>
+                                    <span class="newsletter__ingrid-tag">💬 Risposte Immediate</span>
+                                    <span class="newsletter__ingrid-tag">🎯 Sempre Disponibile</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- JavaScript Modulo Newsletter -->
+    <script src="modules/newsletter/newsletter.js"></script>
+    
+</body>
+</html>

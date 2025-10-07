@@ -1,0 +1,754 @@
+/**
+ * Modulo: Newsletter Registration Multi-Platform
+ * File: newsletter.css
+ * 
+ * IMPORTANTE: Usa SOLO CSS classico, MAI stili annidati (&)
+ */
+
+/* ========================================
+   NEWSLETTER - BASE STYLES
+   ======================================== */
+
+/* Font Awesome Support */
+.newsletter__tab-icon,
+.newsletter__button-icon,
+.newsletter__message-icon,
+.newsletter__feature-icon,
+.newsletter__ingrid-avatar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.newsletter__tab-icon {
+    font-size: 18px;
+}
+
+.newsletter__button-icon {
+    font-size: 20px;
+}
+
+.newsletter__message-icon {
+    font-size: 24px;
+}
+
+.newsletter__feature-icon {
+    font-size: 20px;
+}
+
+.newsletter__ingrid-avatar-icon {
+    font-size: 48px;
+    color: var(--primary);
+}
+
+.newsletter {
+    position: relative;
+    padding: var(--space-3xl) var(--space-md);
+    background: var(--newsletter-bg, var(--gradient-secondary));
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.newsletter__background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    z-index: -1;
+}
+
+.newsletter__container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.newsletter__content {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.newsletter__header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.newsletter__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.newsletter__subtitle {
+    font-family: var(--font-primary);
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   TAB NAVIGATION
+   ======================================== */
+
+.newsletter__tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    background: rgba(0, 0, 0, 0.2);
+    padding: var(--space-xs);
+    border-radius: var(--radius-lg);
+}
+
+.newsletter__tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-sm);
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.newsletter__tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.newsletter__tab--active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
+}
+
+.newsletter__tab--active::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+}
+
+.newsletter__tab-icon {
+    color: currentColor;
+    transition: transform var(--transition-normal);
+}
+
+.newsletter__tab:hover .newsletter__tab-icon {
+    transform: scale(1.1);
+}
+
+.newsletter__tab--active .newsletter__tab-icon {
+    transform: scale(1.15);
+}
+
+.newsletter__tab-text {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* ========================================
+   TAB PANELS
+   ======================================== */
+
+.newsletter__panels {
+    position: relative;
+    min-height: 400px;
+}
+
+.newsletter__panel {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.newsletter__panel--active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   FORM - EMAIL
+   ======================================== */
+
+.newsletter__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.newsletter__form-group {
+    position: relative;
+}
+
+.newsletter__input {
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    transition: all var(--transition-normal);
+}
+
+.newsletter__input::placeholder {
+    color: var(--text-muted);
+}
+
+.newsletter__input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+}
+
+.newsletter__input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================
+   CHECKBOX
+   ======================================== */
+
+.newsletter__form-group--checkbox {
+    margin-top: var(--space-sm);
+}
+
+.newsletter__checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    cursor: pointer;
+    user-select: none;
+}
+
+.newsletter__checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all var(--transition-normal);
+}
+
+.newsletter__checkbox:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.newsletter__checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.newsletter__checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+.newsletter__checkbox-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.newsletter__privacy-link {
+    color: var(--primary);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+}
+
+.newsletter__privacy-link:hover {
+    color: var(--accent);
+}
+
+/* ========================================
+   BUTTON
+   ======================================== */
+
+.newsletter__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--gradient-button);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 1.125rem;
+    font-weight: 600;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+    position: relative;
+    overflow: hidden;
+    margin-top: var(--space-md);
+    width: 100%;
+}
+
+.newsletter__button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-button-hover);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.newsletter__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.4);
+}
+
+.newsletter__button:hover::before {
+    opacity: 1;
+}
+
+.newsletter__button:active {
+    transform: translateY(0);
+}
+
+.newsletter__button-text {
+    position: relative;
+    z-index: 1;
+}
+
+.newsletter__button-icon {
+    position: relative;
+    z-index: 1;
+    transition: transform var(--transition-normal);
+}
+
+.newsletter__button:hover .newsletter__button-icon {
+    transform: translateX(4px);
+}
+
+.newsletter__button--whatsapp {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.newsletter__button--whatsapp:hover {
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+}
+
+.newsletter__button--channel {
+    background: linear-gradient(135deg, #00E676 0%, #00C853 100%);
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+}
+
+.newsletter__button--channel:hover {
+    box-shadow: 0 6px 25px rgba(0, 230, 118, 0.4);
+}
+
+.newsletter__button--ingrid {
+    background: linear-gradient(135deg, var(--accent) 0%, #a0b229 100%);
+    box-shadow: 0 4px 15px rgba(203, 223, 68, 0.3);
+}
+
+.newsletter__button--ingrid:hover {
+    box-shadow: 0 6px 25px rgba(203, 223, 68, 0.4);
+}
+
+/* ========================================
+   WHATSAPP & CHANNEL
+   ======================================== */
+
+.newsletter__whatsapp,
+.newsletter__channel {
+    text-align: center;
+}
+
+.newsletter__description {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-lg);
+}
+
+.newsletter__note {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: var(--space-md);
+    font-style: italic;
+}
+
+/* ========================================
+   FEATURES (CHANNEL)
+   ======================================== */
+
+.newsletter__features {
+    display: flex;
+    gap: var(--space-lg);
+    justify-content: center;
+    margin: var(--space-xl) 0;
+    flex-wrap: wrap;
+}
+
+.newsletter__feature {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.newsletter__feature-icon {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.newsletter__feature-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ========================================
+   INGRID AI
+   ======================================== */
+
+.newsletter__ingrid {
+    text-align: center;
+}
+
+.newsletter__ingrid-avatar {
+    display: inline-flex;
+    margin-bottom: var(--space-lg);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.newsletter__ingrid-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    text-transform: uppercase;
+}
+
+.newsletter__ingrid-features {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--space-lg);
+}
+
+.newsletter__ingrid-tag {
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ========================================
+   MESSAGES (SUCCESS/ERROR)
+   ======================================== */
+
+.newsletter__message {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-md);
+    animation: slideInDown 0.4s ease-out;
+}
+
+.newsletter__message--success {
+    background: rgba(82, 189, 123, 0.15);
+    border: 1px solid rgba(82, 189, 123, 0.3);
+    color: #52bd7b;
+}
+
+.newsletter__message--error {
+    background: rgba(231, 76, 60, 0.15);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+}
+
+.newsletter__message-icon {
+    flex-shrink: 0;
+}
+
+.newsletter__message-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* ========================================
+   STATES
+   ======================================== */
+
+.newsletter.is-loading .newsletter__button {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.newsletter.is-loading .newsletter__button-icon {
+    animation: spin 1s linear infinite;
+}
+
+.newsletter.is-success .newsletter__form {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ========================================
+   VARIANTS
+   ======================================== */
+
+.newsletter--primary {
+    background: var(--gradient-primary);
+}
+
+.newsletter--secondary {
+    background: var(--gradient-secondary);
+}
+
+.newsletter--dark {
+    background: var(--gradient-dark);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   RESPONSIVE - TABLET
+   ======================================== */
+
+@media (max-width: 768px) {
+    .newsletter {
+        padding: var(--space-2xl) var(--space-md);
+    }
+
+    .newsletter__content {
+        padding: var(--space-xl);
+    }
+
+    .newsletter__title {
+        font-size: 3rem;
+    }
+
+    .newsletter__subtitle {
+        font-size: 1rem;
+    }
+
+    .newsletter__tabs {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-xs);
+    }
+
+    .newsletter__tab {
+        padding: var(--space-sm);
+    }
+
+    .newsletter__tab-text {
+        font-size: 0.75rem;
+    }
+
+    .newsletter__input {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.95rem;
+    }
+
+    .newsletter__button {
+        padding: var(--space-sm) var(--space-lg);
+        font-size: 1rem;
+    }
+
+    .newsletter__features {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .newsletter__feature {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+   ======================================== */
+
+@media (max-width: 480px) {
+    .newsletter {
+        padding: var(--space-xl) var(--space-sm);
+    }
+
+    .newsletter__content {
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+    }
+
+    .newsletter__header {
+        margin-bottom: var(--space-lg);
+    }
+
+    .newsletter__title {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-sm);
+    }
+
+    .newsletter__subtitle {
+        font-size: 0.9rem;
+    }
+
+    .newsletter__tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .newsletter__tab {
+        padding: var(--space-xs) 0;
+    }
+
+    .newsletter__tab-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .newsletter__tab-text {
+        font-size: 0.7rem;
+    }
+
+    .newsletter__input {
+        padding: var(--space-sm);
+        font-size: 0.9rem;
+    }
+
+    .newsletter__button {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.95rem;
+    }
+
+    .newsletter__checkbox-text {
+        font-size: 0.85rem;
+    }
+
+    .newsletter__description {
+        font-size: 0.9rem;
+    }
+
+    .newsletter__note {
+        font-size: 0.8rem;
+    }
+
+    .newsletter__ingrid-title {
+        font-size: 1.5rem;
+    }
+
+    .newsletter__ingrid-tag {
+        font-size: 0.75rem;
+        padding: 4px var(--space-sm);
+    }
+}
+
+/* ========================================
+   PAGE BUILDER OVERRIDES
+   ======================================== */
+
+.page-builder .newsletter,
+.page-builder .newsletter [class*="fixed"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+    transform: none !important;
+}

@@ -1,0 +1,335 @@
+# Cursor Rules - Sistema Moduli Bologna Marathon
+
+## 🎯 Obiettivo
+Queste regole guidano Cursor AI nello sviluppo, modifica e gestione dei moduli del sistema modulare.
+
+## 📋 Regole Generali
+
+### 1. Struttura Modulo Obbligatoria
+Ogni modulo DEVE avere:
+- `modulo.php` (template PHP)
+- `modulo.css` (stili)
+- `module.json` (manifest)
+- `modulo.js` (JavaScript, opzionale)
+
+### 2. Nomenclatura
+- **Cartella**: `kebab-case` (es: `mio-modulo`)
+- **File**: `kebab-case` (es: `mio-modulo.php`)
+- **Classe CSS**: BEM (es: `.mio-modulo__element`)
+- **Variabile PHP**: `camelCase` (es: `$moduleData`)
+
+### 2.1. ICONE - REGOLA OBBLIGATORIA
+- **MAI usare SVG inline** nei moduli
+- **SEMPRE usare Font Awesome** per le icone
+- **Classi standard**: `fas fa-*` (solid), `fab fa-*` (brands), `far fa-*` (regular)
+- **Esempi**: `fas fa-envelope`, `fab fa-whatsapp`, `fas fa-robot`
+- **CSS**: Aggiungere supporto Font Awesome nel CSS del modulo
+
+### 3. Template PHP Standard
+```php
+<?php
+/**
+ * Modulo: Nome Modulo
+ * Descrizione: Breve descrizione
+ * 
+ * @var ModuleRenderer $renderer
+ * @var array $config
+ */
+
+$moduleData = $renderer->getModuleData('moduloName', $config);
+$title = $config['title'] ?? $moduleData['title'] ?? 'Default';
+?>
+
+<div class="modulo modulo--<?= htmlspecialchars($variant) ?>">
+    <!-- Contenuto -->
+</div>
+```
+
+### 4. Manifest module.json Obbligatorio
+```json
+{
+  "name": "modulo-name",
+  "slug": "modulo-name",
+  "aliases": ["moduloName"],
+  "version": "1.0.0",
+  "description": "Descrizione",
+  "component_path": "modulo-name/modulo-name.php",
+  "default_config": {},
+  "assets": {
+    "css": ["modulo-name/modulo-name.css"],
+    "js": ["modulo-name/modulo-name.js"]
+  },
+  "ui_schema": {}
+}
+```
+
+## 🎨 CSS Rules
+
+### 1. **CRITICO: CSS Classico Obbligatorio**
+- **MAI usare stili annidati (&)**
+- **MAI usare SCSS/SASS syntax**
+- **SOLO CSS classico esplicito**
+
+```css
+/* ✅ CORRETTO */
+.modulo {}
+.modulo:hover {}
+.modulo .modulo__title {}
+.modulo.modulo--primary {}
+
+/* ❌ SBAGLIATO */
+.modulo {
+  &:hover {}
+  .modulo__title {}
+}
+```
+
+### 2. BEM Methodology
+```css
+/* Block */
+.modulo {}
+
+/* Element */
+.modulo__title {}
+.modulo__content {}
+
+/* Modifier */
+.modulo--primary {}
+.modulo__button--active {}
+```
+
+### 3. CSS Variables Obbligatorie
+```css
+.modulo {
+  color: var(--text-color);
+  background: var(--color-white);
+  font-family: var(--font-primary);
+  padding: var(--spacing-md);
+}
+```
+
+### 4. Responsive Mobile First
+```css
+/* Mobile */
+.modulo {}
+
+/* Tablet */
+@media (min-width: 768px) {}
+
+/* Desktop */
+@media (min-width: 1024px) {}
+```
+
+## 🔧 JavaScript Rules
+
+### 1. Classe Module Pattern
+```javascript
+class Modulo {
+  constructor(element) {
+    this.element = element;
+    this.config = this.parseConfig();
+    this.init();
+  }
+  
+  init() {
+    this.bindEvents();
+  }
+  
+  bindEvents() {
+    // Event listeners
+  }
+  
+  destroy() {
+    // Cleanup
+  }
+}
+```
+
+### 2. Auto-inizializzazione
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+  const modules = document.querySelectorAll('.modulo');
+  modules.forEach(element => new Modulo(element));
+});
+```
+
+## 📊 Database Rules
+
+### 1. Aggiungere Dati in ModuleRenderer.php
+```php
+// In getModuleData()
+case 'moduloName':
+    return $this->getModuloData($config);
+
+// Nuovo metodo
+private function getModuloData($config) {
+    // Logica dati
+    return $data;
+}
+```
+
+### 2. Prepared Statements Obbligatori
+```php
+$stmt = $this->db->prepare("SELECT * FROM table WHERE id = ?");
+$stmt->execute([$id]);
+return $stmt->fetch();
+```
+
+## 🚀 Workflow Rules
+
+### 1. Creazione Nuovo Modulo
+1. Crea cartella `modules/nome-modulo/`
+2. Crea file base (php, css, json, js)
+3. Implementa template seguendo standard
+4. Aggiungi manifest completo
+5. Registra in `modules_registry` database
+6. Testa in development (`npm run dev`)
+7. Testa in page builder
+
+### 2. Modifica Modulo Esistente
+1. Leggi `modules/README.md` per convenzioni
+2. Modifica file mantenendo compatibilità
+3. Aggiorna manifest se necessario
+4. Testa in development
+5. Testa in page builder
+6. Verifica responsive design
+
+### 3. Debug Modulo
+1. Controlla console browser per errori JS
+2. Verifica log PHP per errori server
+3. Testa configurazione in page builder
+4. Verifica database `modules_registry`
+5. Controlla path file nel manifest
+
+## 🔍 Validation Rules
+
+### 1. Sanitizzazione Output
+```php
+// SEMPRE usare htmlspecialchars per output
+echo htmlspecialchars($title);
+echo '<div>' . htmlspecialchars($content) . '</div>';
+```
+
+### 2. Validazione Input
+```php
+$title = trim($config['title'] ?? '');
+if (empty($title)) {
+    $title = 'Default Title';
+}
+```
+
+### 3. Error Handling
+```php
+try {
+    $data = $this->getData();
+} catch (Exception $e) {
+    error_log('Errore modulo: ' . $e->getMessage());
+    $data = [];
+}
+```
+
+## 📚 Documentation Rules
+
+### 1. Commenti Obbligatori
+```php
+/**
+ * Modulo: Nome Modulo
+ * Descrizione: Cosa fa il modulo
+ * 
+ * @var ModuleRenderer $renderer
+ * @var array $config
+ */
+```
+
+### 2. README Modulo
+Ogni modulo complesso DEVE avere `README.md` con:
+- Descrizione funzionalità
+- Esempi configurazione
+- Note tecniche
+- Troubleshooting
+
+### 3. Changelog
+Aggiorna versione in `module.json` per ogni modifica significativa.
+
+## 🧪 Testing Rules
+
+### 1. Test Development
+- Testa in `npm run dev`
+- Verifica responsive design
+- Testa configurazioni diverse
+- Verifica accessibilità
+
+### 2. Test Production
+- Testa con `npm run release`
+- Verifica bundle CSS/JS
+- Testa performance
+- Verifica compatibilità browser
+
+### 3. Test Page Builder
+- Testa drag & drop
+- Verifica salvataggio configurazione
+- Testa anteprima
+- Verifica ordinamento moduli
+
+## 🚨 Error Prevention
+
+### 1. Path Consistency
+- Usa percorsi relativi: `modulo-name/modulo-name.php`
+- NON usare: `modules/modulo-name/modulo-name.php`
+
+### 2. Naming Consistency
+- Slug nel manifest = nome cartella
+- Nome file = nome modulo
+- Classe CSS = nome modulo
+
+### 3. Database Consistency
+- `modules_registry.name` = slug del modulo
+- `component_path` = path relativo corretto
+- `is_active = 1` per moduli attivi
+
+### 4. **CRITICO: CSS Syntax Consistency**
+- **MAI**: `&:hover`, `&::before`, `.class { .nested {} }`
+- **SEMPRE**: `.class:hover`, `.class::before`, `.class .nested`
+- Controlla ogni file CSS per stili annidati prima del commit
+
+## 🔄 Update Rules
+
+### 1. Backward Compatibility
+- Mantieni compatibilità con configurazioni esistenti
+- Usa valori di default per nuovi campi
+- Non rimuovere campi esistenti senza migration
+
+### 2. Version Control
+- Incrementa versione in `module.json`
+- Documenta breaking changes
+- Fornisci migration guide se necessario
+
+### 3. Rollback Plan
+- Mantieni backup configurazioni
+- Testa rollback in development
+- Documenta procedure di rollback
+
+## 📖 Reference Links
+
+- **Sistema Moduli**: `modules/README.md`
+- **CSS Variables**: `assets/css/core/variables.css`
+- **Page Builder**: `admin/page-builder.php`
+- **ModuleRenderer**: `core/ModuleRenderer.php`
+
+## 🎯 Success Criteria
+
+Un modulo è considerato completo quando:
+- ✅ Segue struttura standard
+- ✅ Ha manifest completo
+- ✅ Funziona in development
+- ✅ Funziona in page builder
+- ✅ È responsive
+- ✅ È accessibile
+- ✅ Ha documentazione
+- ✅ È testato
+
+---
+
+**Sistema Moduli - Cursor Rules** 🧩
+
+*Versione 1.0.0 - Gennaio 2025*

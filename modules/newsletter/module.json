@@ -1,0 +1,201 @@
+{
+  "name": "newsletter",
+  "slug": "newsletter",
+  "aliases": ["newsletter", "newsletterMultiPlatform"],
+  "version": "2.0.0",
+  "description": "Modulo multi-platform con tab navigation per 4 modalità di registrazione: Email, WhatsApp Chat, Canale WhatsApp e Ingrid AI",
+  "category": "marketing",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "newsletter/newsletter.php",
+  "default_config": {
+    "title": "Resta in Contatto",
+    "subtitle": "Scegli il tuo canale preferito per ricevere aggiornamenti",
+    "variant": "primary",
+    "default_tab": "email",
+    "name_placeholder": "Nome *",
+    "email_placeholder": "Email *",
+    "privacy_link": "/privacy-policy",
+    "email_button_text": "Iscriviti via Email",
+    "whatsapp_number": "393123456789",
+    "whatsapp_name_placeholder": "Il tuo nome *",
+    "whatsapp_button_text": "Invia Messaggio WhatsApp",
+    "channel_url": "https://whatsapp.com/channel/0029Vb2BgN0GOj9uUN5Zjp3Z",
+    "channel_button_text": "Unisciti al Canale",
+    "channel_members": "1.2K",
+    "ingrid_number": "393123456789",
+    "ingrid_button_text": "Chatta con Ingrid",
+    "ingrid_welcome_message": "Ciao! Sono Ingrid, come posso aiutarti?",
+    "background_image": "",
+    "background_color": ""
+  },
+  "assets": {
+    "css": ["newsletter/newsletter.css"],
+    "js": ["newsletter/newsletter.js"],
+    "vendors": []
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "title": {
+      "type": "text",
+      "label": "Titolo Principale",
+      "placeholder": "Resta in Contatto",
+      "required": true,
+      "default": "Resta in Contatto",
+      "help": "Titolo visualizzato sopra le tab"
+    },
+    "subtitle": {
+      "type": "textarea",
+      "label": "Sottotitolo",
+      "placeholder": "Scegli il tuo canale preferito...",
+      "rows": 2,
+      "default": "Scegli il tuo canale preferito per ricevere aggiornamenti",
+      "help": "Descrizione sotto il titolo"
+    },
+    "default_tab": {
+      "type": "select",
+      "label": "Tab Predefinita",
+      "options": [
+        { "value": "email", "label": "📧 Email" },
+        { "value": "whatsapp", "label": "💬 WhatsApp Chat" },
+        { "value": "channel", "label": "📢 Canale WhatsApp" },
+        { "value": "ingrid", "label": "🤖 Ingrid AI" }
+      ],
+      "default": "email",
+      "help": "Quale tab mostrare all'apertura"
+    },
+    "variant": {
+      "type": "select",
+      "label": "Variante Colore",
+      "options": [
+        { "value": "primary", "label": "Primary (Blu)" },
+        { "value": "secondary", "label": "Secondary" },
+        { "value": "dark", "label": "Dark (Scuro)" }
+      ],
+      "default": "primary",
+      "help": "Variante di colore del background"
+    },
+    "background_image": {
+      "type": "image",
+      "label": "Immagine di Sfondo",
+      "placeholder": "URL immagine",
+      "help": "Immagine di sfondo opzionale con opacità ridotta"
+    },
+    "background_color": {
+      "type": "color",
+      "label": "Colore di Sfondo Custom",
+      "help": "Sovrascrive la variante se specificato (es: linear-gradient(...))"
+    },
+    "name_placeholder": {
+      "type": "text",
+      "label": "[Email] Placeholder Nome",
+      "default": "Nome *",
+      "help": "Placeholder campo nome nella tab Email"
+    },
+    "email_placeholder": {
+      "type": "text",
+      "label": "[Email] Placeholder Email",
+      "default": "Email *",
+      "help": "Placeholder campo email nella tab Email"
+    },
+    "privacy_link": {
+      "type": "url",
+      "label": "[Email] Link Privacy Policy",
+      "default": "/privacy-policy",
+      "help": "URL della pagina privacy policy"
+    },
+    "email_button_text": {
+      "type": "text",
+      "label": "[Email] Testo Pulsante",
+      "default": "Iscriviti via Email",
+      "help": "Testo del pulsante di invio email"
+    },
+    "whatsapp_number": {
+      "type": "text",
+      "label": "[WhatsApp Chat] Numero Destinatario",
+      "placeholder": "393123456789",
+      "default": "393123456789",
+      "help": "Numero WhatsApp per messaggi diretti (senza +)"
+    },
+    "whatsapp_name_placeholder": {
+      "type": "text",
+      "label": "[WhatsApp Chat] Placeholder Nome",
+      "default": "Il tuo nome *",
+      "help": "Placeholder campo nome per WhatsApp chat"
+    },
+    "whatsapp_button_text": {
+      "type": "text",
+      "label": "[WhatsApp Chat] Testo Pulsante",
+      "default": "Invia Messaggio WhatsApp",
+      "help": "Testo del pulsante WhatsApp chat"
+    },
+    "channel_url": {
+      "type": "url",
+      "label": "[Canale] URL Canale WhatsApp",
+      "default": "https://whatsapp.com/channel/0029Vb2BgN0GOj9uUN5Zjp3Z",
+      "help": "URL del canale WhatsApp ufficiale"
+    },
+    "channel_button_text": {
+      "type": "text",
+      "label": "[Canale] Testo Pulsante",
+      "default": "Unisciti al Canale",
+      "help": "Testo del pulsante canale"
+    },
+    "channel_members": {
+      "type": "text",
+      "label": "[Canale] Numero Membri",
+      "default": "1.2K",
+      "help": "Numero di membri del canale (es: 1.2K, 500+, ecc.)"
+    },
+    "ingrid_number": {
+      "type": "text",
+      "label": "[Ingrid AI] Numero WhatsApp",
+      "placeholder": "393123456789",
+      "default": "393123456789",
+      "help": "Numero WhatsApp per Ingrid AI (senza +)"
+    },
+    "ingrid_button_text": {
+      "type": "text",
+      "label": "[Ingrid AI] Testo Pulsante",
+      "default": "Chatta con Ingrid",
+      "help": "Testo del pulsante Ingrid AI"
+    },
+    "ingrid_welcome_message": {
+      "type": "textarea",
+      "label": "[Ingrid AI] Messaggio di Benvenuto",
+      "rows": 2,
+      "default": "Ciao! Sono Ingrid, come posso aiutarti?",
+      "help": "Messaggio precompilato per aprire chat con Ingrid"
+    }
+  },
+  "tags": ["newsletter", "subscription", "whatsapp", "marketing", "lead-generation", "multi-platform", "tabs", "ai-assistant"],
+  "screenshots": [],
+  "changelog": [
+    {
+      "version": "2.0.0",
+      "date": "2025-01-07",
+      "changes": [
+        "🎉 REWRITE COMPLETO: Modulo multi-platform con tab navigation",
+        "✨ 4 modalità in un unico modulo: Email, WhatsApp Chat, Canale, Ingrid AI",
+        "🎨 Tab navigation elegante con icone e animazioni",
+        "💬 WhatsApp Chat con campo nome dinamico (messaggio: 'Ciao sono [Nome], vorrei registrarmi')",
+        "📢 Canale WhatsApp con link diretto e contatore membri",
+        "🤖 Ingrid AI - Assistente virtuale su WhatsApp con avatar animato",
+        "🎯 Tab switching fluido con animazioni fade-in",
+        "📱 Design responsive ottimizzato per mobile (tab su 2 righe)",
+        "🎨 Avatar SVG animato per Ingrid con gradient personalizzato",
+        "✨ Tags/badges per features Ingrid (24/7, Risposte Immediate, ecc.)",
+        "🔧 JavaScript migliorato per gestione tab e validazione",
+        "📊 Tracking eventi per ogni tab e azione"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2025-01-07",
+      "changes": [
+        "Release iniziale",
+        "Supporto per tre modalità di registrazione separate"
+      ]
+    }
+  ]
+}
