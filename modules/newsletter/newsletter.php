@@ -230,9 +230,15 @@ $subtitle = htmlspecialchars($subtitle);
                         </a>
                         
                         <div class="newsletter__ingrid-features">
-                            <span class="newsletter__ingrid-tag">🤖 Assistenza 24/7</span>
-                            <span class="newsletter__ingrid-tag">💬 Risposte Immediate</span>
-                            <span class="newsletter__ingrid-tag">🎯 Sempre Disponibile</span>
+                            <span class="newsletter__ingrid-tag">
+                                <i class="fas fa-robot"></i> Assistenza 24/7
+                            </span>
+                            <span class="newsletter__ingrid-tag">
+                                <i class="fas fa-comments"></i> Risposte Immediate
+                            </span>
+                            <span class="newsletter__ingrid-tag">
+                                <i class="fas fa-bullseye"></i> Sempre Disponibile
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -20,6 +20,15 @@
             this.whatsappButton = this.element.querySelector('.newsletter__button--whatsapp');
             this.whatsappNameInput = this.element.querySelector('#whatsapp-name');
             
+            // Debug
+            console.log('Newsletter: Elementi trovati', {
+                tabs: this.tabs.length,
+                panels: this.panels.length,
+                form: !!this.form,
+                whatsappButton: !!this.whatsappButton,
+                whatsappNameInput: !!this.whatsappNameInput
+            });
+            
             this.init();
         }
 
@@ -257,6 +266,12 @@
            ======================================== */
 
         initWhatsAppChat() {
+            if (!this.whatsappButton) {
+                console.warn('Newsletter: Pulsante WhatsApp non trovato');
+                return;
+            }
+            
+            console.log('Newsletter: Inizializzo WhatsApp chat', this.whatsappButton);
             this.whatsappButton.addEventListener('click', this.handleWhatsAppClick.bind(this));
         }
 
