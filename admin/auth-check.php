@@ -12,14 +12,11 @@ if (!defined('AUTH_CHECK_INCLUDED')) {
     require_once __DIR__ . '/../core/Auth/AuthService.php';
     require_once __DIR__ . '/../core/Auth/AuthMiddleware.php';
 
-    use BolognaMarathon\Auth\AuthService;
-    use BolognaMarathon\Auth\AuthMiddleware;
-
-    // Inizializza servizi auth
+    // Inizializza servizi auth (usa namespace completi)
     $database = new Database();
     $db = $database->getConnection();
-    $authService = new AuthService($db);
-    $authMiddleware = new AuthMiddleware($authService);
+    $authService = new \BolognaMarathon\Auth\AuthService($db);
+    $authMiddleware = new \BolognaMarathon\Auth\AuthMiddleware($authService);
 
     // Verifica autenticazione (se auth enabled, redirect a login se necessario)
     $authMiddleware->handle();
