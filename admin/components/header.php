@@ -1,3 +1,16 @@
+<?php
+// Calcola percorso base dinamico per evitare problemi di navigazione
+$currentDir = dirname($_SERVER['PHP_SELF']);
+$basePath = '';
+if (strpos($currentDir, '/admin/pages') !== false) {
+    $basePath = '../'; // Se siamo in admin/pages/
+} elseif (strpos($currentDir, '/admin') !== false) {
+    $basePath = ''; // Se siamo in admin/
+} else {
+    $basePath = 'admin/'; // Se siamo fuori da admin
+}
+?>
+
 <!-- Admin Header -->
 <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
     <div class="flex items-center justify-between">
@@ -66,7 +79,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">admin@bolognamarathon.run</p>
                     </div>
                     
-                    <a href="pages/settings.php" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="<?= $basePath ?>pages/settings.php" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="fas fa-cog w-4 mr-2"></i> Impostazioni
                     </a>
                     
