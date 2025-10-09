@@ -1,0 +1,33 @@
+{
+    "name": "bologna-marathon/sito-modulare",
+    "description": "Sistema modulare SSR per Bologna Marathon",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "BolognaMarathon\\Core\\": "core/",
+            "BolognaMarathon\\Services\\": "core/Services/",
+            "BolognaMarathon\\API\\": "core/API/",
+            "BolognaMarathon\\Utils\\": "core/Utils/",
+            "BolognaMarathon\\Auth\\": "core/Auth/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ]
+    }
+}
+
