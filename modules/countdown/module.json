@@ -1,0 +1,98 @@
+{
+  "name": "countdown",
+  "slug": "countdown",
+  "aliases": ["countdown", "countdownModule", "countdown_module"],
+  "version": "1.0.0",
+  "description": "Modulo countdown elegante con due varianti: banner full-width e card sovrapposta",
+  "category": "content",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "countdown/countdown.php",
+  "default_config": {
+    "variant": "banner",
+    "target_date": "2026-03-01T09:00:00",
+    "title": "",
+    "subtitle": "Mancano solo",
+    "logo_1": "assets/images/logo-bologna-marathon.svg",
+    "logo_2": "assets/images/logo-bologna-marathon.svg",
+    "show_logos": true,
+    "theme_class": ""
+  },
+  "assets": {
+    "css": ["countdown/countdown.css"],
+    "js": ["countdown/countdown.js"],
+    "vendors": []
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "variant": {
+      "type": "select",
+      "label": "Variante Layout",
+      "options": [
+        { "value": "banner", "label": "Banner Full-Width" },
+        { "value": "card", "label": "Card Sovrapposta" }
+      ],
+      "default": "banner",
+      "description": "Scegli tra banner a tutta larghezza o card sovrapposta"
+    },
+    "target_date": {
+      "type": "datetime",
+      "label": "Data Target",
+      "placeholder": "2026-03-01T09:00:00",
+      "required": true,
+      "default": "2026-03-01T09:00:00",
+      "description": "Data e ora dell'evento in formato ISO (YYYY-MM-DDTHH:mm:ss)"
+    },
+    "title": {
+      "type": "text",
+      "label": "Titolo",
+      "placeholder": "Titolo countdown (opzionale)",
+      "required": false,
+      "default": "",
+      "description": "Titolo sopra il countdown (lascia vuoto per nascondere)"
+    },
+    "subtitle": {
+      "type": "text",
+      "label": "Sottotitolo",
+      "placeholder": "Mancano solo",
+      "required": false,
+      "default": "Mancano solo",
+      "description": "Testo sopra il countdown"
+    },
+    "show_logos": {
+      "type": "boolean",
+      "label": "Mostra Loghi",
+      "default": true,
+      "description": "Mostra i loghi ai lati (solo variante banner)"
+    },
+    "logo_1": {
+      "type": "image",
+      "label": "Logo Sinistro",
+      "placeholder": "assets/images/logo-bologna-marathon.svg",
+      "default": "assets/images/logo-bologna-marathon.svg",
+      "description": "URL del logo sinistro"
+    },
+    "logo_2": {
+      "type": "image",
+      "label": "Logo Destro",
+      "placeholder": "assets/images/logo-bologna-marathon.svg",
+      "default": "assets/images/logo-bologna-marathon.svg",
+      "description": "URL del logo destro"
+    },
+    "theme_class": {
+      "type": "select",
+      "label": "Tema Colore",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "theme-marathon", "label": "Marathon" },
+        { "value": "theme-portici", "label": "30K Portici" },
+        { "value": "theme-5k", "label": "5K City Run" },
+        { "value": "theme-kidsrun", "label": "Kids Run" },
+        { "value": "theme-run-tune-up", "label": "Run Tune Up" }
+      ],
+      "default": "",
+      "description": "Tema colore per il countdown"
+    }
+  }
+}
+

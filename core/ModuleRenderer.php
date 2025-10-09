@@ -192,15 +192,31 @@ class ModuleRenderer {
     
     /**
      * Ottiene le istanze di moduli di una pagina
+     * Se l'istanza usa un template, prende la config dal master
      */
     public function getPageModuleInstances($pageId) {
-        $sql = "SELECT mi.*
+        $sql = "SELECT 
+                    mi.*,
+                    COALESCE(template.config, mi.config) as effective_config,
+                    template.template_name,
+                    template.id as template_master_id
                 FROM module_instances mi
+                LEFT JOIN module_instances template ON mi.template_instance_id = template.id AND template.is_template = 1
                 WHERE mi.page_id = ? AND mi.is_active = 1
                 ORDER BY COALESCE(mi.parent_instance_id, 0), mi.order_index";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$pageId]);
-        return $stmt->fetchAll();
+        $instances = $stmt->fetchAll();
+        
+        // Sostituisci config con effective_config per ogni istanza
+        foreach ($instances as &$instance) {
+            if (isset($instance['effective_config'])) {
+                $instance['config'] = $instance['effective_config'];
+                unset($instance['effective_config']);
+            }
+        }
+        
+        return $instances;
     }
 
     /**
@@ -517,6 +533,9 @@ class ModuleRenderer {
             case 'footer':
                 return $this->getFooterData($config);
             case 'race-cards':
+            case 'partner':
+            case 'sponsors':
+                return $this->getPartnerData($config);
             case 'raceCards':
                 return $this->getRaceCardsData($config);
             case 'button':
@@ -941,6 +960,37 @@ class ModuleRenderer {
             'image_alt' => $config['image_alt'] ?? 'Maratona di Bologna',
             'image_position' => $config['image_position'] ?? 'right',
             'stats' => $config['stats'] ?? $defaultStats
+        ];
+    }
+
+    /**
+     * Ottiene tutti gli sponsor dal database
+     */
+    public function getSponsors() {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, name, category, group_type, image_path, website_url, description, is_active, sort_order
+                FROM sponsors 
+                WHERE is_active = 1 
+                ORDER BY sort_order ASC, name ASC
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log('Errore nel caricamento sponsor: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Ottiene dati per il modulo partner
+     */
+    private function getPartnerData($config) {
+        return [
+            'title' => $config['title'] ?? 'I Nostri Partner',
+            'show_group1' => $config['show_group1'] ?? true,
+            'show_group2' => $config['show_group2'] ?? true,
+            'show_group3' => $config['show_group3'] ?? true
         ];
     }
 }

@@ -30,12 +30,6 @@
     -ms-user-select: none;
 }
 
-.btn:focus,button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.3);
-}
-
-
 /* Shimmer effect */
 .btn::before, button::before {
     content: '';
@@ -50,6 +44,11 @@
 
 .btn:hover::before,buttonbtn:hover::before {
     left: 100%;
+}
+
+.btn:focus,button:focus {
+    outline: none;
+    /* box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.3); */
 }
 
 /* Disabled state */
@@ -100,7 +99,7 @@ button.btn-disabled,
 
 .btn-primary:hover, button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 20px rgba(var(--secondary-rgb), 0.8), var(--shadow-lg);
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3), var(--shadow-lg);
     color: #ffffff;
     background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
 }
@@ -127,6 +126,7 @@ button.btn-disabled,
     color: var(--text-primary);
     border: 1px solid var(--bg-glass-hover);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-ghost:hover {

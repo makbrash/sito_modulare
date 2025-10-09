@@ -5,6 +5,7 @@
 
 class BolognaMarathonApp {
     constructor() {
+        this.countdownInstances = [];
         this.init();
     }
     
@@ -12,6 +13,83 @@ class BolognaMarathonApp {
         this.setupMenu();
         this.setupModules();
         this.setupScrollEffects();
+        this.setupCountdowns();
+    }
+    
+    /**
+     * Setup countdown centralizzato
+     * Gestisce tutti i countdown presenti nella pagina
+     */
+    setupCountdowns() {
+        const countdownElements = document.querySelectorAll('[data-countdown]');
+        countdownElements.forEach(element => {
+            const targetDate = element.getAttribute('data-countdown');
+            if (targetDate) {
+                this.initCountdown(element, targetDate);
+            }
+        });
+    }
+    
+    /**
+     * Inizializza un countdown specifico
+     */
+    initCountdown(element, targetDate) {
+        const countdownDate = new Date(targetDate).getTime();
+        const format = element.getAttribute('data-countdown-format') || 'full';
+        
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const distance = countdownDate - now;
+            
+            if (distance < 0) {
+                element.innerHTML = '<span class="countdown-ended">Evento concluso</span>';
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // Formati diversi
+            if (format === 'compact') {
+                // Formato compatto per menu: 146g 12h 54m 05s
+                element.textContent = `${days}g ${hours}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+            } else if (format === 'full') {
+                // Formato completo per modulo countdown
+                this.renderFullCountdown(element, days, hours, minutes, seconds);
+            }
+        };
+        
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 1000);
+        
+        // Salva istanza per cleanup
+        this.countdownInstances.push({ element, interval });
+    }
+    
+    /**
+     * Render countdown formato completo
+     */
+    renderFullCountdown(element, days, hours, minutes, seconds) {
+        element.innerHTML = `
+            <div class="countdown-item">
+                <div class="countdown-number">${days}</div>
+                <div class="countdown-label">Gior.</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number">${hours}</div>
+                <div class="countdown-label">Ore</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number">${minutes.toString().padStart(2, '0')}</div>
+                <div class="countdown-label">Min.</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number">${seconds.toString().padStart(2, '0')}</div>
+                <div class="countdown-label">Sec.</div>
+            </div>
+        `;
     }
     
     /**

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Smartphone Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upload-btn {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #333;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-btn:active {
+            transform: translateY(0);
+        }
+
+        .upload-btn input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .viewer {
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .viewer {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>📱 Carica Screenshot</h2>
+            
+            <div class="button-group">
+                <button class="upload-btn">
+                    Screenshot 1
+                    <input type="file" accept="image/*" id="upload1">
+                </button>
+                
+                <button class="upload-btn">
+                    Screenshot 2
+                    <input type="file" accept="image/*" id="upload2">
+                </button>
+                
+                <button class="upload-btn">
+                    Screenshot 3
+                    <input type="file" accept="image/*" id="upload3">
+                </button>
+            </div>
+
+            <div class="info">
+                <strong>💡 Suggerimenti:</strong><br>
+                • Clicca sui pulsanti per caricare immagini<br>
+                • Passa il mouse sullo smartphone per vederlo muovere<br>
+                • Le immagini appariranno sul display
+            </div>
+        </div>
+
+        <div class="viewer">
+            <canvas id="canvas3d"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, phone, screen;
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
+
+        function init() {
+            const container = document.getElementById('canvas3d');
+            
+            // Scene
+            scene = new THREE.Scene();
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                45,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 0, 6);
+            camera.lookAt(0, 0, 0);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: container, 
+                antialias: true, 
+                alpha: true 
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const backLight = new THREE.DirectionalLight(0x6366f1, 0.3);
+            backLight.position.set(-5, -5, -5);
+            scene.add(backLight);
+            
+            // Create Phone
+            createPhone();
+            
+            // Events
+            container.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('resize', onWindowResize);
+            
+            // File uploads
+            document.getElementById('upload1').addEventListener('change', (e) => loadImage(e));
+            document.getElementById('upload2').addEventListener('change', (e) => loadImage(e));
+            document.getElementById('upload3').addEventListener('change', (e) => loadImage(e));
+            
+            animate();
+        }
+
+        function createPhone() {
+            const group = new THREE.Group();
+            
+            // Phone body with rounded edges
+            const bodyShape = new THREE.Shape();
+            const width = 2;
+            const height = 4;
+            const radius = 0.2;
+            
+            bodyShape.moveTo(-width/2 + radius, -height/2);
+            bodyShape.lineTo(width/2 - radius, -height/2);
+            bodyShape.quadraticCurveTo(width/2, -height/2, width/2, -height/2 + radius);
+            bodyShape.lineTo(width/2, height/2 - radius);
+            bodyShape.quadraticCurveTo(width/2, height/2, width/2 - radius, height/2);
+            bodyShape.lineTo(-width/2 + radius, height/2);
+            bodyShape.quadraticCurveTo(-width/2, height/2, -width/2, height/2 - radius);
+            bodyShape.lineTo(-width/2, -height/2 + radius);
+            bodyShape.quadraticCurveTo(-width/2, -height/2, -width/2 + radius, -height/2);
+            
+            const extrudeSettings = {
+                depth: 0.15,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.03,
+                bevelSegments: 5
+            };
+            
+            const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, extrudeSettings);
+            const bodyMaterial = new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+            
+            // Screen
+            const screenGeometry = new THREE.PlaneGeometry(1.8, 3.6);
+            const screenMaterial = new THREE.MeshBasicMaterial({
+                color: 0x111111,
+                side: THREE.DoubleSide
+            });
+            
+            screen = new THREE.Mesh(screenGeometry, screenMaterial);
+            screen.position.z = 0.25; // Staccato dal corpo per evitare sovrapposizione
+            screen.rotation.y = Math.PI; // Gira il piano verso l'esterno
+            group.add(screen);
+            
+            // Camera notch (top) - using cylinder + spheres for rounded ends
+            const notchGroup = new THREE.Group();
+            
+            const notchCylinder = new THREE.CylinderGeometry(0.03, 0.03, 0.15, 16);
+            const notchMaterial = new THREE.MeshStandardMaterial({
+                color: 0x0a0a0a
+            });
+            const notchBody = new THREE.Mesh(notchCylinder, notchMaterial);
+            notchBody.rotation.z = Math.PI / 2;
+            notchGroup.add(notchBody);
+            
+            const notchSphere1 = new THREE.SphereGeometry(0.03, 16, 16);
+            const notchEnd1 = new THREE.Mesh(notchSphere1, notchMaterial);
+            notchEnd1.position.x = -0.075;
+            notchGroup.add(notchEnd1);
+            
+            const notchEnd2 = new THREE.Mesh(notchSphere1, notchMaterial);
+            notchEnd2.position.x = 0.075;
+            notchGroup.add(notchEnd2);
+            
+            notchGroup.position.set(0, 1.7, 0.16);
+            group.add(notchGroup);
+            
+            // Side buttons
+            const buttonGeometry = new THREE.BoxGeometry(0.05, 0.3, 0.08);
+            const buttonMaterial = new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            
+            const button1 = new THREE.Mesh(buttonGeometry, buttonMaterial);
+            button1.position.set(-1.05, 0.5, 0.075);
+            group.add(button1);
+            
+            const button2 = new THREE.Mesh(buttonGeometry, buttonMaterial);
+            button2.position.set(-1.05, 0, 0.075);
+            group.add(button2);
+            
+            phone = group;
+            scene.add(phone);
+        }
+
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const texture = new THREE.Texture(img);
+                    texture.needsUpdate = true;
+                    
+                    // 🎯 Fix specchio: inverti texture orizzontalmente
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.repeat.x = -1;
+                    
+                    // ✨ Fix sgranatura: filtri di alta qualità
+                    texture.minFilter = THREE.LinearMipmapLinearFilter;
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.generateMipmaps = true;
+                    
+                    // 🚀 Anisotropic filtering per massima nitidezza
+                    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+                    texture.anisotropy = maxAnisotropy;
+                    
+                    // Use MeshBasicMaterial which doesn't need lights
+                    const newMaterial = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        side: THREE.DoubleSide,
+                        transparent: false
+                    });
+                    
+                    // Dispose old material
+                    if (screen.material.map) {
+                        screen.material.map.dispose();
+                    }
+                    screen.material.dispose();
+                    
+                    // Apply new material
+                    screen.material = newMaterial;
+                    
+                    console.log('✅ Texture loaded:', img.width, 'x', img.height, '| Anisotropy:', maxAnisotropy);
+                };
+                img.onerror = function() {
+                    console.error('Error loading image');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function onMouseMove(event) {
+            const rect = event.target.getBoundingClientRect();
+            mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas3d');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Smooth mouse follow (limited range)
+            targetRotationY = mouseX * 0.2;
+            targetRotationX = mouseY * 0.15;
+            
+            phone.rotation.y += (targetRotationY - phone.rotation.y) * 0.05;
+            phone.rotation.x += (targetRotationX - phone.rotation.x) * 0.05;
+            
+            // Gentle floating animation (reduced)
+            phone.position.y = Math.sin(Date.now() * 0.001) * 0.05;
+            phone.position.x = 0;
+            phone.position.z = 0;
+            
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>

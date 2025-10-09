@@ -107,6 +107,13 @@
                 panel.classList.toggle('newsletter__panel--active', isActive);
                 panel.setAttribute('aria-hidden', !isActive);
             });
+            
+            // Update service descriptions
+            const serviceInfos = this.element.querySelectorAll('.newsletter__service-info');
+            serviceInfos.forEach(info => {
+                const infoType = info.classList.contains(`newsletter__service-info--${tabName}`);
+                info.classList.toggle('newsletter__service-info--active', infoType);
+            });
         }
 
         /* ========================================
@@ -157,24 +164,13 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                // Prova a decodificare JSON in modo robusto
+                // Leggi una sola volta il body e prova a decodificare JSON
+                const raw = await response.text();
                 let result;
-                const contentType = response.headers.get('content-type') || '';
                 try {
-                    if (contentType.includes('application/json')) {
-                        result = await response.json();
-                    } else {
-                        const text = await response.text();
-                        try {
-                            result = JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(text && text.trim().length < 200 ? text : 'Risposta non valida dal server');
-                        }
-                    }
-                } catch (parseError) {
-                    // Fallback finale a testo grezzo
-                    const text = await response.text().catch(() => '');
-                    throw new Error(text && text.trim() ? text.trim() : 'Errore durante la lettura della risposta');
+                    result = JSON.parse(raw);
+                } catch (e) {
+                    throw new Error(raw && raw.trim().length < 200 ? raw.trim() : 'Risposta non valida dal server');
                 }
 
                 if (result.success) {

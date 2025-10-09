@@ -20,6 +20,7 @@
     box-shadow: 2px 0 4px rgba(0,0,0,0.1);
     max-width: 300px;
     box-sizing: border-box;
+    z-index: 1000000;
 }
 
 .sidebar h3 {
@@ -43,6 +44,11 @@
     flex-direction: column;
     /* background: white; */
     /* background: #f5f5f5; */
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .page-canvas {
@@ -95,6 +101,7 @@
     transform: translateY(-100%);
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 1000000;
 }
 
@@ -545,3 +552,391 @@
         border-top: 1px solid #dee2e6;
     }
 }
+
+
+
+/*admin panel*/
+        /* Page Builder Overrides - Disabilita classi fixed */
+        .page-canvas [class*="fixed"],
+        .page-canvas .sticky{
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: auto !important;
+            transform: none !important;
+        }
+        
+        /* Sidebar Fisse */
+        .page-builder .sidebar,
+        .page-builder .config-panel {
+            position: sticky;
+            top: 1rem;
+            max-height: calc(100vh);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* Scrollbar personalizzate per le sidebar */
+        .page-builder .sidebar::-webkit-scrollbar,
+        .page-builder .config-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .page-builder .sidebar::-webkit-scrollbar-track,
+        .page-builder .config-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .page-builder .sidebar::-webkit-scrollbar-thumb,
+        .page-builder .config-panel::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .page-builder .sidebar::-webkit-scrollbar-thumb:hover,
+        .page-builder .config-panel::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .modal-header h3 i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f8f9fa;
+            color: #dc3545;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        
+        /* Form Groups nei Modal */
+        .modal-body .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .modal-body .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .modal-body label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .modal-body input[type="text"],
+        .modal-body select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        .modal-body input[type="text"]:focus,
+        .modal-body select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(35, 168, 235, 0.1);
+        }
+        
+        .modal-body small {
+            font-size: 0.875rem;
+        }
+        
+        /* Page Actions Buttons */
+        .page-actions button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+/* Page Status Badge */
+.page-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.page-status--published {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.page-status--draft {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* === SISTEMA MODELLI MODULI === */
+
+/* Template Badge */
+.template-badge {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 2px solid;
+}
+
+.template-badge--active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #5568d3;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+}
+
+.template-badge i {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.template-badge strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.template-badge p {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* Template Selector */
+.template-selector {
+    background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
+    border: 2px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.template-selector label {
+    color: #0066cc;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.template-select {
+    width: 100%;
+    padding: 0.625rem;
+    border: 2px solid #b3d9ff;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.template-select:hover {
+    border-color: #66b3ff;
+}
+
+.template-select:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+/* Template Preview (readonly) */
+.template-preview {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.template-preview strong {
+    color: #495057;
+    font-size: 0.9375rem;
+}
+
+.template-preview small {
+    color: #6c757d;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.template-preview > div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.template-preview > div:last-child {
+    border-bottom: none;
+}
+
+/* Template Actions */
+.template-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.template-actions .btn-warning {
+    background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
+    color: white;
+    border: none;
+}
+
+.template-actions .btn-warning:hover {
+    background: linear-gradient(135deg, #fb8c00 0%, #f57c00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.template-actions .btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.template-actions .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Pulsante Salva come Modello */
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+        
+        .page-status i {
+            margin-right: 0.25rem;
+        }
+        
+        /* Button Success */
+        .btn-success {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        /* Button Warning */
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+ 

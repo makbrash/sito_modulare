@@ -3,6 +3,7 @@ body {
 	font-size: 18px;
 	line-height: 1.5;
 	color: var(--text-primary);
+	overflow-y: scroll!important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -16,7 +17,7 @@ h1 {font-size:var(--text-h1);}
 h2 {font-size:var(--text-h1);}
 h3 {font-size:var(--text-h3);}
 h4 {font-size:var(--text-h4);}
-h5 {font-size:var(--text-h5);}
+h5 {font-size:var(--text-h5);font-weight: normal;}
 h6 {font-size:var(--text-h6);}
 
 
@@ -59,6 +60,7 @@ h6 strong, h6 b {
 h1 strong, h2 strong, h3 strong, h4 strong, h5 strong, h6 strong {
     font-weight: inherit;
     font-size: inherit;
+    white-space: nowrap;
 }
 
 h1 b, h2 b, h3 b, h4 b, h5 b, h6 b {

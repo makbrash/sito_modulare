@@ -5,7 +5,6 @@
  * Usa il sistema CSS esistente: h1, h2, p, .card-tag, .container, .row, .col-*
  */
 
-
 /* Block principale */
 .presentation {
   background: var(--gradient-dark);
@@ -16,15 +15,37 @@
 
 /* Contenuto */
 .presentation_content {
-  /* padding: var(--space-); */
-  /* display: flex; */
-  /* flex-direction: column; */
-  /* height: 100%; */
   padding: var(--space-3xl) var(--space-md);
   max-width: 900px;
   margin: auto;
 }
 
+/* Colonne - Desktop */
+.presentation__image-col {
+  order: 2;
+}
+
+.presentation__text-col {
+  order: 1;
+}
+
+/* Immagine a sinistra su desktop */
+.presentation--image-left .presentation__image-col {
+  order: 1;
+}
+
+.presentation--image-left .presentation__text-col {
+  order: 2;
+}
+
+/* Immagine a destra su desktop */
+.presentation--image-right .presentation__image-col {
+  order: 2;
+}
+
+.presentation--image-right .presentation__text-col {
+  order: 1;
+}
 
 /* Wrapper immagine */
 .presentation_image-wrapper {
@@ -47,20 +68,34 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-md);
-  /* margin-top: var(--space-lg); */
   flex-direction: row;
 }
 
-/* Responsive */
+/* Responsive - Mobile */
 @media (max-width: 768px) {
+  /* Su mobile: SEMPRE immagine prima, testo dopo */
+  .presentation__image-col {
+    order: 1;
+  }
+  .row--align-center{
+    min-height: 100px!important;
+  }
+  
+  .presentation__text-col {
+    order: 2!important;
+  }
+  
   .presentation_image-wrapper {
     height: 50vh;
     min-height: 300px;
   }
   
   .presentation_stats {
-    /* flex-direction: column; */
     gap: var(--space-xs);
+  }
+  
+  .presentation_content {
+    padding: var(--space-xl) var(--space-md);
   }
 }
 

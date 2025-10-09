@@ -1,143 +1,206 @@
 <?php
 /**
- * Sync Modules Utility
- * Sincronizza automaticamente i moduli dal filesystem al database
+ * Sync Modules - Auto-registrazione moduli da filesystem
+ * Legge i module.json e sincronizza con il database
  */
 
-require_once __DIR__ . '/../config/database.php';
+require_once '../config/database.php';
 
-try {
-    $database = new Database();
-    $db = $database->getConnection();
+$database = new Database();
+$db = $database->getConnection();
+
+// Percorso moduli
+$modulesPath = __DIR__ . '/../modules/';
+
+// Moduli registrati
+$registered = [];
+$errors = [];
+
+// Scansiona cartelle moduli
+$moduleDirs = array_filter(glob($modulesPath . '*'), 'is_dir');
+
+foreach ($moduleDirs as $moduleDir) {
+    $moduleName = basename($moduleDir);
+    $manifestPath = $moduleDir . '/module.json';
     
-    echo "<h2>🔄 Sync Moduli Automatico</h2>";
-    
-    // Directory moduli
-    $modulesPath = __DIR__ . '/../modules/';
-    
-    // Moduli esistenti nel filesystem (con manifest)
-    $modulesInFilesystem = [];
-    $manifests = [];
-    if (is_dir($modulesPath)) {
-        $directories = scandir($modulesPath);
-        foreach ($directories as $dir) {
-            if ($dir !== '.' && $dir !== '..' && is_dir($modulesPath . $dir)) {
-                $moduleFile = $modulesPath . $dir . '/' . $dir . '.php';
-                $manifestPath = $modulesPath . $dir . '/module.json';
-                if (file_exists($moduleFile)) {
-                    $modulesInFilesystem[] = $dir;
-                    if (file_exists($manifestPath)) {
-                        $content = file_get_contents($manifestPath);
-                        $json = json_decode($content, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
-                            $manifests[$dir] = $json;
-                        }
-                    }
-                }
-            }
-        }
+    if (!file_exists($manifestPath)) {
+        continue;
     }
     
-    echo "<h3>📁 Moduli trovati nel filesystem:</h3>";
-    echo "<ul>";
-    foreach ($modulesInFilesystem as $module) {
-        echo "<li><strong>{$module}</strong></li>";
+    // Leggi manifest
+    $manifest = json_decode(file_get_contents($manifestPath), true);
+    
+    if (!$manifest) {
+        $errors[] = "Errore lettura manifest: $moduleName";
+        continue;
     }
-    echo "</ul>";
     
-    // Moduli esistenti nel database
-    $stmt = $db->query("SELECT name, component_path, css_class, default_config FROM modules_registry WHERE is_active = 1");
-    $modulesInDB = $stmt->fetchAll();
+    // Prepara dati per database
+    $name = $manifest['name'] ?? $moduleName;
+    $componentPath = $manifest['component_path'] ?? "$moduleName/$moduleName.php";
+    $cssClass = $manifest['slug'] ?? $moduleName;
+    $defaultConfig = json_encode($manifest['default_config'] ?? []);
+    $isActive = $manifest['is_active'] ?? true;
     
-    echo "<h3>🗄️ Moduli nel database:</h3>";
-    echo "<ul>";
-    foreach ($modulesInDB as $module) {
-        echo "<li><strong>{$module['name']}</strong> - {$module['component_path']}</li>";
-    }
-    echo "</ul>";
-    
-    // Niente hardcoding: usa manifest se presente, altrimenti fallback convenzionale
-    
-    // Sincronizza moduli
-    echo "<h3>⚡ Sincronizzazione:</h3>";
-    
-    foreach ($modulesInFilesystem as $moduleName) {
-        $componentPath = $moduleName . '/' . $moduleName . '.php';
-        $defaultConfig = [];
-        $cssClass = $moduleName . '-module';
-        $registryName = $moduleName; // slug
-        if (isset($manifests[$moduleName])) {
-            $m = $manifests[$moduleName];
-            $componentPath = isset($m['component_path']) ? $m['component_path'] : $componentPath;
-            $cssClass = isset($m['css_class']) ? $m['css_class'] : $cssClass;
-            $defaultConfig = isset($m['default_config']) && is_array($m['default_config']) ? $m['default_config'] : [];
-            $registryName = isset($m['slug']) ? $m['slug'] : $registryName;
-        }
+    try {
+        // Inserisci o aggiorna
+        $stmt = $db->prepare("
+            INSERT INTO modules_registry (name, component_path, css_class, default_config, is_active) 
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                component_path = VALUES(component_path),
+                css_class = VALUES(css_class),
+                default_config = VALUES(default_config),
+                is_active = VALUES(is_active)
+        ");
         
-        // Verifica se il modulo esiste già
-        $stmt = $db->prepare("SELECT id FROM modules_registry WHERE name = ?");
-        $stmt->execute([$registryName]);
-        $exists = $stmt->fetch();
+        $stmt->execute([$name, $componentPath, $cssClass, $defaultConfig, $isActive ? 1 : 0]);
         
-        if ($exists) {
-            // Aggiorna configurazione se necessario
-            $stmt = $db->prepare("UPDATE modules_registry SET 
-                component_path = ?, 
-                css_class = ?, 
-                default_config = ? 
-                WHERE name = ?");
-            $stmt->execute([
-                $componentPath,
-                $cssClass,
-                json_encode($defaultConfig),
-                $registryName
-            ]);
-            echo "<p>✅ <strong>{$registryName}</strong> - Aggiornato</p>";
-        } else {
-            // Inserisci nuovo modulo
-            $stmt = $db->prepare("INSERT INTO modules_registry (name, component_path, css_class, default_config) VALUES (?, ?, ?, ?)");
-            $stmt->execute([
-                $registryName,
-                $componentPath,
-                $cssClass,
-                json_encode($defaultConfig)
-            ]);
-            echo "<p>🆕 <strong>{$registryName}</strong> - Aggiunto</p>";
-        }
+        $registered[] = $name;
+        
+    } catch (Exception $e) {
+        $errors[] = "Errore registrazione $name: " . $e->getMessage();
     }
-    
-    // Rimuovi moduli non più esistenti nel filesystem
-    echo "<h3>🗑️ Pulizia moduli obsoleti:</h3>";
-    foreach ($modulesInDB as $dbModule) {
-        // Disattiva se nessuna cartella con slug corrispondente
-        if (!in_array($dbModule['name'], $modulesInFilesystem)) {
-            $stmt = $db->prepare("UPDATE modules_registry SET is_active = 0 WHERE name = ?");
-            $stmt->execute([$dbModule['name']]);
-            echo "<p>❌ <strong>{$dbModule['name']}</strong> - Disattivato (non trovato nel filesystem)</p>";
-        }
-    }
-    
-    // Verifica finale
-    echo "<h3>✅ Stato finale:</h3>";
-    $stmt = $db->query("SELECT name, component_path, is_active FROM modules_registry ORDER BY name");
-    $finalModules = $stmt->fetchAll();
-    
-    echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
-    echo "<tr><th>Modulo</th><th>Percorso</th><th>Stato</th></tr>";
-    foreach ($finalModules as $module) {
-        $status = $module['is_active'] ? '✅ Attivo' : '❌ Disattivo';
-        echo "<tr>";
-        echo "<td><strong>{$module['name']}</strong></td>";
-        echo "<td>{$module['component_path']}</td>";
-        echo "<td>{$status}</td>";
-        echo "</tr>";
-    }
-    echo "</table>";
-    
-    echo "<p><a href='../index.php'>🔗 Vai alla Homepage</a></p>";
-    echo "<p><a href='sync-modules.php'>🔄 Riavvia Sync</a></p>";
-    
-} catch (Exception $e) {
-    echo "<p>❌ Errore: " . $e->getMessage() . "</p>";
 }
+
 ?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync Moduli - Bologna Marathon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 3rem;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.125rem;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 1.5rem;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin-bottom: 1.5rem;
+        }
+        
+        .module-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        
+        .module-list li {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .module-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .module-list i {
+            color: #28a745;
+            font-size: 1.25rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-sync"></i> Sincronizzazione Moduli</h1>
+        <p class="subtitle">Auto-registrazione da filesystem</p>
+        
+        <?php if (!empty($registered)): ?>
+            <div class="success">
+                <strong><i class="fas fa-check-circle"></i> Sincronizzazione completata!</strong>
+                <p style="margin-top: 0.5rem;">Moduli registrati: <?= count($registered) ?></p>
+                <ul class="module-list">
+                    <?php foreach ($registered as $mod): ?>
+                        <li><i class="fas fa-cube"></i> <?= htmlspecialchars($mod) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($errors)): ?>
+            <div class="error">
+                <strong><i class="fas fa-exclamation-triangle"></i> Errori durante la sincronizzazione:</strong>
+                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                    <?php foreach ($errors as $error): ?>
+                        <li><?= htmlspecialchars($error) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+        
+        <a href="page-builder.php" class="btn">
+            <i class="fas fa-edit"></i> Vai al Page Builder
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "name": "partner",
+  "slug": "partner",
+  "aliases": ["partner", "sponsor", "sponsors"],
+  "version": "1.0.0",
+  "description": "Modulo per visualizzare partner e sponsor con gallerie Swiper responsive",
+  "category": "content",
+  "author": "Bologna Marathon Team",
+  "is_active": true,
+  "component_path": "partner/partner.php",
+  "default_config": {
+    "title": "I Nostri Partner",
+    "hide_texts": false,
+    "show_group1": true,
+    "show_group2": true,
+    "show_group3": true,
+    "show_group4": true
+  },
+  "assets": {
+    "css": ["partner/partner.css"],
+    "js": ["partner/partner.js"],
+    "vendors": ["swiper"]
+  },
+  "dependencies": [],
+  "ui_schema": {
+    "title": {
+      "type": "text",
+      "label": "Titolo Sezione",
+      "placeholder": "Inserisci il titolo",
+      "required": false,
+      "default": "I Nostri Partner"
+    },
+    "hide_texts": {
+      "type": "boolean",
+      "label": "Nascondi Tutti i Testi",
+      "default": false,
+      "description": "Nasconde titolo principale, sottotitolo e titoli dei gruppi"
+    },
+    "show_group1": {
+      "type": "boolean",
+      "label": "Mostra Sponsor Principali",
+      "default": true
+    },
+    "show_group2": {
+      "type": "boolean",
+      "label": "Mostra Sponsor",
+      "default": true
+    },
+    "show_group3": {
+      "type": "boolean",
+      "label": "Mostra Sponsor Tecnici",
+      "default": true
+    },
+    "show_group4": {
+      "type": "boolean",
+      "label": "Mostra Credits",
+      "default": true,
+      "description": "Mostra la sezione credits con loghi più piccoli"
+    }
+  }
+}

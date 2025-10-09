@@ -9,9 +9,9 @@
 .highlights {
   background: var(--gradient-dark);
   padding: var(
-  --space-xl) 0;
+  --space-3xl) 0;
   width: 100%;
-  padding-bottom: 0;
+  /* padding-bottom: 0; */
 }
 
 /* Titolo */
@@ -58,7 +58,7 @@
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--bg-primary);
+  /* background: var(--bg-primary); */
   /* border-right: 1px solid #fff; */
   padding-bottom: var(--space-xl);
 }
@@ -104,7 +104,7 @@ a.highlight_card {
 
 /* Titolo news */
 .highlight_title {
-  /* font-size: var(--text-lg); */
+  font-size: 2.5rem;
   /* font-weight: 600; */
   /* line-height: 1.4; */
   /* color: var(--text-primary); */
@@ -120,8 +120,8 @@ a.highlight_card {
 /* Navigation */
 .highlights_navigation {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 38%;
+  transform: translateY(-62%);
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -145,6 +145,7 @@ a.highlight_card {
   transition: all var(--transition-normal);
   pointer-events: all;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .highlights_btn:hover {
@@ -188,6 +189,9 @@ a.highlight_card {
   .highlights_btn--next {
     right: var(--space-sm);
   }
+    .highlight_title {
+    font-size: 3rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -196,7 +200,7 @@ a.highlight_card {
   }
   
   .highlight_title {
-    font-size: var(--text-base);
+    font-size: 2rem;
   }
 }
 

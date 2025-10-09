@@ -62,18 +62,18 @@
 
 /* Tema 5K */
 .race-5k {
-    --primary: #ff6b35;
-    --secondary: #e55a2b;
+    --primary: #e7ad45;
+    --secondary: #e89f17;
     --accent: #22d3ee;
-    --info: #ff8c5a;
+    --info: #fed06c;
     --success: #52bd7b;
-    --warning: #F39C12;
-    --error: #E74C3C;
+    --warning: #f39c12;
+    --error: #e74c3c;
     --countdown-color: #00ffff;
 
     /* RGB values for rgba() functions */
-    --primary-rgb: 255, 107, 53;
-    --secondary-rgb: 229, 90, 43;
+    --primary-rgb: 231, 173, 69;
+    --secondary-rgb: 232, 159, 23;
     --accent-rgb: 34, 211, 238;
 
     /* Gradients */
@@ -89,18 +89,18 @@
 
 /* Tema Kids Run */
 .race-kidsrun {
-    --primary: #007b5f;
-    --secondary: #005a47;
+    --primary: #009bac;
+    --secondary: #098290;
     --accent: #22d3ee;
-    --info: #00a67a;
+    --info: #26c7d9;
     --success: #52bd7b;
     --warning: #f39c12;
     --error: #e74c3c;
     --countdown-color: #00ffff;
 
     /* RGB values for rgba() functions */
-    --primary-rgb: 0, 123, 95;
-    --secondary-rgb: 0, 90, 71;
+    --primary-rgb: 0, 155, 172;
+    --secondary-rgb: 9, 130, 144;
     --accent-rgb: 34, 211, 238;
 
     /* Gradients */
@@ -204,18 +204,18 @@
 /* Override per sezione 5K */
 .theme-5k,
 .theme-race-5k {
-    --primary: #ff6b35;
-    --secondary: #e55a2b;
+    --primary: #e7ad45;
+    --secondary: #e89f17;
     --accent: #22d3ee;
-    --info: #ff8c5a;
+    --info: #fed06c;
     --success: #52bd7b;
-    --warning: #F39C12;
-    --error: #E74C3C;
+    --warning: #f39c12;
+    --error: #e74c3c;
     --countdown-color: #00ffff;
 
     /* RGB values for rgba() functions */
-    --primary-rgb: 255, 107, 53;
-    --secondary-rgb: 229, 90, 43;
+    --primary-rgb: 231, 173, 69;
+    --secondary-rgb: 232, 159, 23;
     --accent-rgb: 34, 211, 238;
 
     /* Gradients */
@@ -232,18 +232,18 @@
 /* Override per sezione Kids Run */
 .theme-kidsrun,
 .theme-race-kidsrun {
-    --primary: #007b5f;
-    --secondary: #005a47;
+    --primary: #009bac;
+    --secondary: #098290;
     --accent: #22d3ee;
-    --info: #00a67a;
+    --info: #26c7d9;
     --success: #52bd7b;
     --warning: #f39c12;
     --error: #e74c3c;
     --countdown-color: #00ffff;
 
     /* RGB values for rgba() functions */
-    --primary-rgb: 0, 123, 95;
-    --secondary-rgb: 0, 90, 71;
+    --primary-rgb: 0, 155, 172;
+    --secondary-rgb: 9, 130, 144;
     --accent-rgb: 34, 211, 238;
 
     /* Gradients */

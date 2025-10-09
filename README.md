@@ -17,13 +17,17 @@ Sistema SSR modulare per la Bologna Marathon con page builder visuale, moduli ri
 sito_modulare/
 ├── admin/                # Interfaccia e API page builder
 │   ├── api/              # Endpoint JSON per moduli e pagine
+│   ├── docs/             # Documentazione admin specifica
 │   └── page-builder.php  # UI amministrativa
 ├── assets/
 │   ├── css/              # CSS core + admin
 │   └── js/               # JS core + admin
 ├── core/ModuleRenderer.php
 ├── modules/              # Moduli con manifest e assets dedicati
+│   └── docs/             # Documentazione moduli
 ├── database/             # Schema SQL e dati di esempio
+│   └── docs/             # Documentazione database
+├── docs/                 # Documentazione sistema generale
 ├── build/                # Output pronto per il cloud (no Node richiesto)
 └── gulpfile.js           # Pipeline di build
 ```
@@ -102,14 +106,11 @@ La cartella `build/` contiene tutto il necessario per il deploy (PHP + asset min
 
 Ogni campo supporta `type`, `label`, `placeholder`, `default`, `help`, `options` (per select) e strutture `array` con `item_schema` annidato.
 
-## 🧱 Moduli
+## 🧩 Moduli
 
 ### Guida Completa Sviluppo
-- **Documentazione**: `MODULE-DEVELOPMENT-GUIDE.md` (guida completa)
-- **Regole**: `MODULE-RULES.md` (regole specifiche)
-- **Template**: `MODULE-TEMPLATE.md` (template completo)
-- **Checklist**: `MODULE-CHECKLIST.md` (checklist validazione)
-- **Riepilogo**: `MODULE-SUMMARY.md` (riepilogo rapido)
+- **Documentazione**: `modules/docs/DEVELOPMENT-GUIDE.md` (guida completa)
+- **Sistema Template**: `modules/docs/TEMPLATES-SYSTEM.md` (modelli globali)
 - **Esempi**: `modules/README.md` (esempi pratici)
 
 ### Struttura Modulo
@@ -169,4 +170,42 @@ MIT License – consulta il file `LICENSE` per i dettagli.
 
 ---
 
-Per ulteriori dettagli su singoli moduli consulta `modules/README.md` e mantieni aggiornate le documentazioni per supportare future integrazioni automatizzate.
+## 🚨 REGOLE FONDAMENTALI
+
+### ⚠️ PRIMA DI SCRIVERE CODICE
+
+**Leggi**: `docs/CODING-STANDARDS.md` - **OBBLIGATORIO**
+
+#### Regole Base
+1. ❌ **NO HARDCODING** - Usa CSS Variables, configurazioni, costanti
+2. ❌ **NO CODICE SPAGHETTI** - Separa CSS, JS, PHP in file dedicati
+3. ❌ **NO CSS/JS INLINE** - Sempre file esterni
+4. ✅ **Separazione responsabilità** - Template ≠ Stili ≠ Logica
+
+## 📚 Documentazione
+
+### 🗺️ Mappa Completa
+**Vedi**: `DOCUMENTATION-MAP.md` - Navigazione rapida di tutta la documentazione
+
+### Per Sviluppatori
+1. **⚡ START (2 min)**: `docs/QUICK-REFERENCE.md` - Le 5 regole fondamentali
+2. **🚨 STANDARD (10 min)**: `docs/CODING-STANDARDS.md` - Standard obbligatori
+3. **📖 Sistema generale**: `docs/README.md`
+4. **🧩 Sviluppo moduli**: `modules/docs/DEVELOPMENT-GUIDE.md`
+5. **🎨 Page Builder**: `admin/docs/PAGE-BUILDER.md`
+6. **🗄️ Database**: `database/docs/SCHEMA-REFERENCE.md`
+
+### Per AI Models
+1. **Regole complete**: `.cursorrules` - Regole generali e specifiche
+2. **Quick reference**: `docs/QUICK-REFERENCE.md` - Regole essenziali
+3. **Standard codifica**: `docs/CODING-STANDARDS.md` - Esempi pratici
+4. **Guida moduli**: `modules/docs/DEVELOPMENT-GUIDE.md`
+5. **Sistema template**: `modules/docs/TEMPLATES-SYSTEM.md`
+6. **Troubleshooting**: `admin/docs/TROUBLESHOOTING.md`
+
+### Per Troubleshooting
+- **Admin**: `admin/docs/TROUBLESHOOTING.md`
+- **Moduli**: `modules/docs/DEVELOPMENT-GUIDE.md` (sezione troubleshooting)
+- **Database**: `database/docs/MIGRATIONS.md`
+
+Per ulteriori dettagli consulta la documentazione specifica in ogni cartella `docs/` e mantieni aggiornate le documentazioni per supportare future integrazioni automatizzate.

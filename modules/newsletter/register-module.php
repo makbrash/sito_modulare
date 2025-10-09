@@ -2,6 +2,17 @@
 /**
  * Script di Registrazione Modulo Newsletter
  * Registra il modulo newsletter nel database
+ * 
+ * STRUTTURA TABELLA modules_registry:
+ * - id (INT, PK, AUTO_INCREMENT)
+ * - name (VARCHAR(100), UNIQUE, NOT NULL)
+ * - component_path (VARCHAR(200), NOT NULL)
+ * - css_class (VARCHAR(100), NULLABLE)
+ * - default_config (JSON, NULLABLE)
+ * - is_active (BOOLEAN, DEFAULT TRUE)
+ * - created_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+ * 
+ * ⚠️ ATTENZIONE: Le colonne description, ui_schema, slug, version, updated_at NON esistono!
  */
 
 require_once __DIR__ . '/../../config/database.php';
@@ -19,8 +30,8 @@ try {
     }
     
     // Verifica se il modulo esiste già
-    $stmt = $db->prepare("SELECT id FROM modules_registry WHERE slug = ?");
-    $stmt->execute([$manifest['slug']]);
+    $stmt = $db->prepare("SELECT id FROM modules_registry WHERE name = ?");
+    $stmt->execute([$manifest['name']]);
     $existingModule = $stmt->fetch();
     
     if ($existingModule) {
@@ -28,26 +39,19 @@ try {
         $stmt = $db->prepare("
             UPDATE modules_registry 
             SET 
-                name = ?,
-                description = ?,
-                version = ?,
                 component_path = ?,
+                css_class = ?,
                 default_config = ?,
-                ui_schema = ?,
-                is_active = ?,
-                updated_at = NOW()
-            WHERE slug = ?
+                is_active = ?
+            WHERE name = ?
         ");
         
         $stmt->execute([
-            $manifest['name'],
-            $manifest['description'],
-            $manifest['version'],
             $manifest['component_path'],
+            $manifest['name'], // usa name come css_class
             json_encode($manifest['default_config']),
-            json_encode($manifest['ui_schema']),
             $manifest['is_active'] ? 1 : 0,
-            $manifest['slug']
+            $manifest['name']
         ]);
         
         echo "✅ Modulo '{$manifest['name']}' aggiornato con successo!\n";
@@ -56,18 +60,15 @@ try {
         // Inserisci nuovo modulo
         $stmt = $db->prepare("
             INSERT INTO modules_registry 
-            (name, slug, description, version, component_path, default_config, ui_schema, is_active, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            (name, component_path, css_class, default_config, is_active) 
+            VALUES (?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
             $manifest['name'],
-            $manifest['slug'],
-            $manifest['description'],
-            $manifest['version'],
             $manifest['component_path'],
+            $manifest['name'], // usa name come css_class
             json_encode($manifest['default_config']),
-            json_encode($manifest['ui_schema']),
             $manifest['is_active'] ? 1 : 0
         ]);
         

@@ -84,7 +84,7 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
 }
 ?>
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="<?= htmlspecialchars($bodyClass) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,6 +104,7 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
                 'assets/css/core/typography.css',
                 'assets/css/core/layout.css',
                 'assets/css/core/fonts.css',
+                'assets/css/core/scrollbar.css',
             ];
             foreach ($coreCss as $href) {
                 if (file_exists(__DIR__ . '/' . $href)) {
@@ -117,16 +118,14 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
                     echo '<link rel="stylesheet" href="' . htmlspecialchars($href) . '">';
                 }
             }
-            
-            // Splash Logo CSS (sempre incluso)
-            echo '<link rel="stylesheet" href="modules/splash-logo/splash-logo.css">';
 
             // Pre-rendering per tracciare moduli annidati
             ob_start();
             foreach ($modules as $module) {
-                if ($module['module_name'] !== 'menu') {
+                $moduleName = $module['module_name'];
+                if ($moduleName !== 'menu' && $moduleName !== 'splash-logo' && $moduleName !== 'splashLogo') {
                     $config = json_decode($module['config'], true) ?? [];
-                    $renderer->renderModule($module['module_name'], $config);
+                    $renderer->renderModule($moduleName, $config);
                 }
             }
             ob_end_clean();
@@ -161,9 +160,23 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 </head>
-<body class="page-<?= $page['template'] ?> <?= htmlspecialchars($bodyClass) ?>">
-    <!-- Splash Logo Module -->
-    <?php echo $renderer->renderModule('splashLogo', []); ?>
+<body class="page-<?= $page['template'] ?> production">
+    
+    <?php
+    // Renderizza Splash Logo se presente (deve essere fuori dal main per overlay fullscreen)
+    $splashModules = array_filter($modules, function($module) {
+        if (is_array($module) && isset($module['module_name'])) {
+            return $module['module_name'] === 'splash-logo' || $module['module_name'] === 'splashLogo';
+        }
+        return false;
+    });
+    
+    if (!empty($splashModules)) {
+        $splashModule = reset($splashModules);
+        $config = json_decode($splashModule['config'], true) ?? [];
+        echo $renderer->renderModule('splashLogo', $config);
+    }
+    ?>
     
     <!-- Skip Link per accessibilità -->
     <a href="#main-content" class="skip-link">Salta al contenuto principale</a>
@@ -187,15 +200,23 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
     <!-- Main Content -->
     <main id="main-content" class="site-main">
         <?php if ($useInstances): ?>
-            <!-- Renderizza istanze di moduli (escluso menu) -->
+            <!-- Renderizza istanze di moduli (escluso menu e splash-logo) -->
             <?php foreach ($moduleTree as $node): ?>
-                <?php if (($node['module_name'] ?? '') === 'menu') { continue; } ?>
+                <?php 
+                $moduleName = $node['module_name'] ?? '';
+                if ($moduleName === 'menu' || $moduleName === 'splash-logo' || $moduleName === 'splashLogo') { 
+                    continue; 
+                } 
+                ?>
                 <?php renderModuleInstanceNode($renderer, $node); ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <!-- Renderizza moduli tradizionali (escluso menu) -->
+            <!-- Renderizza moduli tradizionali (escluso menu e splash-logo) -->
             <?php foreach ($modules as $module): ?>
-                <?php if ($module['module_name'] !== 'menu'): ?>
+                <?php 
+                $moduleName = $module['module_name'];
+                if ($moduleName !== 'menu' && $moduleName !== 'splash-logo' && $moduleName !== 'splashLogo'): 
+                ?>
                 <div class="module-wrapper" data-module="<?= htmlspecialchars($module['module_name']) ?>">
                     <?php
                     $config = json_decode($module['config'], true) ?? [];
@@ -222,7 +243,8 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
             $moduleAssets = $moduleAssets ?? $renderer->collectModuleAssets($modules);
             // Core JS (se esiste)
             $coreJs = [
-                'assets/js/core/app.js'
+                'assets/js/core/app.js',
+                'assets/js/core/image-3d.js'
             ];
             foreach ($coreJs as $src) {
                 if (file_exists(__DIR__ . '/' . $src)) {
@@ -230,8 +252,6 @@ function renderModuleInstanceNode(ModuleRenderer $renderer, array $node): void
                 }
             }
             
-            // Splash Logo JS (sempre incluso)
-            echo '<script src="modules/splash-logo/splash-logo.js"></script>';
             // JS moduli deduplicati
             if (!empty($moduleAssets['js'])) {
                 foreach ($moduleAssets['js'] as $src) {

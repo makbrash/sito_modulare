@@ -1,0 +1,238 @@
+/**
+ * Modulo: Partner
+ * File: partner.css
+ * 
+ * Basato su highlights.css ma adattato per partner
+ */
+
+/* Block principale */
+.partner {
+  background: var(--gradient-dark);
+  padding: var(--space-2xl) 0;
+  width: 100%;
+}
+
+/* Titolo principale */
+.partner__title {
+  text-align: center;
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+/* Sottotitolo */
+.partner__subtitle {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  padding: var(--space-md);
+}
+
+/* Gruppo partner */
+.partner__group {
+  margin-bottom: var(--space-lg);
+}
+
+.partner__group:last-child {
+  margin-bottom: 0;
+}
+
+/* Titolo gruppo */
+.partner__group-title {
+  text-align: center;
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  /* font-size: var(--text-h5); */
+  font-weight: 500;
+}
+
+/* Swiper container */
+.partner__swiper {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Rimuovi margini extra */
+.partner__swiper * {
+  box-sizing: border-box;
+}
+
+.partner__swiper .swiper-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: auto;
+  max-width: max-content;
+}
+
+.partner__swiper .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
+
+/* Card partner */
+.partner__card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* height: 120px; */
+  background: var(--bg-glass);
+  /* border: 1px solid var(--bg-glass-hover); */
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.partner__card:hover {
+  /* background: var(--bg-glass-hover); */
+  transform: translateY(-2px);
+  /* box-shadow: var(--shadow-md); */
+}
+
+/* Logo partner */
+.partner__logo {
+  max-width: 100%;
+  /* max-height: 80px; */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(0.9);
+  transition: filter var(--transition-normal);
+}
+
+.partner__card:hover .partner__logo {
+  filter: brightness(1);
+}
+
+/* Logo Credits - Più piccoli */
+.partner__logo--credits {
+  max-width: 80%;
+  max-height: 60px;
+  /* opacity: 0.85; */
+}
+
+.partner__card--credits {
+  padding: var(--space-xs);
+  background: transparent;
+}
+
+.partner__card--credits:hover .partner__logo--credits {
+  opacity: 1;
+}
+
+/* Gruppo Credits - Spacing ridotto */
+.partner__group--credits {
+  margin-top: var(--space-md);
+}
+
+.partner__group--credits .partner__group-title {
+  /* font-size: 0.9rem; */
+  /* opacity: 0.8; */
+}
+
+/* Navigation */
+.partner__navigation {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+  left: 0;
+  right: 0;
+}
+
+.partner__btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--primary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  pointer-events: all;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.partner__btn:hover {
+  background: var(--primary);
+  color: var(--bg-primary);
+  transform: scale(1.1);
+}
+
+.partner__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.partner__btn--prev {
+  left: var(--space-md);
+  display: none;
+}
+
+.partner__btn--next {
+  right: var(--space-md);
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .partner {
+    padding: var(--space-3xl) 0;
+  }
+  
+  .partner__btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .partner__btn--prev {
+    left: var(--space-sm);
+  }
+  
+  .partner__btn--next {
+    right: var(--space-sm);
+  }
+  
+  .partner__card {
+    /* height: 100px; */
+    padding: var(--space-sm);
+  }
+  
+  .partner__logo {
+    /* max-height: 60px; */
+  }
+}
+
+@media (max-width: 480px) {
+  .partner__card {
+    /* height: 80px; */
+    padding: var(--space-xs);
+  }
+  
+  .partner__logo {
+    /* max-height: 50px; */
+  }
+}
+
+/* Page Builder Overrides */
+.page-builder .partner {
+  padding: var(--space-md) 0;
+}
+
+.page-builder .partner__card {
+  height: 100px;
+}

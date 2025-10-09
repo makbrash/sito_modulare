@@ -1,0 +1,336 @@
+/**
+ * Custom Scrollbar - Bologna Marathon
+ * Sistema scrollbar personalizzate ottimizzato per performance
+ * 
+ * File: assets/css/core/scrollbar.css
+ */
+
+/* ========================================
+   SCROLLBAR GLOBALE
+   ======================================== */
+
+/* Modern browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+/* Rimuove le freccette (arrows/buttons) */
+::-webkit-scrollbar-button {
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(var(--primary-rgb), 0.8) 0%, 
+        rgba(var(--primary-rgb), 0.6) 100%);
+    border-radius: 6px;
+    border: 2px solid var(--bg-primary);
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(var(--primary-rgb), 1) 0%, 
+        rgba(var(--primary-rgb), 0.8) 100%);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--primary);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--primary-rgb), 0.8) transparent;
+}
+
+/* ========================================
+   SCROLLBAR THIN (per aree piccole)
+   ======================================== */
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-button {
+    display: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    border: 1px solid var(--bg-primary);
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--primary-rgb), 0.8) transparent;
+}
+
+/* ========================================
+   SCROLLBAR HIDDEN (per swiper, carousel)
+   ======================================== */
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* ========================================
+   OTTIMIZZAZIONI PERFORMANCE
+   ======================================== */
+
+/* Prevenzione lag durante scroll */
+body,
+html {
+    /* Smooth scrolling senza lag */
+    scroll-behavior: smooth;
+    
+    /* Ottimizzazione rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container scrollabili ottimizzati */
+.scroll-container {
+    /* Isola il rendering dello scroll */
+    contain: paint;
+    
+    /* Ottimizza scroll su mobile */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Prevenzione lag */
+    will-change: auto; /* Non usare 'scroll-position' causa lag */
+}
+
+/* ========================================
+   SCROLLBAR TEMATIZZATE
+   ======================================== */
+
+/* Marathon Theme */
+.theme-marathon ::-webkit-scrollbar-thumb,
+.theme-race-marathon ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(35, 168, 235, 0.8) 0%, 
+        rgba(35, 168, 235, 0.6) 100%);
+}
+
+.theme-marathon ::-webkit-scrollbar-thumb:hover,
+.theme-race-marathon ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(35, 168, 235, 1) 0%, 
+        rgba(35, 168, 235, 0.8) 100%);
+}
+
+/* Portici Theme */
+.theme-portici ::-webkit-scrollbar-thumb,
+.theme-race-portici ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(220, 51, 94, 0.8) 0%, 
+        rgba(220, 51, 94, 0.6) 100%);
+}
+
+.theme-portici ::-webkit-scrollbar-thumb:hover,
+.theme-race-portici ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(220, 51, 94, 1) 0%, 
+        rgba(220, 51, 94, 0.8) 100%);
+}
+
+/* 5K Theme */
+.theme-5k ::-webkit-scrollbar-thumb,
+.theme-race-5k ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(231, 173, 69, 0.8) 0%, 
+        rgba(231, 173, 69, 0.6) 100%);
+}
+
+.theme-5k ::-webkit-scrollbar-thumb:hover,
+.theme-race-5k ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(231, 173, 69, 1) 0%, 
+        rgba(231, 173, 69, 0.8) 100%);
+}
+
+/* Kids Run Theme */
+.theme-kidsrun ::-webkit-scrollbar-thumb,
+.theme-race-kidsrun ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(0, 155, 172, 0.8) 0%, 
+        rgba(0, 155, 172, 0.6) 100%);
+}
+
+.theme-kidsrun ::-webkit-scrollbar-thumb:hover,
+.theme-race-kidsrun ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(0, 155, 172, 1) 0%, 
+        rgba(0, 155, 172, 0.8) 100%);
+}
+
+/* Run Tune Up Theme */
+.theme-run-tune-up ::-webkit-scrollbar-thumb,
+.theme-race-run-tune-up ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, 
+        rgba(203, 223, 68, 0.8) 0%, 
+        rgba(203, 223, 68, 0.6) 100%);
+}
+
+.theme-run-tune-up ::-webkit-scrollbar-thumb:hover,
+.theme-race-run-tune-up ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(203, 223, 68, 1) 0%, 
+        rgba(203, 223, 68, 0.8) 100%);
+}
+
+/* ========================================
+   AREE SPECIFICHE CON SCROLL
+   ======================================== */
+
+/* Menu mobile overlay */
+.mobile-menu-overlay {
+    /* Scrollbar thin per il menu */
+    scrollbar-width: thin;
+}
+
+.mobile-menu-overlay::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Tabelle risultati */
+.results-table-wrapper {
+    /* Ottimizzazione per tabelle grandi */
+    contain: layout style paint;
+}
+
+.results-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.results-table-wrapper::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+}
+
+/* Search suggestions */
+.search-suggestions {
+    scrollbar-width: thin;
+}
+
+.search-suggestions::-webkit-scrollbar {
+    width: 4px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    border: none;
+}
+
+/* Gallery lightbox */
+.lightbox-content {
+    scrollbar-width: thin;
+}
+
+/* ========================================
+   PREVENZIONE LAG
+   ======================================== */
+
+/* Evita repaint durante scroll */
+.fixed,
+.sticky,
+.main-menu {
+    /* Isola il rendering */
+    contain: layout style;
+    
+    /* Ottimizza compositing */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Ottimizza elementi fuori viewport */
+.module-wrapper {
+    /* Lazy rendering per performance */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+}
+
+/* Disabilita will-change di default (causa lag) */
+* {
+    will-change: auto;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Mobile: scrollbar più sottile */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        border: 1px solid rgba(11, 11, 21, 0.5);
+    }
+}
+
+/* Touch devices: nasconde scrollbar durante scroll */
+@media (hover: none) and (pointer: coarse) {
+    /* Scrollbar appare solo quando necessario */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    *:hover::-webkit-scrollbar-thumb,
+    *:active::-webkit-scrollbar-thumb {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Contrasto aumentato per accessibilità */
+@media (prefers-contrast: high) {
+    ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border: 2px solid var(--bg-primary);
+    }
+}
+
+/* Riduzione movimento per utenti sensibili */
+@media (prefers-reduced-motion: reduce) {
+    html,
+    body {
+        scroll-behavior: auto;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        transition: none;
+    }
+}
+

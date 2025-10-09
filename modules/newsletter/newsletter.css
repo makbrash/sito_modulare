@@ -21,11 +21,11 @@
 }
 
 .newsletter__tab-icon {
-    font-size: 18px;
+    font-size: 28px; /* icone più grandi per familiarità */
 }
 
 .newsletter__button-icon {
-    font-size: 20px;
+    font-size: 24px; /* icone pulsanti più grandi */
 }
 
 .newsletter__message-icon {
@@ -44,7 +44,7 @@
 .newsletter {
     position: relative;
     padding: var(--space-3xl) var(--space-md);
-    background: var(--newsletter-bg, var(--gradient-secondary));
+    background: var(--gradient-dark);
     overflow: hidden;
     isolation: isolate;
 }
@@ -66,14 +66,6 @@
     margin: 0 auto;
 }
 
-.newsletter__content {
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-xl);
-    padding: var(--space-2xl);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: var(--shadow-xl);
-}
 
 /* ========================================
    HEADER
@@ -81,102 +73,185 @@
 
 .newsletter__header {
     text-align: center;
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-md);
 }
 
-.newsletter__title {
-    font-family: var(--font-display);
-    font-size: var(--text-h2);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--space-sm);
-    line-height: 1.1;
-}
-
-.newsletter__subtitle {
-    font-size: 1.125rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto;
-}
 
 /* ========================================
-   TAB NAVIGATION - CIRCOLARI ELEGANTI
+   TAB NAVIGATION - CERCHI COLORATI CON ICONE BIANCHE
    ======================================== */
 
 .newsletter__tabs {
     display: flex;
     justify-content: center;
-    gap: var(--space-md);
-    margin-bottom: var(--space-2xl);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xs);
     flex-wrap: wrap;
 }
 
 .newsletter__tab {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; */
     gap: var(--space-xs);
-    padding: var(--space-md);
-    background: var(--bg-glass);
-    border: 2px solid transparent;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    backdrop-filter: blur(10px);
-    min-width: 80px;
-    text-align: center;
-    position: relative;
+    /* padding: var(--space-sm); */
+    background: transparent;
+    /* border: none; */
+    /* cursor: pointer; */
+    /* transition: all var(--transition-normal); */
+    /* min-width: 90px; */
+    /* text-align: center; */
+    /* position: relative; */
+    border: none;
+    box-shadow: none;
+    padding: 7px;
     overflow: hidden;
 }
 
-.newsletter__tab::before {
+.newsletter__tab:hover {
+    /* transform: translateY(-4px); */
+    background: none;
+    box-shadow: none;
+}
+
+.newsletter__tab-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-glass);
+}
+
+.newsletter__tab-circle::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     transition: left var(--transition-slow);
 }
 
-.newsletter__tab:hover::before {
+.newsletter__tab:hover .newsletter__tab-circle::before {
     left: 100%;
 }
 
-.newsletter__tab:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+
+/* Tab attiva: bordo luminoso e cerchio più grande */
+.newsletter__tab--active .newsletter__tab-circle {
+    transform: scale(1.15);
+
+    border: solid 3px #ffffff21;
 }
 
-.newsletter__tab--active {
-    background: var(--gradient-primary);
-    border-color: var(--primary);
-    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
-    transform: translateY(-2px);
-}
 
 .newsletter__tab-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--text-primary);
+    font-size: 43px;
+    color: #ffffff;
     transition: all var(--transition-normal);
 }
 
+.iconSvg {
+    width: 41px;
+}
+
 .newsletter__tab--active .newsletter__tab-icon {
-    color: var(--text-primary);
     transform: scale(1.1);
 }
 
 .newsletter__tab-text {
-    font-size: 0.875rem;
-    font-weight: 600;
+
     color: var(--text-primary);
     white-space: nowrap;
+    margin-top: var(--space-xs);
 }
+
+/* ========================================
+   SERVICE DESCRIPTIONS - SOTTO LE TAB
+   ======================================== */
+
+.newsletter__service-description {
+    margin-bottom: var(--space-md);
+    min-height: 180px;
+    position: relative;
+}
+
+.newsletter__service-info {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+
+    padding: var(--space-lg) var(--space-sm);
+    /* border: 1px solid rgba(255, 255, 255, 0.08); */
+    max-width: 695px;
+    margin: auto;
+}
+
+.newsletter__service-info--active {
+    display: block;
+}
+
+.newsletter__service-title {
+
+    color: var(--primary);
+    /* margin-bottom: var(--space-sm); */
+    text-align: center;
+}
+
+.newsletter__service-text {
+
+    text-align: center;
+    /* margin-bottom: var(--space-md); */
+}
+
+.newsletter__service-pros {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: var(--space-sm);
+    justify-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.newsletter__service-pros li {
+    display: flex;
+    gap: var(--space-xs);
+    font-size: 0.9rem;
+    /* color: var(--text-secondary); */
+    /* line-height: 1.2; */
+    justify-content: center;
+    align-items: flex-start;
+    color: var(--accent);
+}
+
+.newsletter__service-pros li i {
+    color: var(--primary);
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+/* Colori contestuali per check icons */
+.newsletter__service-info--email .newsletter__service-pros li i {
+    color: #5DADE2;
+    font-size: var(--space-md);
+}
+
+.newsletter__service-info--whatsapp .newsletter__service-pros li i {
+    color: #25D366;
+}
+
+.newsletter__service-info--channel .newsletter__service-pros li i {
+    color: #34D399;
+}
+
 
 /* ========================================
    PANELS
@@ -184,7 +259,7 @@
 
 .newsletter__panels {
     position: relative;
-    min-height: 400px;
+    /* min-height: 350px; */
 }
 
 .newsletter__panel {
@@ -223,6 +298,7 @@
     color: var(--text-primary);
     font-size: 1rem;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: all var(--transition-normal);
 }
 
@@ -282,7 +358,7 @@
     justify-content: center;
     gap: var(--space-sm);
     padding: var(--space-md) var(--space-xl);
-    border: none;
+    /* border: none; */
     border-radius: var(--radius-lg);
     font-family: var(--font-primary);
     font-weight: 600;
@@ -295,7 +371,7 @@
     white-space: nowrap;
     user-select: none;
     width: 100%;
-    margin-top: var(--space-md);
+    /* margin-top: var(--space-md); */
 }
 
 .newsletter__button:focus {
@@ -321,6 +397,7 @@
 .newsletter__button:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
+    color: #fff;
 }
 
 .newsletter__button-icon {
@@ -346,13 +423,15 @@
 /* WhatsApp Button */
 .newsletter__button--whatsapp {
     background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-    color: white;
-    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+    border: 1px solid rgba(18, 140, 126, 0.35);
 }
 
 .newsletter__button--whatsapp:hover {
     background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
-    box-shadow: 0 0 20px rgba(37, 211, 102, 0.5), var(--shadow-lg);
+    box-shadow: 0 14px 34px rgba(37, 211, 102, 0.45), var(--shadow-lg);
+    color: #fff;
 }
 
 /* Channel Button */
@@ -377,6 +456,7 @@
 .newsletter__button--ingrid:hover {
     background: var(--gradient-button-hover);
     box-shadow: 0 0 20px rgba(var(--secondary-rgb), 0.8), var(--shadow-lg);
+    color: #fff;
 }
 
 /* ========================================
@@ -431,6 +511,7 @@
 
 .newsletter__feature-icon {
     color: var(--primary);
+    font-size: 24px; /* icone features più grandi */
 }
 
 .newsletter__feature-text {
@@ -475,6 +556,7 @@
     color: var(--text-secondary);
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 /* ========================================
@@ -520,46 +602,50 @@
         padding: var(--space-xl) var(--space-sm);
     }
     
-    .newsletter__content {
-        padding: var(--space-lg);
-    }
+
     
     .newsletter__title {
         font-size: 2.5rem;
     }
     
     .newsletter__tabs {
-        gap: var(--space-sm);
+        gap: var(--space-md);
     }
     
-    .newsletter__tab {
-        min-width: 70px;
-        padding: var(--space-sm);
+ 
+    
+    .newsletter__tab-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .newsletter__tab-icon {
+        font-size: 32px;
     }
     
     .newsletter__tab-text {
-        font-size: 0.75rem;
+        font-size: 1rem;
     }
     
-    .newsletter__features {
-        flex-direction: column;
-        gap: var(--space-sm);
-    }
-    
-    .newsletter__ingrid-features {
-        flex-direction: column;
-        align-items: center;
+    .newsletter__service-pros {
+        /* grid-template-columns: 1fr; */
+        display: flex;
+        align-content: flex-start;
+        align-items: flex-start;
     }
 }
 
 @media (max-width: 480px) {
     .newsletter__tabs {
-        flex-direction: column;
-        align-items: center;
+        gap: var(--space-xs);
     }
     
-    .newsletter__tab {
-        width: 100%;
-        max-width: 200px;
+    .newsletter__tab-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .newsletter__tab-icon {
+        font-size: 24px;
     }
 }

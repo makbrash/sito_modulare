@@ -155,6 +155,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ## 📊 Database Rules
 
+### ⚠️ 0. STRUTTURA TABELLA `modules_registry` - SEMPRE VERIFICARE!
+```sql
+-- STRUTTURA CORRETTA (da database/schema.sql):
+CREATE TABLE modules_registry (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    component_path VARCHAR(200) NOT NULL,
+    css_class VARCHAR(100),              -- NULLABLE
+    default_config JSON,                 -- NULLABLE
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ⚠️ COLONNE CHE NON ESISTONO (NON USARE):
+-- - description
+-- - ui_schema
+-- - slug
+-- - version
+```
+
+**Template install.sql Corretto:**
+```sql
+INSERT INTO modules_registry (
+    name,
+    component_path,
+    css_class,           -- Opzionale
+    default_config,      -- Opzionale (JSON)
+    is_active
+) VALUES (
+    'modulo-name',
+    'modulo-name/modulo-name.php',
+    'modulo-name',
+    '{"config": "value"}',
+    1
+) ON DUPLICATE KEY UPDATE
+    component_path = VALUES(component_path),
+    css_class = VALUES(css_class),
+    default_config = VALUES(default_config),
+    is_active = VALUES(is_active);
+```
+
+**⚠️ REGOLA CRITICA:**
+- **SEMPRE** consultare `database/schema.sql` prima di scrivere SQL
+- **MAI** assumere la struttura delle tabelle senza verificare
+- Includere commento header in ogni `install.sql` con struttura tabella
+
 ### 1. Aggiungere Dati in ModuleRenderer.php
 ```php
 // In getModuleData()

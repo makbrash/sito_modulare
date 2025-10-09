@@ -8,6 +8,127 @@ Sistema modulare per il sito ufficiale della Bologna Marathon (bolognamarathon.r
 - **Architettura**: SSR (Server-Side Rendering) modulare
 - **Path**: `http://localhost/sito_modulare/`
 
+## 🚨 REGOLE FONDAMENTALI
+
+### ❌ ASSOLUTAMENTE VIETATO
+
+#### 1. **NO HARDCODING**
+- ❌ **MAI** valori hardcoded in PHP/HTML/JavaScript
+- ❌ **MAI** colori hardcoded (usa CSS Variables)
+- ❌ **MAI** URL hardcoded (usa variabili configurazione)
+- ❌ **MAI** stringhe hardcoded (usa file di configurazione)
+- ✅ **SEMPRE** usa configurazioni dinamiche, CSS Variables, costanti
+
+#### 2. **NO CODICE SPAGHETTI**
+- ❌ **MAI** CSS inline in PHP/HTML (es: `<div style="color: red">`)
+- ❌ **MAI** JavaScript inline in PHP/HTML (es: `<button onclick="alert('hi')">`)
+- ❌ **MAI** logica complessa in template PHP
+- ❌ **MAI** SQL queries dirette in pagine (usa ModuleRenderer)
+- ✅ **SEMPRE** separa: CSS in `.css`, JS in `.js`, logica in classi PHP
+
+#### 3. **SEPARAZIONE DELLE RESPONSABILITÀ**
+```
+✅ STRUTTURA CORRETTA:
+module.php     → Template HTML + variabili PHP
+module.css     → TUTTI gli stili del modulo
+module.js      → TUTTA la logica JavaScript
+module.json    → Configurazione e manifest
+
+❌ STRUTTURA SBAGLIATA:
+module.php     → HTML + <style> + <script> + logica business
+```
+
+#### 📝 Esempi Pratici
+
+**❌ CODICE SPAGHETTI (NON FARE MAI)**
+```php
+// ❌ hero.php - PESSIMO ESEMPIO
+<div style="color: #23a8eb; padding: 2rem;">
+    <style>
+        .hero { background: red; }
+        .hero:hover { background: blue; }
+    </style>
+    <script>
+        function handleClick() { alert('ciao'); }
+    </script>
+    <button onclick="handleClick()">Click</button>
+    <?php
+        // ❌ Logica business nel template
+        $db = new PDO(...);
+        $results = $db->query("SELECT * FROM users WHERE id = " . $_GET['id']);
+    ?>
+</div>
+```
+
+**✅ CODICE PULITO E MODULARE (FARE SEMPRE)**
+```php
+// ✅ hero.php - TEMPLATE PULITO
+<?php
+$moduleData = $renderer->getModuleData('hero', $config);
+$title = $config['title'] ?? 'Default';
+?>
+<div class="hero hero--primary">
+    <h1 class="hero__title"><?= htmlspecialchars($title) ?></h1>
+    <button class="hero__button" data-action="cta">
+        <?= htmlspecialchars($config['button_text']) ?>
+    </button>
+</div>
+
+// ✅ hero.css - TUTTI GLI STILI
+.hero {
+    color: var(--primary);
+    padding: var(--spacing-lg);
+}
+.hero:hover {
+    background: var(--primary-light);
+}
+
+// ✅ hero.js - TUTTA LA LOGICA
+class Hero {
+    constructor(element) {
+        this.element = element;
+        this.bindEvents();
+    }
+    bindEvents() {
+        this.element.addEventListener('click', this.handleClick.bind(this));
+    }
+    handleClick(event) {
+        const target = event.target.closest('[data-action]');
+        if (target) this.executeAction(target.dataset.action);
+    }
+}
+
+// ✅ ModuleRenderer.php - LOGICA DATABASE
+private function getHeroData($config) {
+    $stmt = $this->db->prepare("SELECT * FROM heroes WHERE id = ?");
+    $stmt->execute([$config['hero_id']]);
+    return $stmt->fetch();
+}
+```
+
+### ✅ REGOLE OBBLIGATORIE
+
+#### CSS
+- ✅ **File separati**: Ogni modulo ha il suo `.css`
+- ✅ **CSS Variables**: Per colori, spacing, font
+- ✅ **BEM Methodology**: Nomenclatura classi
+- ✅ **No nesting**: Solo CSS classico esplicito
+- ✅ **Mobile-first**: Responsive design
+
+#### JavaScript
+- ✅ **File separati**: Ogni modulo ha il suo `.js`
+- ✅ **Classe modulare**: Pattern orientato a oggetti
+- ✅ **Event delegation**: Performance ottimizzata
+- ✅ **Auto-init**: Inizializzazione automatica
+- ✅ **Cleanup**: Metodo `destroy()` per memory leak
+
+#### PHP
+- ✅ **Template puliti**: Solo HTML + variabili PHP
+- ✅ **Logica nel core**: `ModuleRenderer.php` per business logic
+- ✅ **Prepared statements**: SEMPRE per query database
+- ✅ **Sanitizzazione**: `htmlspecialchars()` per output
+- ✅ **Separazione**: Template ≠ Logica ≠ Database
+
 ## 📁 STRUTTURA PROGETTO
 ```
 sito_modulare/
@@ -21,17 +142,21 @@ sito_modulare/
 ├── core/
 │   └── ModuleRenderer.php # Sistema rendering moduli SSR
 ├── modules/               # Moduli riutilizzabili
+│   ├── docs/             # Documentazione moduli
 │   ├── hero/             # Action Hero
 │   ├── results/          # Tabella risultati
 │   ├── menu/             # Menu navigazione
 │   ├── footer/           # Footer sito
 │   └── text/             # Rich Text
 ├── database/
+│   ├── docs/             # Documentazione database
 │   ├── schema.sql        # Schema database
 │   └── test_data.sql     # Dati di test
 ├── admin/
+│   ├── docs/             # Documentazione admin
 │   ├── test-setup.php    # Setup database
-│   └── admin.php         # Pannello admin
+│   └── page-builder.php  # Page Builder
+├── docs/                 # Documentazione sistema generale
 └── index.php            # Homepage principale
 ```
 
@@ -52,6 +177,13 @@ sito_modulare/
 - `--font-display`: 'Bebas Neue' (Font display)
 - `--font-accent`: 'Gloss And Bloom' (Font accent personalizzato)
 
+### Scrollbar Personalizzate
+- **File**: `assets/css/core/scrollbar.css`
+- **Funzionalità**: Scrollbar custom con temi dinamici, ottimizzata per performance
+- **Temi**: Si adatta automaticamente ai colori di ogni gara
+- **Performance**: Zero lag, ottimizzata con `contain`, `content-visibility`, no `will-change: scroll-position`
+- **Guida**: `assets/css/core/SCROLLBAR-GUIDE.md`
+
 ### Personalizzazione
 - **Override per pagina**: Tramite database (campo `css_variables`)
 - **Override globali**: Modifica `variables.css`
@@ -69,9 +201,16 @@ sito_modulare/
 6. **gallery** - Galleria immagini (lightbox)
 
 ## 🗄️ DATABASE SCHEMA
+
+### ⚠️ IMPORTANTE: Verifica Struttura Tabelle
+**SEMPRE consultare prima di scrivere SQL:**
+- 📊 **Reference Completo**: `database/docs/SCHEMA-REFERENCE.md`
+- 📄 **Schema Originale**: `database/schema.sql`
+- 🔄 **Migrazioni**: `database/docs/MIGRATIONS.md`
+
 ### Tabelle Principali
 - `pages` - Pagine del sito
-- `modules_registry` - Moduli disponibili
+- `modules_registry` - Moduli disponibili (⚠️ NO description, ui_schema, slug, version)
 - `page_modules` - Moduli assegnati alle pagine
 - `race_results` - Risultati gara
 - `races` - Gare
@@ -82,6 +221,15 @@ sito_modulare/
 2. **Pannello admin**: `admin/admin.php`
 3. **Debug**: `debug.php`
 4. **Path corretto**: `http://localhost/sito_modulare/`
+
+### Struttura `modules_registry` (Uso Frequente)
+```sql
+-- Colonne disponibili:
+id, name, component_path, css_class, default_config, is_active, created_at
+
+-- Colonne che NON esistono:
+description, ui_schema, slug, version
+```
 
 ## 🚀 WORKFLOW SVILUPPO
 
@@ -231,19 +379,131 @@ $title = $config['title'] ?? $moduleData['title'] ?? 'Default';
 4. **Aggiungi moduli** secondo necessità
 5. **Deploy** su server produzione
 
-## 📚 DOCUMENTAZIONE CONSOLIDATA
+## ⚠️ CHECKLIST PRE-COMMIT
 
-### Guide Principali
-- **`MODULE-DEVELOPMENT-GUIDE.md`** - Guida completa sviluppo moduli
-- **`LAYOUT-SYSTEM.md`** - Sistema layout responsive
-- **`THEME-SYSTEM-FINAL.md`** - Sistema temi dinamici
-- **`BUILD-SYSTEM.md`** - Sistema build e deploy
-- **`DOCUMENTATION-INDEX.md`** - Indice completo documentazione
+Prima di ogni commit, verifica:
 
-### Strumenti Admin
-- **`admin/theme-editor.php`** - Gestione temi e colori
-- **`admin/page-builder.php`** - Costruttore pagine modulare
+### 🚨 Codice Pulito
+- [ ] ❌ Nessun CSS inline in HTML/PHP
+- [ ] ❌ Nessun JavaScript inline in HTML/PHP
+- [ ] ❌ Nessun valore hardcoded
+- [ ] ❌ Nessuna query SQL diretta in template
+- [ ] ✅ Separazione: `.php` + `.css` + `.js`
+- [ ] ✅ CSS Variables per colori/spacing
+- [ ] ✅ Prepared statements per database
+- [ ] ✅ Sanitizzazione output (`htmlspecialchars()`)
+
+### 📚 Documentazione
+- [ ] ❌ Nessun file `.md` duplicato
+- [ ] ❌ Nessun file obsoleto (`FIX-*.md`, `QUICK-*.md`)
+- [ ] ✅ File `.md` organizzati per categoria
+- [ ] ✅ Riferimenti aggiornati in `README.md` e `.cursorrules`
+- [ ] ✅ Link interni funzionanti
+- [ ] ✅ Un solo file per argomento
+
+### 🧹 Pulizia
+- [ ] ✅ File temporanei eliminati
+- [ ] ✅ Commenti debug rimossi
+- [ ] ✅ Console.log() rimossi in produzione
+- [ ] ✅ Codice formattato correttamente
+
+## 📚 DOCUMENTAZIONE ORGANIZZATA
+
+### 🚨 REGOLE GESTIONE DOCUMENTAZIONE
+
+#### ✅ OBBLIGATORIO
+
+1. **Organizzare file `.md` con cura**
+   - ✅ Usa struttura gerarchica logica (`docs/`, `admin/docs/`, `modules/docs/`)
+   - ✅ Nomenclatura chiara e descrittiva (`PAGE-BUILDER.md` non `PB.md`)
+   - ✅ Posiziona in cartelle strategiche per categoria
+   - ✅ Mantieni un solo `README.md` per cartella come indice
+
+2. **Eliminare vecchi file non più utili**
+   - ✅ **SEMPRE** elimina file obsoleti dopo consolidamento
+   - ✅ **SEMPRE** elimina fix temporanei dopo risoluzione
+   - ✅ **MAI** accumulare file `FIX-*.md` o `QUICK-*.md` indefinitamente
+   - ✅ Mantieni max 1 file per argomento consolidato
+
+3. **Modificare esistenti invece di crearne nuovi**
+   - ✅ **PRIMA** cerca file esistente simile
+   - ✅ **AGGIORNA** file esistente se possibile
+   - ✅ **CONSOLIDA** informazioni duplicate in un unico file
+   - ✅ **CREA nuovo** solo se argomento completamente diverso
+   - ❌ **MAI** creare `FILE-v2.md`, `FILE-new.md`, `FILE-final.md`
+
+4. **Aggiornare riferimenti**
+   - ✅ **SEMPRE** aggiorna `README.md` quando sposti file
+   - ✅ **SEMPRE** aggiorna `.cursorrules` quando cambi struttura
+   - ✅ **SEMPRE** aggiorna link interni nei file `.md`
+   - ✅ **VERIFICA** che tutti i link funzionino dopo modifiche
+
+5. **Posizionamento strategico**
+   - ✅ **Sistema generale** → `docs/`
+   - ✅ **Admin specifico** → `admin/docs/`
+   - ✅ **Moduli** → `modules/docs/`
+   - ✅ **Database** → `database/docs/`
+   - ❌ **MAI** file `.md` sparsi in root senza organizzazione
+
+#### 📝 Template Documentazione Standard
+
+```markdown
+# 🎯 Titolo Chiaro e Descrittivo
+
+## 🎯 Panoramica
+Breve descrizione del contenuto (2-3 frasi)
+
+## 📋 Contenuto
+Organizzato in sezioni logiche con header H2/H3
+
+## 🧪 Esempi Pratici
+Esempi concreti quando applicabile
+
+## 🚨 Troubleshooting
+Problemi comuni e soluzioni
+
+## 📚 Riferimenti
+Link a file correlati
+
+---
+**Titolo - Sistema Modulare Bologna Marathon** 🎯
+*Versione 1.0.0 - Data*
+```
+
+### 📁 Struttura Documentazione
+
+#### Sistema Generale (`docs/`)
+- **`docs/README.md`** - Panoramica documentazione
+- **`docs/BUILD-SYSTEM.md`** - Sistema build e deploy
+- **`docs/LAYOUT-SYSTEM.md`** - Sistema layout responsive
+- **`docs/THEME-SYSTEM-FINAL.md`** - Sistema temi dinamici
+
+#### Admin (`admin/docs/`)
+- **`admin/docs/PAGE-BUILDER.md`** - Guida completa Page Builder
+- **`admin/docs/FIXES.md`** - Fix tecnici applicati
+- **`admin/docs/TROUBLESHOOTING.md`** - Risoluzione problemi
+- **`admin/page-builder.php`** - Page Builder principale
 - **`admin/test-setup.php`** - Setup database
+
+#### Moduli (`modules/docs/`)
+- **`modules/docs/DEVELOPMENT-GUIDE.md`** - Guida sviluppo moduli
+- **`modules/docs/TEMPLATES-SYSTEM.md`** - Sistema modelli globali
+- **`modules/README.md`** - Esempi pratici moduli
+
+#### Database (`database/docs/`)
+- **`database/docs/SCHEMA-REFERENCE.md`** - Riferimento schema completo
+- **`database/docs/MIGRATIONS.md`** - Guide migrazione database
+- **`database/schema.sql`** - Schema database
+
+## 🎨 SISTEMA MODELLI MODULI GLOBALI
+- **Modelli Condivisi**: Un'unica istanza master referenziata da più pagine
+- **Modifica Globale**: Aggiorna master → applica a tutte le pagine
+- **Personalizzazione**: Possibilità di "staccare" e personalizzare per singola pagina
+- **Interfaccia**: Integrata nel Page Builder con UI intuitiva
+- **Database**: Colonne `is_template`, `template_name`, `template_instance_id`
+- **Use Cases**: Menu, footer, newsletter form condivisi
+- **Installazione**: `admin/install-templates.php`
+- **Guida**: `MODULE-TEMPLATES-GUIDE.md`
 
 ## 🎨 SISTEMA TEMI AGGIORNATO
 - **Theme Editor**: Gestione completa temi dinamici

@@ -85,7 +85,7 @@ $menuId = 'menu-' . uniqid();
             <div class="mobile-menu-header">
                 <div class="mobile-brand">
                     <img src="<?= htmlspecialchars($logo) ?>" alt="<?= htmlspecialchars($logoAlt) ?>" class="mobile-logo">
-                    <h2 class="mobile-title"><?= htmlspecialchars($marathonTitle) ?></h2>
+                    <h2 class="mobile-title"><?= $marathonTitle ?></h2>
                 </div>
             </div>
 

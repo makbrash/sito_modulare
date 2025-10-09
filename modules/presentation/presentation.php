@@ -40,9 +40,7 @@ $stats = $config['stats'] ?? $moduleData['stats'] ?? [
     ]
 ];
 
-// Sanitizzazione output
-$title = htmlspecialchars($title);
-$subtitle = htmlspecialchars($subtitle);
+// Sanitizzazione output (title e subtitle possono contenere HTML)
 $description1 = htmlspecialchars($description1);
 $description2 = htmlspecialchars($description2);
 $image_url = htmlspecialchars($image_url);
@@ -54,27 +52,26 @@ $image_position = htmlspecialchars($image_position);
      data-module="presentation" 
      data-config='<?= htmlspecialchars(json_encode($config)) ?>'>
     
-    <div class="container-fluid">
+    <div class="container-presentazione">
+
         <div class="row row--align-center" style="min-height: 100vh;">
             
-            <?php if ($image_position === 'left'): ?>
-                <!-- Immagine a sinistra -->
-                <div class="col-12 col-md-6">
-                    <div class="">
-                        <img src="<?= $image_url ?>" 
-                             alt="<?= $image_alt ?>" 
-                             class=""
-                             loading="lazy">
-                    </div>
+            <!-- Immagine (sempre prima su mobile) -->
+            <div class="presentation__image-col col-12 col-md-6 <?= $image_position === 'left' ? 'presentation__image-col--left' : 'presentation__image-col--right' ?>">
+                <div class="presentation_image-wrapper">
+                    <img src="<?= $image_url ?>" 
+                         alt="<?= $image_alt ?>" 
+                         class="presentation_image img-3d"
+                         loading="lazy">
                 </div>
-            <?php endif; ?>
+            </div>
             
             <!-- Contenuto testuale -->
-            <div class="col-12 col-md-6">
+            <div class="presentation__text-col col-12 col-md-6">
                 <div class="presentation_content">
                     
                     <!-- Titolo -->
-                    <h2 class="presentation_title ">
+                    <h2 class="presentation_title">
                         <?= $title ?> <strong><?= $subtitle ?></strong>
                     </h2>
                     
@@ -91,11 +88,11 @@ $image_position = htmlspecialchars($image_position);
                         <?php foreach ($stats as $stat): ?>
                             <div class="card-tag">
                                 <div class="card-tag_icon">
-                                    <i class="<?= ($stat['icon']) ?>"></i>
+                                    <i class="<?= htmlspecialchars($stat['icon']) ?>"></i>
                                 </div>
                                 <div class="card-tag_content">
-                                    <span class="card-tag_number"><?= ($stat['number']) ?></span>
-                                    <span class="card-tag_label"><?= ($stat['label']) ?></span>
+                                    <span class="card-tag_number"><?= htmlspecialchars($stat['number']) ?></span>
+                                    <span class="card-tag_label"><?= htmlspecialchars($stat['label']) ?></span>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -103,18 +100,6 @@ $image_position = htmlspecialchars($image_position);
                     
                 </div>
             </div>
-            
-            <?php if ($image_position === 'right'): ?>
-                <!-- Immagine a destra -->
-                <div class="col-12 col-md-6">
-                    <div class="presentation_image-wrapper">
-                        <img src="<?= $image_url ?>" 
-                             alt="<?= $image_alt ?>" 
-                             class="presentation_image"
-                             loading="lazy">
-                    </div>
-                </div>
-            <?php endif; ?>
             
         </div>
     </div>

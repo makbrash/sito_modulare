@@ -18,9 +18,9 @@
 .menu-brand .countdown .countdown-timer{font-family:"Courier New",monospace;/* font-weight:700; */color:var(--countdown-color);text-shadow:0 0 10px rgba(0,255,255,.3);animation:pulse 2s infinite;font-size: .85em;}
 .search-container{flex:1;/* max-width:500px; */position:relative;/* backdrop-filter: blur(10px); */transition: all .3s 
 cubic-bezier(.4, 0, .2, 1);width: 100%;display: flex;justify-content: flex-end;}
-.search-container .search-box{position:relative;display:flex;align-items: center;background:var(--search-bg);border:1px solid var(--search-border);border-radius:50px;padding: .5rem 1.5rem;transition:all .3s cubic-bezier(.4,0,.2,1);backdrop-filter: blur(10px)!important;max-width: 800px;width: 100%;}
+.search-container .search-box{position:relative;display:flex;align-items: center;background:var(--search-bg);border:1px solid var(--search-border);border-radius:50px;padding: .5rem 1.5rem;transition:all .3s cubic-bezier(.4,0,.2,1);backdrop-filter: blur(10px)!important;-webkit-backdrop-filter: blur(10px)!important;max-width: 800px;width: 100%;}
 .search-container .search-box:hover{background:var(--search-bg-hover);border-color: var(--primary);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.1)}
-.search-container .search-box.focused{/* background:var(--search-bg-focus); */border-color:var(--search-border-focus);box-shadow:0 0 0 3px rgba(35,168,235,.2);transform:translateY(-2px);backdrop-filter: blur(30px) !important;}
+.search-container .search-box.focused{/* background:var(--search-bg-focus); */border-color:var(--search-border-focus);box-shadow:0 0 0 3px rgba(35,168,235,.2);transform:translateY(-2px);backdrop-filter: blur(30px) !important;-webkit-backdrop-filter: blur(30px) !important;}
 .search-container .search-box.typing .search-input{color:var(--primary)}
 .search-container .search-box.typing .search-icon{color:var(--primary);transform:scale(1.1)}
 .search-container .search-input{flex:1;border:none;background:transparent;color:var(--text-primary);font-size:1rem;font-weight:500;outline:none;transition:all .3s ease;height: 100%;}
@@ -32,7 +32,7 @@ cubic-bezier(.4, 0, .2, 1);width: 100%;display: flex;justify-content: flex-end;}
 .search-container .search-btn:hover{background:rgba(255,255,255,.1);color:var(--primary);transform:scale(1.1)}
 .search-container .search-btn.sending{background:var(--primary);color:#fff;animation:pulse .6s ease-in-out}
 .search-container .search-icon{width:20px;height:20px;transition:all .3s ease}
-.search-container .search-suggestions{position:absolute;top:100%;/* left:0; *//* right:0; */background: var(--gradient-dark);backdrop-filter:blur(20px);/* border:1px solid rgba(255,255,255,.2); */border-radius: 22px;/* margin-top: 6px; */padding: .7rem;box-shadow:0 8px 32px rgba(0,0,0,.2);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s cubic-bezier(.4,0,.2,1);z-index:1001;width: 100%;max-width: 800px;}
+.search-container .search-suggestions{position:absolute;top:100%;/* left:0; *//* right:0; */background: var(--gradient-dark);backdrop-filter:blur(20px);-webkit-backdrop-filter: blur(20px);/* border:1px solid rgba(255,255,255,.2); */border-radius: 22px;/* margin-top: 6px; */padding: .7rem;box-shadow:0 8px 32px rgba(0,0,0,.2);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .3s cubic-bezier(.4,0,.2,1);z-index:1001;width: 100%;max-width: 800px;}
 .search-container .search-suggestions.show{opacity:1;visibility:visible;transform:translateY(0)}
 .search-container .search-suggestions.has-input{background: var(--bg-primary);}
 .search-container .suggestion-item{padding: .5rem 1rem;border-radius:8px;cursor:pointer;transition:all .2s ease;color:var(--text-primary);font-weight:500}
@@ -52,8 +52,9 @@ cubic-bezier(.4, 0, .2, 1);width: 100%;display: flex;justify-content: flex-end;}
     right:100%;
     width: 100%;
     height: 100vh;
-    background: #0b0b15c9;
+    background: var(--gradient-dark);
     backdrop-filter: blur(56px);
+    -webkit-backdrop-filter: blur(56px);
     z-index: 2000;
     transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

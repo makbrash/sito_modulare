@@ -106,9 +106,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 echo json_encode(['success' => true]);
                 exit;
                 
+            case 'debug_instances':
+                // Debug: lista tutte le istanze per la pagina corrente
+                $pageId = (int)$_GET['page_id'] ?? 0;
+                $stmt = $db->prepare("SELECT id, page_id, module_name, instance_name, is_template, template_name FROM module_instances WHERE page_id = ? OR is_template = 1 ORDER BY id DESC");
+                $stmt->execute([$pageId]);
+                $instances = $stmt->fetchAll();
+                
+                echo json_encode([
+                    'success' => true,
+                    'page_id' => $pageId,
+                    'instances' => $instances,
+                    'count' => count($instances)
+                ]);
+                exit;
+                
             case 'get_module_preview':
                 $moduleName = $_POST['module_name'];
-                $config = json_decode($_POST['config'], true);
+                $instanceId = (int)$_POST['instance_id'] ?? null;
+                
+                // Se abbiamo un instanceId, usa la logica del template globale
+                if ($instanceId) {
+                    $currentConfig = [];
+                    $usesTemplate = false;
+                    
+                    $stmt = $db->prepare("SELECT mi.*, template.config as tpl_config 
+                        FROM module_instances mi
+                        LEFT JOIN module_instances template ON mi.template_instance_id = template.id
+                        WHERE mi.id = ?");
+                    $stmt->execute([$instanceId]);
+                    $instance = $stmt->fetch();
+                    
+                    if ($instance) {
+                        // Se usa un template, prendi config dal master
+                        if ($instance['template_instance_id']) {
+                            $usesTemplate = true;
+                            $currentConfig = json_decode($instance['tpl_config'], true) ?? [];
+                        } else {
+                            $currentConfig = json_decode($instance['config'], true) ?? [];
+                        }
+                    }
+                    
+                    // Se usa template, usa la config del master invece di quella inviata
+                    if ($usesTemplate) {
+                        $config = $currentConfig;
+                    } else {
+                        // Modulo normale, usa la config inviata dal form
+                        $config = json_decode($_POST['config'], true);
+                    }
+                } else {
+                    // Nessun instanceId, usa la config inviata
+                    $config = json_decode($_POST['config'], true);
+                }
                 
                 $output = $renderer->renderModule($moduleName, $config);
                 echo json_encode(['success' => true, 'html' => $output]);
@@ -118,14 +167,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $moduleName = $_POST['module_name'];
                 $instanceId = (int)$_POST['instance_id'] ?? null;
                 
-                // Ottieni configurazione attuale se esiste
+                // Ottieni configurazione attuale e info template
                 $currentConfig = [];
+                $usesTemplate = false;
+                $templateId = null;
+                $templateName = null;
+                
                 if ($instanceId) {
-                    $stmt = $db->prepare("SELECT config FROM module_instances WHERE id = ?");
+                    $stmt = $db->prepare("SELECT mi.*, template.id as tpl_id, template.template_name, template.config as tpl_config 
+                        FROM module_instances mi
+                        LEFT JOIN module_instances template ON mi.template_instance_id = template.id
+                        WHERE mi.id = ?");
                     $stmt->execute([$instanceId]);
                     $instance = $stmt->fetch();
+                    
                     if ($instance) {
-                        $currentConfig = json_decode($instance['config'], true) ?? [];
+                        // Se usa un template, prendi config dal master
+                        if ($instance['template_instance_id']) {
+                            $usesTemplate = true;
+                            $templateId = $instance['tpl_id'];
+                            $templateName = $instance['template_name'];
+                            $currentConfig = json_decode($instance['tpl_config'], true) ?? [];
+                        } else {
+                            $currentConfig = json_decode($instance['config'], true) ?? [];
+                        }
                     }
                 }
                 
@@ -142,7 +207,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 echo json_encode([
                     'success' => true, 
                     'config' => $config,
-                    'manifest' => $manifest
+                    'manifest' => $manifest,
+                    'uses_template' => $usesTemplate,
+                    'template_id' => $templateId,
+                    'template_name' => $templateName
                 ]);
                 exit;
                 
@@ -152,6 +220,336 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 $success = $renderer->updatePageTheme($pageId, $theme);
                 echo json_encode(['success' => $success]);
+                exit;
+                
+            case 'create_page':
+                $title = trim($_POST['title'] ?? '');
+                $slug = trim($_POST['slug'] ?? '');
+                $status = $_POST['status'] ?? 'draft';
+                
+                if (empty($title)) {
+                    echo json_encode(['success' => false, 'error' => 'Il titolo è obbligatorio']);
+                    exit;
+                }
+                
+                // Genera slug se non fornito
+                if (empty($slug)) {
+                    $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $title));
+                    $slug = trim($slug, '-');
+                }
+                
+                // Verifica slug unico
+                $stmt = $db->prepare("SELECT id FROM pages WHERE slug = ?");
+                $stmt->execute([$slug]);
+                if ($stmt->fetch()) {
+                    // Aggiungi timestamp per rendere unico
+                    $slug .= '-' . time();
+                }
+                
+                // Crea nuova pagina con colonne corrette dello schema
+                $stmt = $db->prepare("INSERT INTO pages (slug, title, description, template, layout_config, css_variables, status) 
+                                     VALUES (?, ?, '', 'default', '{}', '{}', ?)");
+                $stmt->execute([$slug, $title, $status]);
+                $newPageId = $db->lastInsertId();
+                
+                echo json_encode(['success' => true, 'page_id' => $newPageId, 'message' => 'Pagina creata con successo']);
+                exit;
+                
+            case 'duplicate_page':
+                $sourcePageId = (int)$_POST['page_id'];
+                $newTitle = trim($_POST['title'] ?? '');
+                
+                if (empty($newTitle)) {
+                    echo json_encode(['success' => false, 'error' => 'Il titolo è obbligatorio']);
+                    exit;
+                }
+                
+                // Ottieni pagina sorgente
+                $stmt = $db->prepare("SELECT * FROM pages WHERE id = ?");
+                $stmt->execute([$sourcePageId]);
+                $sourcePage = $stmt->fetch();
+                
+                if (!$sourcePage) {
+                    echo json_encode(['success' => false, 'error' => 'Pagina sorgente non trovata']);
+                    exit;
+                }
+                
+                // Genera slug unico
+                $baseSlug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $newTitle));
+                $baseSlug = trim($baseSlug, '-');
+                $slug = $baseSlug;
+                $counter = 1;
+                
+                while (true) {
+                    $stmt = $db->prepare("SELECT id FROM pages WHERE slug = ?");
+                    $stmt->execute([$slug]);
+                    if (!$stmt->fetch()) break;
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+                
+                // Duplica pagina con colonne corrette dello schema
+                $stmt = $db->prepare("INSERT INTO pages (slug, title, description, template, layout_config, css_variables, meta_data, status) 
+                                     VALUES (?, ?, ?, ?, ?, ?, ?, 'draft')");
+                $stmt->execute([
+                    $slug,
+                    $newTitle,
+                    $sourcePage['description'] ?? '',
+                    $sourcePage['template'] ?? 'default',
+                    $sourcePage['layout_config'] ?? '{}',
+                    $sourcePage['css_variables'] ?? '{}',
+                    $sourcePage['meta_data'] ?? '{}'
+                ]);
+                $newPageId = $db->lastInsertId();
+                
+                // Duplica moduli associati
+                $stmt = $db->prepare("SELECT * FROM module_instances WHERE page_id = ? ORDER BY order_index");
+                $stmt->execute([$sourcePageId]);
+                $modules = $stmt->fetchAll();
+                
+                $stmtInsert = $db->prepare("INSERT INTO module_instances (page_id, module_name, instance_name, config, order_index) 
+                                           VALUES (?, ?, ?, ?, ?)");
+                
+                foreach ($modules as $module) {
+                    // Genera nome istanza unico per la nuova pagina
+                    $baseInstanceName = $module['instance_name'];
+                    $instanceName = $baseInstanceName . '_copy';
+                    $instanceCounter = 1;
+                    
+                    // Verifica unicità nome istanza
+                    while (true) {
+                        $stmt = $db->prepare("SELECT id FROM module_instances WHERE page_id = ? AND instance_name = ?");
+                        $stmt->execute([$newPageId, $instanceName]);
+                        if (!$stmt->fetch()) break;
+                        $instanceName = $baseInstanceName . '_copy_' . $instanceCounter;
+                        $instanceCounter++;
+                    }
+                    
+                    // Inserisci modulo duplicato
+                    $stmtInsert->execute([
+                        $newPageId,
+                        $module['module_name'],
+                        $instanceName,
+                        $module['config'],
+                        $module['order_index']
+                    ]);
+                }
+                
+                echo json_encode([
+                    'success' => true, 
+                    'page_id' => $newPageId,
+                    'modules_duplicated' => count($modules),
+                    'message' => 'Pagina duplicata con successo'
+                ]);
+                exit;
+                
+            case 'delete_page':
+                $pageId = (int)$_POST['page_id'];
+                
+                // Verifica che non sia l'ultima pagina
+                $stmt = $db->query("SELECT COUNT(*) FROM pages");
+                $pageCount = $stmt->fetchColumn();
+                
+                if ($pageCount <= 1) {
+                    echo json_encode(['success' => false, 'error' => 'Non puoi eliminare l\'ultima pagina']);
+                    exit;
+                }
+                
+                // Elimina moduli associati
+                $stmt = $db->prepare("DELETE FROM module_instances WHERE page_id = ?");
+                $stmt->execute([$pageId]);
+                
+                // Elimina pagina
+                $stmt = $db->prepare("DELETE FROM pages WHERE id = ?");
+                $stmt->execute([$pageId]);
+                
+                echo json_encode(['success' => true, 'message' => 'Pagina eliminata con successo']);
+                exit;
+                
+            case 'toggle_page_status':
+                $pageId = (int)$_POST['page_id'];
+                
+                // Ottieni status corrente
+                $stmt = $db->prepare("SELECT status FROM pages WHERE id = ?");
+                $stmt->execute([$pageId]);
+                $page = $stmt->fetch();
+                
+                if (!$page) {
+                    echo json_encode(['success' => false, 'error' => 'Pagina non trovata']);
+                    exit;
+                }
+                
+                // Toggle status
+                $newStatus = $page['status'] === 'published' ? 'draft' : 'published';
+                
+                // Aggiorna status
+                $stmt = $db->prepare("UPDATE pages SET status = ? WHERE id = ?");
+                $stmt->execute([$newStatus, $pageId]);
+                
+                echo json_encode([
+                    'success' => true, 
+                    'status' => $newStatus,
+                    'message' => $newStatus === 'published' ? 'Pagina pubblicata' : 'Pagina impostata come bozza'
+                ]);
+                exit;
+                
+            case 'save_as_template':
+                $instanceId = (int)$_POST['instance_id'];
+                $templateName = trim($_POST['template_name'] ?? '');
+                
+                error_log("DEBUG save_as_template: instanceId = $instanceId, templateName = $templateName");
+                
+                if (empty($templateName)) {
+                    echo json_encode(['success' => false, 'error' => 'Il nome del modello è obbligatorio']);
+                    exit;
+                }
+                
+                // Ottieni istanza corrente
+                $stmt = $db->prepare("SELECT * FROM module_instances WHERE id = ?");
+                $stmt->execute([$instanceId]);
+                $instance = $stmt->fetch();
+                
+                error_log("DEBUG save_as_template: instance found = " . ($instance ? 'YES' : 'NO'));
+                if ($instance) {
+                    error_log("DEBUG save_as_template: instance data = " . json_encode($instance));
+                }
+                
+                if (!$instance) {
+                    // Debug: controlla se l'istanza esiste con altri criteri
+                    $stmt = $db->prepare("SELECT id, page_id, module_name, instance_name FROM module_instances WHERE id = ? OR page_id = ?");
+                    $stmt->execute([$instanceId, $instanceId]);
+                    $debugInstances = $stmt->fetchAll();
+                    error_log("DEBUG save_as_template: debug instances = " . json_encode($debugInstances));
+                    
+                    echo json_encode(['success' => false, 'error' => 'Istanza non trovata (ID: ' . $instanceId . ')']);
+                    exit;
+                }
+                
+                // Crea istanza master (template)
+                $stmt = $db->prepare("INSERT INTO module_instances 
+                    (page_id, module_name, instance_name, config, is_template, template_name, order_index, is_active) 
+                    VALUES (NULL, ?, ?, ?, TRUE, ?, 0, TRUE)");
+                $templateInstanceName = 'template_' . $instance['module_name'] . '_' . time();
+                $stmt->execute([
+                    $instance['module_name'],
+                    $templateInstanceName,
+                    $instance['config'],
+                    $templateName
+                ]);
+                $templateId = $db->lastInsertId();
+                
+                // Aggiorna istanza corrente per usare il template
+                $stmt = $db->prepare("UPDATE module_instances SET template_instance_id = ? WHERE id = ?");
+                $stmt->execute([$templateId, $instanceId]);
+                
+                echo json_encode([
+                    'success' => true, 
+                    'template_id' => $templateId,
+                    'template_name' => $templateName,
+                    'message' => 'Modello creato con successo'
+                ]);
+                exit;
+                
+            case 'get_templates':
+                $moduleName = $_POST['module_name'] ?? '';
+                
+                if (empty($moduleName)) {
+                    echo json_encode(['success' => false, 'error' => 'Nome modulo obbligatorio']);
+                    exit;
+                }
+                
+                // Ottieni tutti i template per questo tipo di modulo
+                $stmt = $db->prepare("SELECT id, template_name, config, created_at 
+                    FROM module_instances 
+                    WHERE is_template = TRUE AND module_name = ? 
+                    ORDER BY template_name");
+                $stmt->execute([$moduleName]);
+                $templates = $stmt->fetchAll();
+                
+                echo json_encode(['success' => true, 'templates' => $templates]);
+                exit;
+                
+            case 'apply_template':
+                $instanceId = (int)$_POST['instance_id'];
+                $templateId = (int)$_POST['template_id'];
+                
+                // Verifica che il template esista
+                $stmt = $db->prepare("SELECT * FROM module_instances WHERE id = ? AND is_template = TRUE");
+                $stmt->execute([$templateId]);
+                $template = $stmt->fetch();
+                
+                if (!$template) {
+                    echo json_encode(['success' => false, 'error' => 'Template non trovato']);
+                    exit;
+                }
+                
+                // Applica template all'istanza
+                $stmt = $db->prepare("UPDATE module_instances SET template_instance_id = ?, config = ? WHERE id = ?");
+                $stmt->execute([$templateId, '{}', $instanceId]);
+                
+                echo json_encode([
+                    'success' => true,
+                    'template_name' => $template['template_name'],
+                    'message' => 'Template applicato con successo'
+                ]);
+                exit;
+                
+            case 'detach_from_template':
+                $instanceId = (int)$_POST['instance_id'];
+                
+                // Ottieni config dal template
+                $stmt = $db->prepare("SELECT mi.*, template.config as template_config 
+                    FROM module_instances mi
+                    LEFT JOIN module_instances template ON mi.template_instance_id = template.id
+                    WHERE mi.id = ?");
+                $stmt->execute([$instanceId]);
+                $instance = $stmt->fetch();
+                
+                if (!$instance) {
+                    echo json_encode(['success' => false, 'error' => 'Istanza non trovata']);
+                    exit;
+                }
+                
+                // Copia config dal template e stacca
+                $newConfig = $instance['template_config'] ?? $instance['config'];
+                $stmt = $db->prepare("UPDATE module_instances SET template_instance_id = NULL, config = ? WHERE id = ?");
+                $stmt->execute([$newConfig, $instanceId]);
+                
+                echo json_encode([
+                    'success' => true,
+                    'config' => json_decode($newConfig, true),
+                    'message' => 'Modulo scollegato dal template'
+                ]);
+                exit;
+                
+            case 'update_template':
+                $templateId = (int)$_POST['template_id'];
+                $config = json_decode($_POST['config'], true);
+                
+                // Verifica che sia un template
+                $stmt = $db->prepare("SELECT * FROM module_instances WHERE id = ? AND is_template = TRUE");
+                $stmt->execute([$templateId]);
+                $template = $stmt->fetch();
+                
+                if (!$template) {
+                    echo json_encode(['success' => false, 'error' => 'Template non trovato']);
+                    exit;
+                }
+                
+                // Aggiorna config del template master
+                $stmt = $db->prepare("UPDATE module_instances SET config = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+                $stmt->execute([json_encode($config), $templateId]);
+                
+                // Conta quante istanze usano questo template
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM module_instances WHERE template_instance_id = ?");
+                $stmt->execute([$templateId]);
+                $count = $stmt->fetchColumn();
+                
+                echo json_encode([
+                    'success' => true,
+                    'affected_instances' => $count,
+                    'message' => "Template aggiornato! Modifiche applicate a $count pagine"
+                ]);
                 exit;
         }
     } catch (Exception $e) {
@@ -202,6 +600,7 @@ if ($currentPage) {
     <link rel="stylesheet" href="../assets/css/core/reset.css">
     <link rel="stylesheet" href="../assets/css/core/typography.css">
     <link rel="stylesheet" href="../assets/css/core/fonts.css">
+    <link rel="stylesheet" href="../assets/css/core/layout.css">
     
     <!-- CSS Moduli -->
     <?php
@@ -223,19 +622,7 @@ if ($currentPage) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Page Builder Overrides - Disabilita classi fixed */
-        .page-canvas [class*="fixed"],
-        .page-canvas .sticky{
-            position: static !important;
-            top: auto !important;
-            left: auto !important;
-            right: auto !important;
-            bottom: auto !important;
-            z-index: auto !important;
-            transform: none !important;
-        }
-        
- 
+
     </style>
 </head>
 <body>
@@ -246,6 +633,12 @@ if ($currentPage) {
             <?php if ($currentPage): ?>
                 <p><strong><?= htmlspecialchars($currentPage['title']) ?></strong></p>
                 <p>ID: <?= $currentPage['id'] ?></p>
+                <p>
+                    <span class="page-status page-status--<?= $currentPage['status'] ?>">
+                        <i class="fas fa-<?= $currentPage['status'] === 'published' ? 'check-circle' : 'clock' ?>"></i>
+                        <?= $currentPage['status'] === 'published' ? 'Pubblicata' : 'Bozza' ?>
+                    </span>
+                </p>
             <?php endif; ?>
             
             <div class="page-selector">
@@ -256,6 +649,30 @@ if ($currentPage) {
                         </option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+            
+            <div class="page-actions" style="margin-top: 1rem;">
+                <?php if ($currentPage): ?>
+                    <?php if ($currentPage['status'] === 'draft'): ?>
+                        <button id="publish-btn" class="btn-small btn-success" onclick="togglePageStatus()" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle"></i> Pubblica Pagina
+                        </button>
+                    <?php else: ?>
+                        <button id="publish-btn" class="btn-small btn-warning" onclick="togglePageStatus()" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fas fa-clock"></i> Imposta come Bozza
+                        </button>
+                    <?php endif; ?>
+                <?php endif; ?>
+                
+                <button class="btn-small btn-edit" onclick="showCreatePageModal()" style="width: 100%; margin-bottom: 0.5rem;">
+                    <i class="fas fa-plus"></i> Nuova Pagina
+                </button>
+                <button class="btn-small btn-secondary" onclick="showDuplicatePageModal()" style="width: 100%; margin-bottom: 0.5rem;">
+                    <i class="fas fa-copy"></i> Duplica Pagina
+                </button>
+                <button class="btn-small btn-delete" onclick="confirmDeletePage()" style="width: 100%;">
+                    <i class="fas fa-trash"></i> Elimina Pagina
+                </button>
             </div>
             
             <div class="theme-selector" style="margin-bottom: 1rem;">
@@ -367,12 +784,167 @@ if ($currentPage) {
         </div>
     </div>
     
+    <!-- Modal Crea Pagina -->
+    <div class="modal" id="create-page-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> Crea Nuova Pagina</h3>
+                <button class="modal-close" onclick="closeModal('create-page-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-page-title">Titolo Pagina *</label>
+                    <input type="text" id="new-page-title" placeholder="Es: Home, Chi Siamo, Contatti" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-page-slug">Slug (opzionale)</label>
+                    <input type="text" id="new-page-slug" placeholder="es: chi-siamo (lascia vuoto per auto-generazione)">
+                    <small style="display: block; margin-top: 0.25rem; color: #6c757d;">Lo slug sarà utilizzato nell'URL della pagina</small>
+                </div>
+                <div class="form-group">
+                    <label for="new-page-status">Stato</label>
+                    <select id="new-page-status">
+                        <option value="draft">Bozza</option>
+                        <option value="published">Pubblicata</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-small btn-secondary" onclick="closeModal('create-page-modal')">Annulla</button>
+                <button class="btn-small btn-edit" onclick="createPage()">
+                    <i class="fas fa-check"></i> Crea Pagina
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Duplica Pagina -->
+    <div class="modal" id="duplicate-page-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-copy"></i> Duplica Pagina</h3>
+                <button class="modal-close" onclick="closeModal('duplicate-page-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: #6c757d;">
+                    Duplicando la pagina "<strong><?= htmlspecialchars($currentPage['title'] ?? '') ?></strong>" verranno copiati anche tutti i moduli associati.
+                </p>
+                <div class="form-group">
+                    <label for="duplicate-page-title">Titolo Nuova Pagina *</label>
+                    <input type="text" id="duplicate-page-title" placeholder="Es: <?= htmlspecialchars($currentPage['title'] ?? 'Home') ?> - Copia" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-small btn-secondary" onclick="closeModal('duplicate-page-modal')">Annulla</button>
+                <button class="btn-small btn-edit" onclick="duplicatePage()">
+                    <i class="fas fa-copy"></i> Duplica Pagina
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         let currentPageId = <?= $pageId ?>;
         let selectedInstance = null;
         let instanceCounter = {};
+        
+        // === FIX PERCORSI IMMAGINI ===
+        
+        /**
+         * Corregge i percorsi relativi delle immagini nel page canvas
+         * Converte percorsi relativi in percorsi assoluti dalla root del progetto
+         */
+        function fixImagePaths(container) {
+            if (!container) return;
+            
+            // Base path del progetto (dall'admin alla root)
+            const basePath = '../';
+            
+            // Seleziona tutte le immagini nel container
+            const images = container.querySelectorAll('img');
+            
+            images.forEach(img => {
+                const src = img.getAttribute('src');
+                
+                // Salta se già assoluto (http/https) o data URI
+                if (!src || src.startsWith('http') || src.startsWith('data:') || src.startsWith('//')) {
+                    return;
+                }
+                
+                // Se il percorso è relativo e non inizia con ../
+                if (!src.startsWith('../')) {
+                    // Aggiungi il base path
+                    img.setAttribute('src', basePath + src);
+                    console.log('Percorso immagine corretto:', src, '->', basePath + src);
+                }
+            });
+            
+            // Gestisci anche i background-image nel CSS inline
+            const elementsWithBg = container.querySelectorAll('[style*="background-image"]');
+            elementsWithBg.forEach(el => {
+                const style = el.getAttribute('style');
+                if (style && style.includes('url(')) {
+                    const fixedStyle = style.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, url) => {
+                        // Salta se già assoluto
+                        if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('//') || url.startsWith('../')) {
+                            return match;
+                        }
+                        console.log('Background-image corretto:', url, '->', basePath + url);
+                        return `url('${basePath}${url}')`;
+                    });
+                    el.setAttribute('style', fixedStyle);
+                }
+            });
+        }
+        
+        /**
+         * Observer per correggere le immagini quando il DOM cambia
+         */
+        function observeImageChanges() {
+            const pageCanvas = document.getElementById('page-canvas');
+            if (!pageCanvas) return;
+            
+            // Correggi immagini esistenti
+            fixImagePaths(pageCanvas);
+            
+            // Osserva cambiamenti futuri
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    // Se sono stati aggiunti nuovi nodi
+                    if (mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === 1) { // Element node
+                                fixImagePaths(node);
+                            }
+                        });
+                    }
+                    
+                    // Se sono stati modificati attributi (es. src di img)
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                        if (mutation.target.tagName === 'IMG') {
+                            fixImagePaths(mutation.target.parentElement);
+                        }
+                    }
+                });
+            });
+            
+            // Inizia ad osservare
+            observer.observe(pageCanvas, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['src', 'style']
+            });
+            
+            console.log('Observer attivo per correzione percorsi immagini');
+        }
+        
+        // Inizializza observer quando il DOM è pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            observeImageChanges();
+        });
         
         // Utility per debounce
         function debounce(func, wait) {
@@ -691,11 +1263,80 @@ if ($currentPage) {
             // Riattacca event listener dopo aver aggiunto il nuovo modulo
             setTimeout(() => {
                 reattachModuleListeners();
+                // Salva automaticamente l'ordinamento dopo aggiunta modulo
+                updateOrder();
             }, 100);
             
-            // NON salvare automaticamente i moduli temporanei nel database
-            // Il salvataggio avverrà solo da "Salva Configurazione"
-            // Manteniamo l'istanza come bozza nel DOM (data-instance-id = "temp")
+            // AUTO-SAVE: Salva immediatamente il modulo con config default
+            // Così è subito disponibile per "Salva come Modello Globale"
+            setTimeout(() => {
+                console.log('Auto-save modulo con config default:', moduleName, instanceName);
+                autoSaveNewModule(tempDiv, moduleName, instanceName, orderIndex);
+            }, 500);
+        }
+        
+        // Auto-save nuovo modulo con config default
+        function autoSaveNewModule(element, moduleName, instanceName, orderIndex) {
+            // Carica config default dal manifest
+            const formData = new FormData();
+            formData.append('action', 'get_module_config');
+            formData.append('module_name', moduleName);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const defaultConfig = data.config;
+                    
+                    console.log('Config default caricata:', defaultConfig);
+                    
+                    // Salva nel database
+                    const saveFormData = new FormData();
+                    saveFormData.append('action', 'save_instance');
+                    saveFormData.append('page_id', currentPageId);
+                    saveFormData.append('module_name', moduleName);
+                    saveFormData.append('instance_name', instanceName);
+                    saveFormData.append('config', JSON.stringify(defaultConfig));
+                    saveFormData.append('order_index', orderIndex);
+                    
+                    return fetch('', {
+                        method: 'POST',
+                        body: saveFormData
+                    });
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Modulo auto-salvato con ID:', data.id);
+                    
+                    // Aggiorna elemento da temp a ID reale
+                    element.setAttribute('data-instance-id', data.id);
+                    
+                    // Aggiorna pulsanti controllo
+                    const controlButtons = element.querySelectorAll('.module-controls button');
+                    controlButtons.forEach(btn => {
+                        btn.setAttribute('data-instance-id', data.id);
+                    });
+                    
+                    // Aggiorna preview con config default
+                    selectedInstance = element;
+                    updateModulePreview();
+                    
+                    // Salva automaticamente l'ordinamento dopo auto-save
+                    updateOrder();
+                    
+                    console.log('Auto-save completato! Modulo pronto per essere trasformato in globale.');
+                } else {
+                    console.error('Errore auto-save:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Errore durante auto-save:', error);
+            });
         }
         
         // Seleziona istanza
@@ -755,7 +1396,11 @@ if ($currentPage) {
             })
             .then(data => {
                 if (data.success) {
-                    renderModuleConfig(moduleName, instanceName, instanceId, data.config, data.manifest);
+                    renderModuleConfig(moduleName, instanceName, instanceId, data.config, data.manifest, {
+                        usesTemplate: data.uses_template,
+                        templateId: data.template_id,
+                        templateName: data.template_name
+                    });
                 } else {
                     configPanel.innerHTML = '<div style="color: #dc3545; padding: 1rem;">Errore: ' + (data.error || 'Errore sconosciuto') + '</div>';
                 }
@@ -767,68 +1412,155 @@ if ($currentPage) {
         }
         
         // Renderizza configurazione modulo dinamica basata sul manifest
-        function renderModuleConfig(moduleName, instanceName, instanceId, config, manifest) {
+        function renderModuleConfig(moduleName, instanceName, instanceId, config, manifest, templateInfo = {}) {
             const configPanel = document.getElementById('config-content');
+            const usesTemplate = templateInfo.usesTemplate || false;
+            const templateId = templateInfo.templateId;
+            const templateName = templateInfo.templateName;
             
-            let html = `
-                <div class="form-group">
-                    <label>Nome Istanza</label>
-                    <input type="text" id="instance-name" value="${instanceName}">
-                </div>
-            `;
+            // Inizia HTML
+            let html = '<div class="form-group">' +
+                '<label>Nome Istanza</label>' +
+                '<input type="text" id="instance-name" value="' + instanceName + '">' +
+                '</div>';
             
-            // Genera campi dinamicamente dal manifest
-            if (manifest.ui_schema) {
-                html += generateDynamicFields(manifest.ui_schema, config);
+            // Se usa un template, mostra badge e UI speciale
+            if (usesTemplate) {
+                html += '<div class="template-badge template-badge--active">' +
+                    '<i class="fas fa-link"></i>' +
+                    '<strong>Modello Globale:</strong> ' + templateName +
+                    '<p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">' +
+                    'Questo modulo è collegato a un modello condiviso' +
+                    '</p>' +
+                    '</div>' +
+                    '<div class="template-actions" style="margin-top: 1rem;">' +
+                    '<button class="btn-small btn-warning" onclick="editGlobalTemplate(' + templateId + ', \'' + moduleName + '\')" style="width: 100%; margin-bottom: 0.5rem;">' +
+                    '<i class="fas fa-edit"></i> Modifica Modello Generale' +
+                    '</button>' +
+                    '<button class="btn-small btn-secondary" onclick="detachFromTemplate(' + instanceId + ')" style="width: 100%;">' +
+                    '<i class="fas fa-unlink"></i> Salva come Modulo di Pagina' +
+                    '</button>' +
+                    '</div>' +
+                    '<div class="template-preview" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">' +
+                    '<strong style="display: block; margin-bottom: 0.5rem;">Anteprima Configurazione:</strong>';
+                
+                // Mostra campi readonly
+                if (manifest.ui_schema) {
+                    for (const [fieldName, fieldConfig] of Object.entries(manifest.ui_schema)) {
+                        const value = config[fieldName] || '';
+                        const displayValue = value || '(non impostato)';
+                        html += '<div style="margin-bottom: 0.5rem;">' +
+                            '<small style="color: #6c757d;">' + (fieldConfig.label || fieldName) + ':</small>' +
+                            '<div style="padding: 0.25rem 0; color: #495057;">' + displayValue + '</div>' +
+                            '</div>';
+                    }
+                }
+                
+                html += '</div>';
+                
             } else {
-                // Modulo senza ui_schema - usa configurazione generica
+                // Modulo normale - mostra select template e pulsante salva
+                html += '<div class="template-selector" style="margin-bottom: 1rem; padding: 1rem; background: #e7f3ff; border-radius: 4px;">' +
+                    '<label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">' +
+                    '<i class="fas fa-layer-group"></i> Gestione Modelli' +
+                    '</label>' +
+                    '<div style="margin-bottom: 0.5rem;">' +
+                    '<select id="template-select" class="template-select" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">' +
+                    '<option value="">-- Seleziona modello --</option>' +
+                    '</select>' +
+                    '<button class="btn-small btn-secondary" onclick="applySelectedTemplate(\'' + instanceId + '\')" style="width: 100%; margin-bottom: 0.5rem;">' +
+                    '<i class="fas fa-check"></i> Applica Modello Selezionato' +
+                    '</button>' +
+                    '</div>' +
+                    '<button class="btn-small btn-success" onclick="saveAsTemplate(\'' + instanceId + '\', \'' + moduleName + '\')" style="width: 100%;">' +
+                    '<i class="fas fa-save"></i> Salva come Modello Globale' +
+                    '</button>' +
+                    '</div>';
+                
+                // Carica template disponibili
+                loadAvailableTemplates(moduleName);
+                
+                // Genera campi dinamicamente dal manifest
+                if (manifest.ui_schema) {
+                    html += generateDynamicFields(manifest.ui_schema, config);
+                } else {
+                    // Modulo senza ui_schema - usa configurazione generica
+                    html += `
+                        <div class="form-group">
+                            <label>Titolo</label>
+                            <input type="text" id="config-title" value="${config.title || ''}" placeholder="Titolo del modulo">
+                        </div>
+                        <div class="form-group">
+                            <label>Contenuto</label>
+                            <textarea id="config-content" placeholder="Contenuto del modulo">${config.content || ''}</textarea>
+                        </div>
+                    `;
+                }
+                
                 html += `
-                    <div class="form-group">
-                        <label>Titolo</label>
-                        <input type="text" id="config-title" value="${config.title || ''}" placeholder="Titolo del modulo">
-                    </div>
-                    <div class="form-group">
-                        <label>Contenuto</label>
-                        <textarea id="config-content" placeholder="Contenuto del modulo">${config.content || ''}</textarea>
-                    </div>
+                    <button class="btn-small btn-edit" onclick="saveInstanceConfig()" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-save"></i> Salva Configurazione
+                    </button>
                 `;
             }
             
-            html += `
-                <button class="btn-small btn-edit" onclick="saveInstanceConfig()" style="width: 100%; margin-top: 1rem;">
-                    <i class="fas fa-save"></i> Salva Configurazione
-                </button>
-            `;
-            
             configPanel.innerHTML = html;
+            
+            // Flagga sul DOM se il modulo usa un modello globale (per la preview)
+            if (typeof selectedInstance !== 'undefined' && selectedInstance) {
+                selectedInstance.setAttribute('data-uses-template', usesTemplate ? '1' : '0');
+            }
             
             // Aggiungi event listeners per aggiornamento in tempo reale
             setTimeout(() => {
-                const inputs = configPanel.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    // Controllo speciale per il nome istanza
-                    if (input.id === 'instance-name') {
-                        input.addEventListener('input', debounce(() => {
-                            validateInstanceName(input.value);
-                        }, 300));
-                    }
-                    
-                    input.addEventListener('input', debounce(() => {
-                        try {
-                            updateModulePreview();
-                        } catch (e) {
-                            console.warn('Preview update skipped:', e.message);
-                        }
-                    }, 500));
-                    input.addEventListener('change', () => {
-                        try {
-                            updateModulePreview();
-                        } catch (e) {
-                            console.warn('Preview update skipped:', e.message);
-                        }
-                    });
-                });
+                attachConfigListeners();
             }, 100);
+        }
+        
+        // Attacca event listeners ai campi di configurazione per preview tempo reale
+        function attachConfigListeners() {
+            const configPanel = document.getElementById('config-content');
+            // ESCLUDI template-select dai listener di preview per evitare loop
+            const inputs = configPanel.querySelectorAll('input:not([readonly]), select:not([disabled]):not(#template-select), textarea:not([readonly])');
+            
+            console.log(`Attaccando event listeners a ${inputs.length} campi per preview tempo reale`);
+            
+            inputs.forEach((input, index) => {
+                // Rimuovi eventuali listener esistenti (previene duplicati)
+                const newInput = input.cloneNode(true);
+                input.parentNode.replaceChild(newInput, input);
+                
+                // Controllo speciale per il nome istanza
+                if (newInput.id === 'instance-name') {
+                    newInput.addEventListener('input', debounce(() => {
+                        validateInstanceName(newInput.value);
+                    }, 300));
+                }
+                
+                // Event listener per input
+                newInput.addEventListener('input', debounce(() => {
+                    try {
+                        console.log('Input changed:', newInput.id, newInput.value);
+                        updateModulePreview();
+                    } catch (e) {
+                        console.warn('Preview update skipped:', e.message);
+                    }
+                }, 500));
+                
+                // Event listener per change (select, checkbox)
+                newInput.addEventListener('change', () => {
+                    try {
+                        console.log('Field changed:', newInput.id, newInput.value || newInput.checked);
+                        updateModulePreview();
+                    } catch (e) {
+                        console.warn('Preview update skipped:', e.message);
+                    }
+                });
+                
+                console.log(`Event listener ${index + 1} attaccato a: ${newInput.id || newInput.name || 'campo senza ID'}`);
+            });
+            
+            console.log('Event listeners per preview tempo reale attaccati con successo!');
         }
         
         // Genera campi dinamicamente dal manifest
@@ -869,7 +1601,16 @@ if ($currentPage) {
                         break;
                         
                     case 'datetime':
-                        html += `<input type="datetime-local" id="config-${fieldName}" value="${value}" placeholder="${fieldConfig.placeholder || ''}">`;
+                        // Converti ISO in datetime-local format se necessario
+                        let datetimeValue = value;
+                        if (value && value.includes('T') && !value.includes(':00.')) {
+                            // Formato già corretto YYYY-MM-DDTHH:mm:ss o YYYY-MM-DDTHH:mm
+                            datetimeValue = value.substring(0, 16); // Prendi solo YYYY-MM-DDTHH:mm
+                        } else if (value && value.includes('Z')) {
+                            // Formato ISO completo, rimuovi Z e millisecondi
+                            datetimeValue = value.substring(0, 16);
+                        }
+                        html += `<input type="datetime-local" id="config-${fieldName}" value="${datetimeValue}" placeholder="${fieldConfig.placeholder || ''}">`;
                         break;
                         
                     case 'image':
@@ -1086,10 +1827,10 @@ if ($currentPage) {
                     if (input.type === 'checkbox') {
                         config[fieldName] = input.checked;
                     } else if (input.type === 'datetime-local') {
-                        // Converti datetime-local in formato ISO
+                        // Mantieni formato compatibile datetime-local
                         if (input.value) {
-                            const date = new Date(input.value);
-                            config[fieldName] = date.toISOString();
+                            // Mantieni formato YYYY-MM-DDTHH:mm:ss (senza millisecondi e Z)
+                            config[fieldName] = input.value.includes(':') ? input.value + ':00' : input.value;
                         } else {
                             config[fieldName] = '';
                         }
@@ -1189,6 +1930,8 @@ if ($currentPage) {
                     // Riattacca event listener dopo il salvataggio
                     setTimeout(() => {
                         reattachModuleListeners();
+                        // Salva automaticamente l'ordinamento dopo salvataggio configurazione
+                        updateOrder();
                     }, 100);
                     
                     // Mostra messaggio di successo
@@ -1245,18 +1988,31 @@ if ($currentPage) {
             const instances = document.querySelectorAll('.module-instance');
             const updates = [];
             
+            console.log(`🔄 Aggiornamento ordinamento: ${instances.length} moduli trovati`);
+            
             instances.forEach((instance, index) => {
                 const instanceId = instance.getAttribute('data-instance-id');
+                const moduleName = instance.getAttribute('data-module-name');
+                const instanceName = instance.getAttribute('data-instance-name');
+                
                 if (instanceId !== 'temp') {
                     updates.push({
                         id: instanceId,
                         page_id: currentPageId,
                         order_index: index
                     });
+                    console.log(`  📍 Posizione ${index}: ${moduleName} (${instanceName}) [ID: ${instanceId}]`);
+                } else {
+                    console.log(`  ⏳ Modulo temporaneo saltato: ${moduleName} (${instanceName})`);
                 }
             });
             
-            if (updates.length === 0) return;
+            if (updates.length === 0) {
+                console.log('❌ Nessun aggiornamento ordinamento necessario');
+                return;
+            }
+            
+            console.log(`💾 Salvando ordinamento per ${updates.length} moduli...`);
             
             const formData = new FormData();
             formData.append('action', 'update_order');
@@ -1268,9 +2024,14 @@ if ($currentPage) {
             })
             .then(response => response.json())
             .then(data => {
-                if (!data.success) {
-                    console.error('Errore aggiornamento ordine:', data.error);
+                if (data.success) {
+                    console.log('✅ Ordinamento salvato con successo!');
+                } else {
+                    console.error('❌ Errore aggiornamento ordine:', data.error);
                 }
+            })
+            .catch(error => {
+                console.error('❌ Errore durante aggiornamento ordine:', error);
             });
         }
         
@@ -1351,6 +2112,9 @@ if ($currentPage) {
                     
                     // Aggiorna contatori dopo l'eliminazione
                     initializeModuleCounters();
+                    
+                    // Salva automaticamente l'ordinamento dopo eliminazione
+                    updateOrder();
                     
                     // Verifica se rimangono altri moduli
                     checkEmptyState();
@@ -1446,18 +2210,24 @@ if ($currentPage) {
             const moduleName = selectedInstance.getAttribute('data-module-name');
             let config = {};
             
-            // Raccogli configurazione attuale dal form
-            try {
-                // Raccogli configurazione dinamicamente
-                config = collectDynamicConfig();
-            } catch (e) {
-                console.warn('Config non ancora caricata:', e);
-                return;
+            // Per i moduli con template, la config viene presa dal server
+            // Per i moduli normali, raccogli dal form
+            const usesTemplate = selectedInstance.getAttribute('data-uses-template') === '1';
+            if (!usesTemplate) {
+                // Modulo normale - raccogli configurazione attuale dal form
+                try {
+                    config = collectDynamicConfig();
+                } catch (e) {
+                    console.warn('Config non ancora caricata:', e);
+                    return;
+                }
             }
+            // Se usa template, config sarà {} e il server userà quella del master
             
             const formData = new FormData();
             formData.append('action', 'get_module_preview');
             formData.append('module_name', moduleName);
+            formData.append('instance_id', selectedInstance.getAttribute('data-instance-id'));
             formData.append('config', JSON.stringify(config));
             
             fetch('', {
@@ -1482,8 +2252,7 @@ if ($currentPage) {
                     const moduleContent = selectedInstance.querySelector('.module-content');
                     if (moduleContent) {
                         moduleContent.innerHTML = data.html;
-                        
-                        // Aggiorna anche il nome dell'istanza se modificato
+                        fixImagePaths(moduleContent);
                         const instanceNameEl = document.getElementById('instance-name');
                         if (instanceNameEl) {
                             selectedInstance.setAttribute('data-instance-name', instanceNameEl.value);
@@ -1492,11 +2261,7 @@ if ($currentPage) {
                                 headerTitle.innerHTML = `<i class="fas fa-cube"></i> ${moduleName} - ${instanceNameEl.value}`;
                             }
                         }
-                        
-                        // Riattacca gli event listener dopo l'aggiornamento del DOM
                         reattachModuleListeners();
-                        
-                        // Applica il tema corrente alla preview
                         const themeSelector = document.getElementById('theme-selector');
                         if (themeSelector) {
                             applyThemeToBody(themeSelector.value);
@@ -1518,6 +2283,9 @@ if ($currentPage) {
                 }
             });
         }
+        
+        // Salvataggio sicuro prima di operazioni template (RIMOSSO per evitare loop)
+        // Ora l'utente deve salvare manualmente prima delle operazioni template
         
         // Anteprima pagina
         function previewPage() {
@@ -1659,6 +2427,419 @@ if ($currentPage) {
             } catch (_) {
                 return false;
             }
+        }
+        
+        // === GESTIONE PAGINE ===
+        
+        // Mostra modal crea pagina
+        function showCreatePageModal() {
+            document.getElementById('create-page-modal').style.display = 'flex';
+            document.getElementById('new-page-title').focus();
+        }
+        
+        // Mostra modal duplica pagina
+        function showDuplicatePageModal() {
+            document.getElementById('duplicate-page-modal').style.display = 'flex';
+            document.getElementById('duplicate-page-title').focus();
+        }
+        
+        // Chiudi modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Reset form fields
+            if (modalId === 'create-page-modal') {
+                document.getElementById('new-page-title').value = '';
+                document.getElementById('new-page-slug').value = '';
+                document.getElementById('new-page-status').value = 'draft';
+            } else if (modalId === 'duplicate-page-modal') {
+                document.getElementById('duplicate-page-title').value = '';
+            }
+        }
+        
+        // Crea nuova pagina
+        function createPage() {
+            const title = document.getElementById('new-page-title').value.trim();
+            const slug = document.getElementById('new-page-slug').value.trim();
+            const status = document.getElementById('new-page-status').value;
+            
+            if (!title) {
+                alert('Il titolo della pagina è obbligatorio');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'create_page');
+            formData.append('title', title);
+            formData.append('slug', slug);
+            formData.append('status', status);
+            
+            // Mostra loading
+            const btn = event.target;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creazione...';
+            btn.disabled = true;
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal('create-page-modal');
+                    alert(data.message || 'Pagina creata con successo!');
+                    // Ricarica sulla nuova pagina
+                    window.location.href = `?page_id=${data.page_id}`;
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante la creazione della pagina: ' + error.message);
+            })
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+        
+        // Duplica pagina corrente
+        function duplicatePage() {
+            const title = document.getElementById('duplicate-page-title').value.trim();
+            
+            if (!title) {
+                alert('Il titolo della nuova pagina è obbligatorio');
+                return;
+            }
+            
+            if (!confirm('Sei sicuro di voler duplicare questa pagina e tutti i suoi moduli?')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'duplicate_page');
+            formData.append('page_id', currentPageId);
+            formData.append('title', title);
+            
+            // Mostra loading
+            const btn = event.target;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Duplicazione...';
+            btn.disabled = true;
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal('duplicate-page-modal');
+                    const message = `Pagina duplicata con successo!\nModuli copiati: ${data.modules_duplicated || 0}`;
+                    alert(message);
+                    // Ricarica sulla nuova pagina
+                    window.location.href = `?page_id=${data.page_id}`;
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante la duplicazione della pagina: ' + error.message);
+            })
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+        
+        // Conferma eliminazione pagina
+        function confirmDeletePage() {
+            if (!confirm('Sei sicuro di voler eliminare questa pagina?\n\nQuesta azione eliminerà anche tutti i moduli associati e non può essere annullata.')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_page');
+            formData.append('page_id', currentPageId);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Pagina eliminata con successo!');
+                    // Ricarica sulla prima pagina disponibile
+                    window.location.href = '?page_id=1';
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante l\'eliminazione della pagina: ' + error.message);
+            });
+        }
+        
+        // Chiudi modal con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal('create-page-modal');
+                closeModal('duplicate-page-modal');
+            }
+        });
+        
+        // Chiudi modal cliccando fuori
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target.id);
+            }
+        });
+        
+        // === GESTIONE MODELLI MODULI ===
+        
+        // Carica template disponibili per un tipo di modulo
+        function loadAvailableTemplates(moduleName) {
+            const formData = new FormData();
+            formData.append('action', 'get_templates');
+            formData.append('module_name', moduleName);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const select = document.getElementById('template-select');
+                    if (select) {
+                        // Popola select con template
+                        data.templates.forEach(template => {
+                            const option = document.createElement('option');
+                            option.value = template.id;
+                            option.textContent = template.template_name;
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading templates:', error);
+            });
+        }
+        
+        // Debug: verifica stato istanza selezionata
+        function debugInstances() {
+            console.log('🔍 Debug istanze nel database...');
+            fetch(`?action=debug_instances&page_id=${currentPageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('🔍 Istanze nel database:', data);
+                })
+                .catch(error => {
+                    console.error('❌ Errore debug:', error);
+                });
+        }
+        
+        // Salva modulo come template globale
+        function saveAsTemplate(instanceId, moduleName) {
+            console.log('🔧 saveAsTemplate chiamata con:', { instanceId, moduleName });
+            
+            // Debug: verifica stato istanza selezionata
+            if (selectedInstance) {
+                const actualId = selectedInstance.getAttribute('data-instance-id');
+                const actualModule = selectedInstance.getAttribute('data-module-name');
+                const actualName = selectedInstance.getAttribute('data-instance-name');
+                console.log('🔧 selectedInstance stato:', { actualId, actualModule, actualName });
+            } else {
+                console.log('❌ selectedInstance è null!');
+            }
+            
+            const templateName = prompt('Nome del modello globale:');
+            if (!templateName || !templateName.trim()) {
+                return;
+            }
+            
+            console.log('🔧 Salvando come template:', { instanceId, templateName });
+            
+            const formData = new FormData();
+            formData.append('action', 'save_as_template');
+            formData.append('instance_id', instanceId);
+            formData.append('template_name', templateName.trim());
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('🔧 Risposta save_as_template:', data);
+                if (data.success) {
+                    alert(data.message || 'Modello creato con successo!');
+                    // Ricarica configurazione per mostrare nuova UI
+                    loadInstanceConfig(selectedInstance);
+                } else {
+                    console.error('❌ Errore save_as_template:', data.error);
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('❌ Errore durante il salvataggio del template:', error);
+                alert('Errore durante la creazione del modello: ' + error.message);
+            });
+        }
+        
+        // Applica template selezionato
+        function applySelectedTemplate(instanceId) {
+            console.log('🔧 applySelectedTemplate chiamata con instanceId:', instanceId);
+            console.log('🔧 Tipo di instanceId:', typeof instanceId);
+            console.log('🔧 Valore di instanceId:', instanceId);
+            
+            // Debug: verifica se instanceId è definito
+            if (typeof instanceId === 'undefined') {
+                console.error('❌ ERRORE: instanceId è undefined!');
+                alert('Errore: instanceId non definito');
+                return;
+            }
+            
+            // Debug: verifica selectedInstance
+            if (selectedInstance) {
+                const actualId = selectedInstance.getAttribute('data-instance-id');
+                console.log('🔧 selectedInstance ID:', actualId);
+            }
+            
+            const select = document.getElementById('template-select');
+            const templateId = select ? select.value : null;
+            
+            console.log('🔧 Template selezionato ID:', templateId);
+            
+            if (!templateId) {
+                alert('Seleziona prima un modello dalla lista');
+                return;
+            }
+            
+            if (!confirm('Applicare questo modello? La configurazione corrente verrà sostituita.')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'apply_template');
+            formData.append('instance_id', instanceId);
+            formData.append('template_id', templateId);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('🔧 Risposta apply_template:', data);
+                if (data.success) {
+                    alert(data.message || 'Template applicato con successo!');
+                    // Ricarica configurazione e preview
+                    loadInstanceConfig(selectedInstance);
+                    updateModulePreview();
+                } else {
+                    console.error('❌ Errore apply_template:', data.error);
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('❌ Errore durante l\'applicazione del template:', error);
+                alert('Errore durante l\'applicazione del modello: ' + error.message);
+            });
+        }
+        
+        // Modifica template globale (tutte le pagine)
+        function editGlobalTemplate(templateId, moduleName) {
+            if (!confirm('ATTENZIONE: Stai per modificare il modello globale.\n\nLe modifiche saranno applicate a TUTTE le pagine che usano questo modello.\n\nContinuare?')) {
+                return;
+            }
+            
+            // Mostra modal di modifica con campi abilitati
+            showEditTemplateModal(templateId, moduleName);
+        }
+        
+        // Modal per modificare template globale
+        function showEditTemplateModal(templateId, moduleName) {
+            // Per ora uso un prompt temporaneo
+            // TODO: Creare modal dedicato con tutti i campi
+            alert('Modal di modifica template in implementazione...\n\nPer ora, puoi:\n1. Staccare dal template\n2. Modificare\n3. Salvare come nuovo modello');
+        }
+        
+        // Stacca modulo da template (crea istanza locale)
+        function detachFromTemplate(instanceId) {
+            if (!confirm('Vuoi scollegare questo modulo dal modello globale?\n\nIl modulo diventerà indipendente e personalizzabile solo per questa pagina.')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'detach_from_template');
+            formData.append('instance_id', instanceId);
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Modulo scollegato con successo!');
+                    // Ricarica configurazione per mostrare campi editabili
+                    loadInstanceConfig(selectedInstance);
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante lo scollegamento: ' + error.message);
+            });
+        }
+        
+        // Toggle status pagina (Pubblica/Bozza)
+        function togglePageStatus() {
+            if (!currentPageId) {
+                alert('Nessuna pagina selezionata');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'toggle_page_status');
+            formData.append('page_id', currentPageId);
+            
+            // Mostra loading
+            const btn = document.getElementById('publish-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aggiornamento...';
+            btn.disabled = true;
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Status aggiornato con successo!');
+                    // Ricarica la pagina per aggiornare l'interfaccia
+                    window.location.reload();
+                } else {
+                    alert('Errore: ' + (data.error || 'Errore sconosciuto'));
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore durante l\'aggiornamento dello status: ' + error.message);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
         }
     </script>
 </body>

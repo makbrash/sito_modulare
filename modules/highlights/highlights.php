@@ -11,7 +11,7 @@
 $moduleData = $renderer->getModuleData('highlights', $config);
 
 // Valori di default con fallback
-$title = $config['title'] ?? $moduleData['title'] ?? 'Ultime NEWS';
+$title = $config['title'] ?? $moduleData['title'] ?? 'Ultime <strong>NEWS</strong>';
 
 // Highlights configurabili
 $highlights = $config['highlights'] ?? $moduleData['highlights'] ?? [
@@ -42,13 +42,12 @@ $highlights = $config['highlights'] ?? $moduleData['highlights'] ?? [
     ]
 ];
 
-// Sanitizzazione output
-$title = htmlspecialchars($title);
+// Sanitizzazione output (title può contenere HTML)
 ?>
 
 <div class="highlights" data-module="highlights" data-config='<?= htmlspecialchars(json_encode($config)) ?>'>
     
-    <div class="container-fluid">
+    <div class="container-highlights">
         <h2 class="highlights_title"><?= $title ?></h2>
         
         <div class="swiper highlights_swiper">

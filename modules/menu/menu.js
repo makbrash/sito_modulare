@@ -33,7 +33,26 @@ class MenuManager {
     initCountdown() {
         if (!this.countdownElement) return;
         
-        const countdownDate = new Date(this.menu.querySelector('.countdown').dataset.date).getTime();
+        // Setta attributi per countdown centralizzato
+        const countdownWrapper = this.menu.querySelector('.countdown');
+        if (countdownWrapper) {
+            const targetDate = countdownWrapper.dataset.date;
+            this.countdownElement.setAttribute('data-countdown', targetDate);
+            this.countdownElement.setAttribute('data-countdown-format', 'compact');
+            
+            // Se BolognaMarathonApp è già caricata, inizializza subito
+            if (window.bolognaMarathon && window.bolognaMarathon.initCountdown) {
+                window.bolognaMarathon.initCountdown(this.countdownElement, targetDate);
+            } else {
+                // Altrimenti usa fallback locale
+                this.initCountdownFallback(targetDate);
+            }
+        }
+    }
+    
+    // Fallback countdown locale (per compatibilità)
+    initCountdownFallback(targetDate) {
+        const countdownDate = new Date(targetDate).getTime();
         
         const updateCountdown = () => {
             const now = new Date().getTime();
@@ -49,7 +68,7 @@ class MenuManager {
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
-            // Nuovo formato: 146g 12h 54m 05s
+            // Formato compatto: 146g 12h 54m 05s
             this.countdownElement.textContent = `${days}g ${hours}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
         };
         

@@ -45,6 +45,7 @@
     font-size: 0.875rem;
     transition: all var(--transition-fast);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .filter-select:focus {

@@ -65,15 +65,15 @@
           },
           // >= 768px (tablet)
           768: {
-            slidesPerView: 3,
+            slidesPerView: 2,
           },
           // >= 1024px (desktop piccolo)
           1024: {
-            slidesPerView: 4,
+            slidesPerView: 3,
           },
           // >= 1280px (desktop medio)
           1280: {
-            slidesPerView: 5,
+            slidesPerView: 4,
           }
           // >= 1536px (desktop grande)
 

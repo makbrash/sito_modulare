@@ -1,0 +1,347 @@
+/**
+ * Countdown Module CSS - Bologna Marathon
+ * File: countdown.css
+ * 
+ * Modulo countdown elegante con due varianti:
+ * - Banner: Fascia full-width
+ * - Card: Card sovrapposta all'intersezione dei blocchi
+ */
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+.countdown-module {
+    position: relative;
+    width: 100%;
+}
+
+.countdown-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    width: 100%;
+}
+
+/* ========================================
+   VARIANTE BANNER (Full-Width)
+   ======================================== */
+
+.countdown-module--banner {
+    background: var(--gradient-dark);
+    padding: var(--space-lg) var(--container-padding);
+    /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
+    /* border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
+}
+
+.module-wrapper:has(.countdown-module--banner) {
+  height: 100px;
+}
+
+
+.countdown-module--banner .countdown-container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+}
+
+/* ========================================
+   VARIANTE CARD (Sovrapposta)
+   ======================================== */
+
+.countdown-module--card {
+    position: relative;
+    /* margin: calc(var(--space-xl) * -1) auto var(--space-xl); */
+    max-width: 624px;
+    padding: 0 var(--container-padding);
+    /* z-index: 10; */
+    /* margin-bottom: -191px; */
+    /* position: absolute; */
+    /* z-index: 1111111111; */
+    margin: auto;
+    top: -86px;
+}
+
+.countdown-module--card .countdown-container {
+    background: var(--gradient-dark);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* ========================================
+   LOGOS
+   ======================================== */
+
+.countdown-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.countdown-logo {
+    height: 60px;
+    width: auto;
+    opacity: 0.9;
+    transition: all var(--transition-normal);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.countdown-logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* ========================================
+   CONTENT
+   ======================================== */
+
+.countdown-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.countdown-title {
+    font-family: var(--font-display);
+    font-size: var(--text-h4);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.countdown-subtitle {
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* ========================================
+   TIMER
+   ======================================== */
+
+.countdown-timer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    justify-content: center;
+}
+
+.countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 80px;
+}
+
+.countdown-number {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3),
+                 0 0 40px rgba(var(--primary-rgb), 0.2);
+}
+
+.countdown-label {
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.production [data-module="countdown"]{
+    opacity: 0;
+    /* transform: translateY(60px); */
+    position: relative;
+    z-index: 2;
+    /* margin: auto; */
+    /* width: 100vw; */
+    height: 0;
+    position: relative;
+    content-visibility: visible;
+}
+
+/* ========================================
+   ENDED STATE
+   ======================================== */
+
+.countdown-ended {
+    font-family: var(--font-display);
+    font-size: var(--text-h4);
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-md);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .countdown-module--banner {
+        padding: var(--space-md) var(--container-padding);
+    }
+    
+    .countdown-module--card {
+        margin: calc(var(--space-lg) * -1) auto var(--space-lg);
+    }
+    
+    .countdown-container {
+        gap: var(--space-md);
+    }
+    
+    .countdown-logo {
+        height: 50px;
+    }
+    
+    .countdown-number {
+        font-size: 3rem;
+    }
+    
+    .countdown-item {
+        min-width: 70px;
+    }
+    
+    .countdown-title {
+        font-size: var(--text-h5);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .countdown-module--banner {
+        padding: var(--space-md) var(--space-sm);
+    }
+    
+    .countdown-module--card {
+        margin: calc(var(--space-md) * -1) auto var(--space-md);
+        padding: 0 var(--space-sm);
+    }
+    
+    .countdown-module--card .countdown-container {
+        padding: var(--space-md);
+    }
+    
+    .countdown-container {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .countdown-logos {
+        order: -1;
+    }
+    
+    .countdown-logo {
+        height: 40px;
+    }
+    
+    .countdown-timer {
+        gap: var(--space-sm);
+    }
+    
+    .countdown-item {
+        min-width: 60px;
+    }
+    
+    .countdown-number {
+        font-size: 2.5rem;
+    }
+    
+    .countdown-label {
+        font-size: 0.75rem;
+    }
+    
+    .countdown-title {
+        font-size: 1.5rem;
+    }
+    
+    .countdown-subtitle {
+        font-size: 0.875rem;
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .countdown-timer {
+        gap: var(--space-xs);
+        flex-wrap: wrap;
+    }
+    
+    .countdown-item {
+        min-width: 50px;
+    }
+    
+    .countdown-number {
+        font-size: 2rem;
+    }
+    
+    .countdown-label {
+        font-size: 0.625rem;
+    }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes pulse-glow {
+    0%, 100% {
+        text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3),
+                     0 0 40px rgba(var(--primary-rgb), 0.2);
+    }
+    50% {
+        text-shadow: 0 0 30px rgba(var(--primary-rgb), 0.5),
+                     0 0 60px rgba(var(--primary-rgb), 0.3);
+    }
+}
+
+.countdown-number {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ========================================
+   THEME OVERRIDES
+   ======================================== */
+
+/* Supporto per classi tema dinamiche */
+.countdown-module.theme-marathon .countdown-number,
+.countdown-module.theme-race-marathon .countdown-number {
+    color: var(--primary);
+}
+
+.countdown-module.theme-portici .countdown-number,
+.countdown-module.theme-race-portici .countdown-number {
+    color: var(--primary);
+}
+
+.countdown-module.theme-5k .countdown-number,
+.countdown-module.theme-race-5k .countdown-number {
+    color: var(--primary);
+}
+
+.countdown-module.theme-kidsrun .countdown-number,
+.countdown-module.theme-race-kidsrun .countdown-number {
+    color: var(--primary);
+}
+
+.countdown-module.theme-run-tune-up .countdown-number,
+.countdown-module.theme-race-run-tune-up .countdown-number {
+    color: var(--primary);
+}
+
