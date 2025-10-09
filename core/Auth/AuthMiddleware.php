@@ -99,8 +99,27 @@ class AuthMiddleware
      */
     private function redirectToLogin(): void
     {
-        $returnUrl = $_SERVER['REQUEST_URI'] ?? '/admin/dashboard.php';
-        header('Location: /admin/login.php?return=' . urlencode($returnUrl));
+        // Calcola base path dell'applicazione
+        $basePath = $this->getBasePath();
+        $returnUrl = $_SERVER['REQUEST_URI'] ?? $basePath . '/admin/dashboard.php';
+        
+        header('Location: ' . $basePath . '/admin/login.php?return=' . urlencode($returnUrl));
+    }
+    
+    /**
+     * Ottiene base path dell'applicazione
+     */
+    private function getBasePath(): string
+    {
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $basePath = dirname(dirname($scriptName)); // Risale di 2 livelli da /admin/xyz.php
+        
+        // Normalizza percorso
+        if ($basePath === '/' || $basePath === '\\') {
+            return '';
+        }
+        
+        return rtrim($basePath, '/\\');
     }
 
     /**
