@@ -18,17 +18,15 @@ $db = $database->getConnection();
 $modulesStmt = $db->query("SELECT * FROM modules_registry ORDER BY name");
 $modules = $modulesStmt->fetchAll();
 
-$skipContent = true;
 require_once '../components/layout.php';
 ?>
 
-<div x-data="modulesManager()">
+<div x-data="modulesManager()" class="space-y-6">
     
     <!-- Header Actions -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestione Moduli</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
                 <span x-text="modules.length"></span> moduli registrati • 
                 <span x-text="modules.filter(m => m.is_active).length"></span> attivi
             </p>

@@ -13,9 +13,12 @@ if (!isset($currentPage)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="it" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: true }" 
+<html lang="it" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: window.innerWidth >= 1024 }" 
       :class="{ 'dark': darkMode }" 
-      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))">
+      x-init="
+        $watch('darkMode', val => localStorage.setItem('darkMode', val));
+        darkMode = localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      ">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,6 +49,17 @@ if (!isset($currentPage)) {
         
         /* Smooth transitions */
         * { transition-property: background-color, border-color, color; transition-duration: 150ms; }
+        
+        /* Force dark mode styles */
+        .dark { color-scheme: dark; }
+        .dark body { background-color: #111827 !important; color: #f9fafb !important; }
+        .dark .bg-gray-50 { background-color: #111827 !important; }
+        .dark .bg-white { background-color: #1f2937 !important; }
+        .dark .text-gray-900 { color: #f9fafb !important; }
+        .dark .text-gray-700 { color: #d1d5db !important; }
+        .dark .text-gray-600 { color: #9ca3af !important; }
+        .dark .border-gray-200 { border-color: #374151 !important; }
+        .dark .border-gray-300 { border-color: #374151 !important; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -69,11 +83,10 @@ if (!isset($currentPage)) {
                     <?php endif; ?>
                     
                     <!-- Page Content Goes Here -->
-                    <?php if (!isset($skipContent)): ?>
-                        <?php
-                        // Content will be rendered from the including page
-                        ?>
-                    <?php endif; ?>
+                    <?php 
+                    // Content will be rendered from the including page
+                    // The including page should not have its own HTML structure
+                    ?>
                 </div>
             </main>
             

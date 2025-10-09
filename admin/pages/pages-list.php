@@ -32,17 +32,15 @@ $pages = $pagesStmt->fetchAll();
 $themesStmt = $db->query("SELECT * FROM theme_identities WHERE is_active = 1 ORDER BY name");
 $themes = $themesStmt->fetchAll();
 
-$skipContent = true;
 require_once '../components/layout.php';
 ?>
 
-<div x-data="pagesManager()">
+<div x-data="pagesManager()" class="space-y-6">
     
     <!-- Header Actions -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestione Pagine</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
                 <?= $stats['total'] ?> pagine totali • <?= $stats['published'] ?> pubblicate • <?= $stats['draft'] ?> bozze
             </p>
         </div>
