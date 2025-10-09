@@ -3,9 +3,8 @@
  * Modules Manager - Gestione Moduli
  */
 
-session_start();
-
-require_once '../../config/database.php';
+// Verifica autenticazione
+require_once __DIR__ . '/../auth-check.php';
 
 $pageTitle = 'Gestione Moduli';
 $currentPage = 'modules';

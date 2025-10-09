@@ -3,9 +3,8 @@
  * Settings - Impostazioni Globali
  */
 
-session_start();
-
-require_once '../../config/database.php';
+// Verifica autenticazione
+require_once __DIR__ . '/../auth-check.php';
 
 $pageTitle = 'Impostazioni';
 $currentPage = 'settings';

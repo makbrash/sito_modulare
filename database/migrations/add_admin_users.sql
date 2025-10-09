@@ -85,10 +85,10 @@ CREATE TABLE IF NOT EXISTS `admin_password_resets` (
 -- UNCOMMENT per creare utente iniziale
 -- =====================================================
 
-/*
+
 INSERT INTO `admin_users` (`username`, `password_hash`, `email`, `display_name`, `role`, `is_active`, `must_change_password`) VALUES
 ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@bolognamarathon.run', 'Amministratore', 'super_admin', 1, 1);
-*/
+
 
 -- =====================================================
 -- ATTIVAZIONE SISTEMA AUTH

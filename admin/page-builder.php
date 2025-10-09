@@ -4,7 +4,9 @@
  * Gestione drag&drop moduli per pagine dinamiche
  */
 
-require_once '../config/database.php';
+// Verifica autenticazione
+require_once __DIR__ . '/auth-check.php';
+
 require_once '../core/ModuleRenderer.php';
 
 // Inizializza connessione database

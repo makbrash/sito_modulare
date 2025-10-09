@@ -3,9 +3,8 @@
  * Pages List - Gestione Pagine
  */
 
-session_start();
-
-require_once '../../config/database.php';
+// Verifica autenticazione
+require_once __DIR__ . '/../auth-check.php';
 
 $pageTitle = 'Gestione Pagine';
 $currentPage = 'pages';

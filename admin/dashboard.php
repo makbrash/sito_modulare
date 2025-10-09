@@ -4,15 +4,8 @@
  * Dashboard principale unificata
  */
 
-session_start();
-
-require_once '../config/database.php';
-
-// TODO: Quando AUTH_ENABLED, verificare sessione
-// if (defined('AUTH_ENABLED') && AUTH_ENABLED && !isset($_SESSION['user_id'])) {
-//     header('Location: login.php');
-//     exit;
-// }
+// Verifica autenticazione
+require_once __DIR__ . '/auth-check.php';
 
 $pageTitle = 'Dashboard';
 $currentPage = 'dashboard';
