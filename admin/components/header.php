@@ -53,12 +53,39 @@ if (strpos($currentDir, '/admin/pages') !== false) {
                 <span class="hidden sm:inline">Visualizza Sito</span>
             </a>
             
-            <!-- User Menu (Future) -->
-            <div class="relative" x-data="{ open: false }">
+            <!-- User Menu -->
+            <div class="relative" x-data="{ 
+                open: false,
+                handleLogout() {
+                    if (confirm('Sei sicuro di voler uscire?')) {
+                        fetch('<?= $basePath ?>api/auth.php?action=logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            window.location.href = '<?= $basePath ?>login.php';
+                        })
+                        .catch(error => {
+                            console.error('Errore logout:', error);
+                            window.location.href = '<?= $basePath ?>login.php';
+                        });
+                    }
+                }
+            }">
                 <button @click="open = !open" 
                         class="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                     <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        AD
+                        <?php 
+                        if (isset($currentUser) && !empty($currentUser['display_name'])) {
+                            $initials = strtoupper(substr($currentUser['display_name'], 0, 2));
+                            echo htmlspecialchars($initials);
+                        } else {
+                            echo 'AD';
+                        }
+                        ?>
                     </div>
                 </button>
                 
@@ -75,8 +102,12 @@ if (strpos($currentDir, '/admin/pages') !== false) {
                      class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                     
                     <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">Admin</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">admin@bolognamarathon.run</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            <?= isset($currentUser) ? htmlspecialchars($currentUser['display_name'] ?? $currentUser['username']) : 'Admin' ?>
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            <?= isset($currentUser) ? htmlspecialchars($currentUser['email'] ?? '') : 'admin@bolognamarathon.run' ?>
+                        </p>
                     </div>
                     
                     <a href="<?= $basePath ?>pages/settings.php" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -85,9 +116,9 @@ if (strpos($currentDir, '/admin/pages') !== false) {
                     
                     <div class="border-t border-gray-200 dark:border-gray-700"></div>
                     
-                    <a href="#" onclick="alert('Auth non ancora attivo')" class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button @click="handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="fas fa-sign-out-alt w-4 mr-2"></i> Logout
-                    </a>
+                    </button>
                 </div>
             </div>
             
