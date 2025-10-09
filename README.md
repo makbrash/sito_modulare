@@ -1,71 +1,157 @@
-# 🏁 Bologna Marathon – Sistema Modulare
+# 🏁 Bologna Marathon – Sistema Modulare v2.0
 
-Sistema SSR modulare per la Bologna Marathon con page builder visuale, moduli riutilizzabili e pipeline di rilascio cloud friendly.
+Sistema SSR modulare avanzato per la Bologna Marathon con:
+- 🎨 **Admin Dashboard** moderno (Alpine.js + Tailwind CSS)
+- 🎯 **Page Builder** drag & drop con live preview
+- 🔐 **Sistema Auth** opt-in con ruoli e sessioni
+- 🛠️ **API REST** per gestione completa
+- 📊 **Error Handling** centralizzato con logging
+- ⚡ **Build System** ottimizzato per cloud deployment
 
-## 🌐 Architettura in breve
+## 🌐 Architettura
 
-| Layer | Descrizione |
-| --- | --- |
-| **Frontend** | PHP SSR, CSS Variables e JavaScript vanilla. Nessuna dipendenza runtime su Node in produzione. |
-| **Admin** | Page builder drag & drop basato su moduli annidabili, API JSON e manifest dei moduli. |
-| **Backend** | PHP 8+, MySQL 5.7+. Tutte le query usano prepared statement. |
-| **Build** | Gulp 4 per bundling CSS/JS e generazione cartella `build/` deployable. |
+| Layer | Tecnologie | Descrizione |
+| --- | --- | --- |
+| **Frontend** | PHP 8+ SSR, CSS Variables, JavaScript vanilla | Server-Side Rendering, nessuna dipendenza Node in produzione |
+| **Admin UI** | Alpine.js, Tailwind CSS, Font Awesome | Dashboard moderna responsive con dark mode |
+| **Backend** | PHP 8+, PDO, Prepared Statements | Architettura a servizi, API REST, error handling centralizzato |
+| **Database** | MySQL 5.7+ | Schema ottimizzato con indici, supporto auth e activity log |
+| **Build** | Gulp 4, PostCSS, Terser | Pipeline ottimizzata per minify e deploy cloud |
+| **Auth** | Sessions, Bcrypt, CSRF Protection | Sistema opt-in con brute-force protection e roles |
+| **Logging** | PSR-3 compliant, File rotation | Logger strutturato con livelli e auto-cleanup |
 
 ## 📁 Struttura principale
 
 ```
 sito_modulare/
-├── admin/                # Interfaccia e API page builder
-│   ├── api/              # Endpoint JSON per moduli e pagine
-│   ├── docs/             # Documentazione admin specifica
-│   └── page-builder.php  # UI amministrativa
+├── admin/                # Sistema amministrazione completo
+│   ├── api/              # REST API endpoints (pages, modules, themes, auth)
+│   ├── components/       # Layout components (header, sidebar, footer)
+│   ├── pages/            # Admin pages (gestione pagine, moduli, temi)
+│   ├── docs/             # Documentazione admin (ADMIN-SYSTEM.md, QUICK-START.md)
+│   ├── dashboard.php     # Dashboard principale con statistiche
+│   ├── page-builder.php  # Page Builder drag & drop
+│   ├── login.php         # Pagina login (se AUTH_ENABLED=true)
+│   └── auth-check.php    # Middleware autenticazione
+├── core/
+│   ├── Services/         # Backend services (Page, Module, Theme, Asset, Config, Data)
+│   ├── Auth/             # Sistema autenticazione (AuthService, AuthMiddleware)
+│   ├── Utils/            # Utilities (ErrorHandler, Logger, DotEnv)
+│   ├── API/              # BaseController per API
+│   ├── ModuleRenderer.php # Renderer principale moduli SSR
+│   └── bootstrap.php     # Init error handler, logger, .env
 ├── assets/
-│   ├── css/              # CSS core + admin
-│   └── js/               # JS core + admin
-├── core/ModuleRenderer.php
-├── modules/              # Moduli con manifest e assets dedicati
-│   └── docs/             # Documentazione moduli
-├── database/             # Schema SQL e dati di esempio
-│   └── docs/             # Documentazione database
+│   ├── css/
+│   │   ├── core/         # Variables, reset, typography, layout, scrollbar
+│   │   └── admin/        # Stili admin dashboard
+│   └── js/
+│       ├── core/         # App.js, image-3d.js
+│       └── admin/        # page-builder.js
+├── modules/              # Moduli riutilizzabili (hero, menu, footer, etc.)
+│   ├── <module>/
+│   │   ├── module.json   # Manifest con ui_schema
+│   │   ├── *.php         # Template PHP
+│   │   ├── *.css         # Stili modulo
+│   │   └── *.js          # JavaScript (opzionale)
+│   └── docs/             # DEVELOPMENT-GUIDE.md, TEMPLATES-SYSTEM.md
+├── database/
+│   ├── docs/             # SCHEMA-REFERENCE.md, MIGRATIONS.md
+│   ├── migrations/       # add_admin_users.sql per sistema auth
+│   ├── schema.sql        # Schema completo database
+│   └── test_data.sql     # Dati di test
 ├── docs/                 # Documentazione sistema generale
-├── build/                # Output pronto per il cloud (no Node richiesto)
-└── gulpfile.js           # Pipeline di build
+│   ├── README.md         # Indice documentazione
+│   ├── BUILD-SYSTEM.md   # Sistema build e deploy
+│   ├── THEME-SYSTEM-FINAL.md  # Sistema temi dinamici
+│   └── LAYOUT-SYSTEM.md  # Sistema layout responsive
+├── logs/                 # Log applicazione (gitignored)
+│   └── app.log           # Log principale con rotazione automatica
+├── build/                # Output deploy cloud (generato)
+├── .env                  # Configurazioni ambiente (gitignored)
+├── env.example           # Template .env con commenti
+├── gulpfile.js           # Pipeline build (minify, bundle, deploy)
+└── package.json          # Dipendenze build (Gulp, PostCSS, Terser)
 ```
 
-## ⚙️ Setup rapido (locale)
+## ⚙️ Setup Rapido (5 minuti)
 
-1. **Prerequisiti**
-   - PHP ≥ 8.0
-   - MySQL ≥ 5.7
-   - Node.js ≥ 16 (solo per build locale)
-   - Composer *non* necessario
+### 1. **Prerequisiti**
+- PHP ≥ 8.0 con estensioni: PDO, MySQLi, JSON, Mbstring
+- MySQL ≥ 5.7
+- Node.js ≥ 16 (solo per build locale, non in produzione)
+- Web server: Apache/Nginx con mod_rewrite
 
-2. **Installazione**
-   ```bash
-   git clone <repo>
-   cd sito_modulare
-   npm install
-   ```
+### 2. **Installazione**
+```bash
+git clone <repo>
+cd sito_modulare
+npm install           # Solo per build tools
+```
 
-3. **Database**
-   - Aggiorna le credenziali in `config/database.php`
-   - Importa `database/schema.sql` (contiene dati di esempio)
-   - Verifica con `admin/test-setup.php`
+### 3. **Configurazione .env**
+```bash
+cp env.example .env   # Copia template configurazione
+```
 
-4. **Sviluppo**
-   ```bash
-   npm run dev        # Watch mode senza server
-   npm run serve      # Watch mode con BrowserSync
-   ```
+Modifica `.env`:
+```env
+# Database
+DB_HOST=localhost
+DB_DATABASE=bologna_marathon
+DB_USERNAME=root
+DB_PASSWORD=
 
-5. **Build e Release**
-   ```bash
-   npm run build      # Build solo asset
-   npm run release    # Build completo per cloud
-   npm run rollback   # Rollback all'ultimo backup
-   ```
+# Application
+APP_DEBUG=true                # false in produzione
+AUTH_ENABLED=false            # true per attivare login admin
+LOG_ENABLED=true
+LOG_LEVEL=error              # debug|info|warning|error
+```
 
-La cartella `build/` contiene tutto il necessario per il deploy (PHP + asset minificati). Nessuna dipendenza Node in produzione.
+### 4. **Setup Database**
+```bash
+# Importa schema completo (include dati test)
+mysql -u root bologna_marathon < database/schema.sql
+
+# (Opzionale) Sistema autenticazione
+mysql -u root bologna_marathon < database/migrations/add_admin_users.sql
+```
+
+Oppure usa tool visuale:
+```
+http://localhost/sito_modulare/admin/test-setup.php
+```
+
+### 5. **Accesso Admin**
+
+**Senza autenticazione** (default):
+```
+http://localhost/sito_modulare/admin/
+# Accesso diretto, nessun login richiesto
+```
+
+**Con autenticazione** (se `AUTH_ENABLED=true`):
+```
+http://localhost/sito_modulare/admin/
+Username: admin
+Password: admin123
+⚠️ CAMBIA PASSWORD al primo accesso!
+```
+
+### 6. **Sviluppo**
+```bash
+npm run dev          # Watch mode: auto-compile CSS/JS
+npm run serve        # Watch + BrowserSync (live reload)
+```
+
+### 7. **Build per Produzione**
+```bash
+npm run build        # Minify CSS/JS
+npm run release      # Build completo → cartella build/
+npm run rollback     # Rollback ultimo backup
+```
+
+La cartella `build/` contiene tutto pronto per deploy cloud. **Zero dipendenze Node in produzione**.
 
 ## 🧩 Page Builder (admin/page-builder.php)
 
@@ -182,30 +268,89 @@ MIT License – consulta il file `LICENSE` per i dettagli.
 3. ❌ **NO CSS/JS INLINE** - Sempre file esterni
 4. ✅ **Separazione responsabilità** - Template ≠ Stili ≠ Logica
 
-## 📚 Documentazione
+## 📚 Documentazione Completa
 
-### 🗺️ Mappa Completa
-**Vedi**: `DOCUMENTATION-MAP.md` - Navigazione rapida di tutta la documentazione
+### 🚀 Quick Start
+- **⚡ Guida Rapida**: `admin/docs/QUICK-START.md` (5 minuti)
+- **📖 Mappa Documentazione**: `DOCUMENTATION-MAP.md` (navigazione completa)
 
-### Per Sviluppatori
-1. **⚡ START (2 min)**: `docs/QUICK-REFERENCE.md` - Le 5 regole fondamentali
-2. **🚨 STANDARD (10 min)**: `docs/CODING-STANDARDS.md` - Standard obbligatori
-3. **📖 Sistema generale**: `docs/README.md`
-4. **🧩 Sviluppo moduli**: `modules/docs/DEVELOPMENT-GUIDE.md`
-5. **🎨 Page Builder**: `admin/docs/PAGE-BUILDER.md`
-6. **🗄️ Database**: `database/docs/SCHEMA-REFERENCE.md`
+### 🎨 Sistema Admin
+- **📘 Admin System**: `admin/docs/ADMIN-SYSTEM.md` - Guida completa admin dashboard
+  - Architettura backend services
+  - API REST endpoints
+  - Sistema autenticazione
+  - Error handling & logging
+  - Page Builder workflow
+  - Best practices
+- **🚀 Quick Start**: `admin/docs/QUICK-START.md` - Setup 5 minuti
+- **🎨 Page Builder**: `admin/docs/PAGE-BUILDER.md` - Drag & drop interface
+- **🐛 Troubleshooting**: `admin/docs/TROUBLESHOOTING.md` - Risoluzione problemi
 
-### Per AI Models
-1. **Regole complete**: `.cursorrules` - Regole generali e specifiche
-2. **Quick reference**: `docs/QUICK-REFERENCE.md` - Regole essenziali
-3. **Standard codifica**: `docs/CODING-STANDARDS.md` - Esempi pratici
-4. **Guida moduli**: `modules/docs/DEVELOPMENT-GUIDE.md`
-5. **Sistema template**: `modules/docs/TEMPLATES-SYSTEM.md`
-6. **Troubleshooting**: `admin/docs/TROUBLESHOOTING.md`
+### 🧩 Sviluppo Moduli
+- **📘 Development Guide**: `modules/docs/DEVELOPMENT-GUIDE.md` - Guida completa
+- **🎯 Templates System**: `modules/docs/TEMPLATES-SYSTEM.md` - Moduli globali
+- **📝 Module Examples**: `modules/README.md` - Esempi pratici
+- **✅ Regole**: `.cursorrules` (sezione moduli)
 
-### Per Troubleshooting
-- **Admin**: `admin/docs/TROUBLESHOOTING.md`
-- **Moduli**: `modules/docs/DEVELOPMENT-GUIDE.md` (sezione troubleshooting)
-- **Database**: `database/docs/MIGRATIONS.md`
+### 🗄️ Database
+- **📊 Schema Reference**: `database/docs/SCHEMA-REFERENCE.md` - Schema completo
+- **🔄 Migrations**: `database/docs/MIGRATIONS.md` - Guide migrazione
+- **💾 SQL Files**: 
+  - `database/schema.sql` - Schema completo
+  - `database/migrations/add_admin_users.sql` - Sistema auth
 
-Per ulteriori dettagli consulta la documentazione specifica in ogni cartella `docs/` e mantieni aggiornate le documentazioni per supportare future integrazioni automatizzate.
+### 🎨 Sistema Generale
+- **📖 Overview**: `docs/README.md` - Panoramica documentazione
+- **🚨 Coding Standards**: `docs/CODING-STANDARDS.md` - Standard obbligatori
+- **⚡ Quick Reference**: `docs/QUICK-REFERENCE.md` - Riferimento rapido
+- **🏗️ Build System**: `docs/BUILD-SYSTEM.md` - Build e deploy
+- **🎨 Theme System**: `docs/THEME-SYSTEM-FINAL.md` - Temi dinamici
+- **📐 Layout System**: `docs/LAYOUT-SYSTEM.md` - Layout responsive
+
+### 🔐 Autenticazione
+- **🔒 Auth Guide**: `admin/docs/AUTH-ACTIVATION-GUIDE.md` - Attivazione auth
+- **👤 User Management**: Sistema ruoli e permessi
+- **🔑 Security**: CSRF, brute-force protection, session management
+
+### 📊 Error Handling & Logging
+- **⚠️ Error Handler**: `core/Utils/ErrorHandler.php` - Gestione centralizzata
+- **📝 Logger**: `core/Utils/Logger.php` - Logging strutturato PSR-3
+- **🔧 Bootstrap**: `core/bootstrap.php` - Inizializzazione sistema
+
+### 🔄 API Reference
+- **📡 Pages API**: `admin/api/pages.php` - CRUD pagine
+- **🧩 Modules API**: `admin/api/modules.php` - CRUD moduli
+- **🎨 Themes API**: `admin/api/themes.php` - CRUD temi
+- **🔐 Auth API**: `admin/api/auth.php` - Autenticazione
+- **📚 API Docs**: `admin/api/README.md` - Documentazione completa
+
+### 🛠️ Per Sviluppatori
+**Prima di iniziare** (obbligatorio):
+1. ⚡ **Leggi**: `docs/QUICK-REFERENCE.md` (2 min)
+2. 🚨 **Segui**: `docs/CODING-STANDARDS.md` (10 min)
+3. 📘 **Consulta**: `admin/docs/ADMIN-SYSTEM.md` (riferimento completo)
+
+**Durante sviluppo**:
+- Moduli: `modules/docs/DEVELOPMENT-GUIDE.md`
+- Database: `database/docs/SCHEMA-REFERENCE.md`
+- API: `admin/api/README.md`
+
+### 🤖 Per AI Models
+**File critici per context**:
+1. `.cursorrules` - Regole complete progetto
+2. `docs/CODING-STANDARDS.md` - Standard codifica
+3. `admin/docs/ADMIN-SYSTEM.md` - Sistema admin
+4. `modules/docs/DEVELOPMENT-GUIDE.md` - Sviluppo moduli
+5. `database/docs/SCHEMA-REFERENCE.md` - Schema database
+
+### 🎯 Guide Rapide per Task Comuni
+| Task | Guida | Tempo |
+|------|-------|-------|
+| Setup iniziale | `admin/docs/QUICK-START.md` | 5 min |
+| Creare modulo | `modules/docs/DEVELOPMENT-GUIDE.md` | 30 min |
+| Modificare tema | `docs/THEME-SYSTEM-FINAL.md` | 10 min |
+| API endpoint | `admin/api/README.md` | 20 min |
+| Deploy produzione | `docs/BUILD-SYSTEM.md` | 15 min |
+| Troubleshooting | `admin/docs/TROUBLESHOOTING.md` | - |
+
+Per dettagli completi, consulta `DOCUMENTATION-MAP.md` con navigazione gerarchica di tutta la documentazione disponibile.
