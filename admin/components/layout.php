@@ -24,8 +24,13 @@ if (!isset($currentPage)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> - Bologna Marathon Admin</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN (Development Only) -->
+    <?php if (APP_DEBUG): ?>
+        <script src="https://cdn.tailwindcss.com"></script>
+    <?php else: ?>
+        <!-- In production, use compiled Tailwind CSS -->
+        <link rel="stylesheet" href="../../assets/css/admin/tailwind.min.css">
+    <?php endif; ?>
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -34,7 +39,7 @@ if (!isset($currentPage)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom Admin CSS -->
-    <link rel="stylesheet" href="../assets/css/admin/page-builder.css">
+    <link rel="stylesheet" href="../../assets/css/admin/page-builder.css">
     
     <style>
         [x-cloak] { display: none !important; }
@@ -74,23 +79,25 @@ if (!isset($currentPage)) {
             <?php include __DIR__ . '/header.php'; ?>
             
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <div class="max-w-7xl mx-auto">
-                    <?php if (isset($pageTitle) && $pageTitle !== 'Dashboard'): ?>
-                        <div class="mb-6">
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($pageTitle) ?></h1>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <!-- Page Content Goes Here -->
-                    <?php 
-                    // Content will be rendered from the including page
-                    // The including page should not have its own HTML structure
-                    ?>
+            <main class="flex-1 overflow-y-auto">
+                <div class="p-6">
+                    <div class="max-w-7xl mx-auto">
+                        <?php if (isset($pageTitle) && $pageTitle !== 'Dashboard'): ?>
+                            <div class="mb-6">
+                                <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($pageTitle) ?></h1>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- Page Content Goes Here -->
+                        <?php 
+                        // Content will be rendered from the including page
+                        // The including page should not have its own HTML structure
+                        ?>
+                    </div>
                 </div>
+                
+                <?php include __DIR__ . '/footer.php'; ?>
             </main>
-            
-            <?php include __DIR__ . '/footer.php'; ?>
             
         </div>
     </div>
@@ -120,7 +127,7 @@ if (!isset($currentPage)) {
     </div>
     
     <!-- Custom Admin JS -->
-    <script src="../assets/js/admin/page-builder.js"></script>
+    <script src="../../assets/js/admin/page-builder.js"></script>
     
     <script>
         // Global notify function
