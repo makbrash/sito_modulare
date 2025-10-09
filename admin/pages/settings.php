@@ -25,7 +25,8 @@ if (file_exists($envFile)) {
     }
 }
 
-require_once '../components/layout.php';
+// Start output buffering to capture content
+ob_start();
 ?>
 
 <div x-data="settingsManager()" class="space-y-6">
@@ -327,4 +328,11 @@ function settingsManager() {
     }
 }
 </script>
+
+<?php
+// Capture the buffered content
+$pageContent = ob_get_clean();
+
+// Include layout (which will use $pageContent)
+require_once '../components/layout.php';
 

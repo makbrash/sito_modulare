@@ -18,7 +18,8 @@ $db = $database->getConnection();
 $modulesStmt = $db->query("SELECT * FROM modules_registry ORDER BY name");
 $modules = $modulesStmt->fetchAll();
 
-require_once '../components/layout.php';
+// Start output buffering to capture content
+ob_start();
 ?>
 
 <div x-data="modulesManager()" class="space-y-6">
@@ -259,4 +260,11 @@ function modulesManager() {
     }
 }
 </script>
+
+<?php
+// Capture the buffered content
+$pageContent = ob_get_clean();
+
+// Include layout (which will use $pageContent)
+require_once '../components/layout.php';
 

@@ -90,8 +90,10 @@ if (!isset($currentPage)) {
                         
                         <!-- Page Content Goes Here -->
                         <?php 
-                        // Content will be rendered from the including page
-                        // The including page should not have its own HTML structure
+                        // Capture content from the including page
+                        if (isset($pageContent)) {
+                            echo $pageContent;
+                        }
                         ?>
                     </div>
                 </div>

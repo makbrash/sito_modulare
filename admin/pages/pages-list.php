@@ -32,7 +32,8 @@ $pages = $pagesStmt->fetchAll();
 $themesStmt = $db->query("SELECT * FROM theme_identities WHERE is_active = 1 ORDER BY name");
 $themes = $themesStmt->fetchAll();
 
-require_once '../components/layout.php';
+// Start output buffering to capture content
+ob_start();
 ?>
 
 <div x-data="pagesManager()" class="space-y-6">
@@ -429,4 +430,11 @@ function pagesManager() {
     }
 }
 </script>
+
+<?php
+// Capture the buffered content
+$pageContent = ob_get_clean();
+
+// Include layout (which will use $pageContent)
+require_once '../components/layout.php';
 

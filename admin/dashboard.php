@@ -48,7 +48,8 @@ try {
     $themesStats = ['total' => 0];
 }
 
-require_once 'components/layout.php';
+// Start output buffering to capture content
+ob_start();
 ?>
 
 <!-- Stats Cards -->
@@ -205,4 +206,11 @@ require_once 'components/layout.php';
     }
     ?>
 </div>
+
+<?php
+// Capture the buffered content
+$pageContent = ob_get_clean();
+
+// Include layout (which will use $pageContent)
+require_once 'components/layout.php';
 

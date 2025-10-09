@@ -18,7 +18,8 @@ $db = $database->getConnection();
 $themesStmt = $db->query("SELECT * FROM theme_identities ORDER BY name");
 $themes = $themesStmt->fetchAll();
 
-require_once '../components/layout.php';
+// Start output buffering to capture content
+ob_start();
 ?>
 
 <div x-data="themesEditor()" class="space-y-6">
@@ -449,4 +450,11 @@ function themesEditor() {
     }
 }
 </script>
+
+<?php
+// Capture the buffered content
+$pageContent = ob_get_clean();
+
+// Include layout (which will use $pageContent)
+require_once '../components/layout.php';
 
