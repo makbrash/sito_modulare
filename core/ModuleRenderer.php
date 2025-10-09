@@ -2,7 +2,17 @@
 /**
  * Module Renderer System
  * Sistema di rendering moduli SSR per Bologna Marathon
+ * 
+ * REFACTORED: Ora usa servizi dedicati per migliorare separazione responsabilità
+ * MANTIENE: Interfaccia pubblica invariata per retrocompatibilità
  */
+
+// Import servizi (se disponibili)
+if (file_exists(__DIR__ . '/Services/AssetCollector.php')) {
+    require_once __DIR__ . '/Services/AssetCollector.php';
+    require_once __DIR__ . '/Services/ConfigManager.php';
+    require_once __DIR__ . '/Services/ModuleDataProvider.php';
+}
 
 class ModuleRenderer {
     private $db;
@@ -10,9 +20,34 @@ class ModuleRenderer {
     private $cache = [];
     private $nestedModules = []; // Traccia moduli annidati
     
+    // Nuovi servizi (se disponibili)
+    private $assetCollector;
+    private $configManager;
+    private $moduleDataProvider;
+    
     public function __construct($database, $modulesPath = null) {
         $this->db = $database;
         $this->modulesPath = $modulesPath ?? (defined('MODULES_PATH') ? MODULES_PATH : __DIR__ . '/../modules/');
+        
+        // Inizializza servizi se disponibili
+        $this->initializeServices();
+    }
+    
+    /**
+     * Inizializza servizi dedicati se disponibili
+     */
+    private function initializeServices() {
+        if (class_exists('BolognaMarathon\Services\AssetCollector')) {
+            $this->assetCollector = new \BolognaMarathon\Services\AssetCollector($this->modulesPath);
+        }
+        
+        if (class_exists('BolognaMarathon\Services\ConfigManager') && $this->assetCollector) {
+            $this->configManager = new \BolognaMarathon\Services\ConfigManager($this->db, $this->assetCollector);
+        }
+        
+        if (class_exists('BolognaMarathon\Services\ModuleDataProvider')) {
+            $this->moduleDataProvider = new \BolognaMarathon\Services\ModuleDataProvider($this->db);
+        }
     }
     
     /**
@@ -112,6 +147,12 @@ class ModuleRenderer {
      * Restituisce il manifest JSON di un modulo.
      */
     public function getModuleManifest($moduleName) {
+        // Usa nuovo servizio se disponibile
+        if ($this->assetCollector) {
+            return $this->assetCollector->getModuleManifest($moduleName);
+        }
+        
+        // Fallback al metodo legacy
         $slug = $this->resolveModuleName($moduleName);
         $this->loadModuleManifests();
         return $this->cache['manifests'][$slug] ?? null;
@@ -121,6 +162,12 @@ class ModuleRenderer {
      * Restituisce la configurazione di default dichiarata dal modulo.
      */
     public function getModuleDefaultConfig($moduleName) {
+        // Usa nuovo servizio se disponibile
+        if ($this->configManager) {
+            return $this->configManager->getModuleDefaultConfig($moduleName);
+        }
+        
+        // Fallback al metodo legacy
         $manifest = $this->getModuleManifest($moduleName);
         if (is_array($manifest) && isset($manifest['default_config'])) {
             if (is_array($manifest['default_config'])) {
@@ -148,6 +195,12 @@ class ModuleRenderer {
      * Unisce configurazione personalizzata con i default del modulo.
      */
     public function mergeConfigWithDefaults($moduleName, array $config = []) {
+        // Usa nuovo servizio se disponibile
+        if ($this->configManager) {
+            return $this->configManager->mergeConfigWithDefaults($moduleName, $config);
+        }
+        
+        // Fallback al metodo legacy
         $defaults = $this->getModuleDefaultConfig($moduleName);
         if (empty($defaults)) {
             return $config;
@@ -352,6 +405,12 @@ class ModuleRenderer {
      * Raccoglie asset vendor per i moduli di pagina (da manifest)
      */
     public function collectVendorAssets(array $pageModules) {
+        // Usa nuovo servizio se disponibile
+        if ($this->assetCollector) {
+            return $this->assetCollector->collectVendorAssets($pageModules);
+        }
+        
+        // Fallback al metodo legacy
         $this->loadModuleManifests();
         $css = [];
         $js = [];
@@ -410,6 +469,12 @@ class ModuleRenderer {
      * Ritorna percorsi relativi servibili dal web server
      */
     public function collectModuleAssets(array $pageModules) {
+        // Usa nuovo servizio se disponibile
+        if ($this->assetCollector) {
+            return $this->assetCollector->collectModuleAssets($pageModules, $this->nestedModules);
+        }
+        
+        // Fallback al metodo legacy
         $this->loadModuleManifests();
         $css = [];
         $js = [];
@@ -513,6 +578,12 @@ class ModuleRenderer {
      * Ottiene dati per un modulo specifico
      */
     public function getModuleData($moduleName, $config = []) {
+        // Usa nuovo servizio se disponibile
+        if ($this->moduleDataProvider) {
+            return $this->moduleDataProvider->getModuleData($moduleName, $config);
+        }
+        
+        // Fallback al metodo legacy
         $resolved = $this->resolveModuleName($moduleName);
         switch ($resolved) {
             case 'results':
